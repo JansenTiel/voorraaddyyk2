@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Uitscans</title>
+  <link rel="stylesheet" href="theme.css"/>
+  <script src="supabase-config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="app.js"></script>
+</head>
+<body>
+<div class="topbar no-print"><div class="inner"><div class="brand"><div class="logo">o</div><div class="title">Oegema Logistics<small>Klant: Dyyk</small></div></div><nav class="nav"><a href='index.html'>Dashboard</a><a href='products.html'>Artikelen + Stickers</a><a href='scan.html'>Inslag / Uitslag (Scan)</a><a href='stock.html'>Huidige voorraad</a><a href='outscans.html'>Uitscans</a></nav></div></div>
+<div class="container"><div id="toast" class="notice"></div><div class="card"><h2>Uitscans</h2><div class="muted">Filterbaar op ordernummer, SKU en omschrijving.</div><div class="row" style="margin-top:12px"><input id="q" placeholder="Zoek op SKU / ordernummer / omschrijving..." /><button class="btn" id="btn_refresh">Verversen</button></div></div><div class="card" style="margin-top:16px"><div class="table-wrap"><div id="list"></div></div></div></div>
+<script>
+setActiveNav();
+const client=sb();
+async function load(){ const q=(byId('q').value||'').trim(); let query=client.from('movements').select('created_at, sku_unique, order_no, location, products(name, sku_base)').eq('type','OUT').order('created_at',{ascending:false}).limit(5000); if(q){ query=query.or(`sku_unique.ilike.%${q}%,order_no.ilike.%${q}%`); } const {data,error}=await query; if(error) throw error; let rows=data||[]; if(q){ const qq=q.toLowerCase(); rows=rows.filter(r=>String(r.products?.name||'').toLowerCase().includes(qq)||String(r.sku_unique||'').toLowerCase().includes(qq)||String(r.order_no||'').toLowerCase().includes(qq)); } const el=byId('list'); if(!rows.length){ el.innerHTML='<div class="muted">Nog geen uitscans.</div>'; return; } el.innerHTML=`<table><thead><tr><th>Tijd</th><th>SKU uniek</th><th>Product</th><th>Locatie</th><th>Ordernummer</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${nlTime(r.created_at)}</td><td><b>${escapeHtml(r.sku_unique)}</b></td><td>${escapeHtml(r.products?.name||'')} <span class="muted">(${escapeHtml(r.products?.sku_base||'')})</span></td><td>${escapeHtml(r.location||'')}</td><td><b>${escapeHtml(r.order_no||'')}</b></td></tr>`).join('')}</tbody></table>`; }
+byId('btn_refresh').addEventListener('click',()=>load().catch(e=>toast(e.message||String(e),'err'))); byId('q').addEventListener('keydown',e=>{ if(e.key==='Enter') load().catch(err=>toast(err.message||String(err),'err')); }); load().catch(e=>toast(e.message||String(e),'err'));
+</script>
+</body></html>
