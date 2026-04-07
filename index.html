@@ -2,177 +2,22 @@
 <html lang="nl">
 <head>
   <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
-  <title>Inventarisatie</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Oegema Voorraadbeheer</title>
 
   <link rel="stylesheet" href="/css/theme.css"/>
-
-  <style>
-    .page-url{
-      margin:12px 0 0;
-      color:var(--navy);
-      font-size:14px;
-      font-weight:700;
-      display:flex;
-      align-items:center;
-      flex-wrap:wrap;
-      gap:8px;
-    }
-
-    .page-url strong{
-      display:inline-flex;
-      align-items:center;
-      padding:5px 12px;
-      border-radius:999px;
-      background:rgba(196,154,108,.14);
-      border:1px solid rgba(196,154,108,.28);
-      color:#6e4f36;
-      font-weight:900;
-      letter-spacing:.01em;
-    }
-
-    .inventory-stack{
-      display:grid;
-      gap:18px;
-      margin-top:18px;
-    }
-
-    .inventory-toolbar{
-      display:grid;
-      grid-template-columns:1fr auto auto auto;
-      gap:12px;
-      align-items:end;
-    }
-
-    .scan-panel,
-    .result-panel{
-      border:1px solid var(--border);
-      border-radius:14px;
-      background:#f8fafc;
-      padding:14px;
-    }
-
-    .scan-list{
-      display:grid;
-      gap:10px;
-      margin-top:12px;
-    }
-
-    .scan-pill{
-      display:flex;
-      justify-content:space-between;
-      gap:10px;
-      align-items:center;
-      border:1px solid var(--border);
-      background:#fff;
-      border-radius:12px;
-      padding:10px 12px;
-    }
-
-    .scan-pill b{
-      color:var(--navy);
-      word-break:break-word;
-    }
-
-    .muted-box{
-      border:1px dashed var(--border);
-      border-radius:12px;
-      background:#fff;
-      padding:12px;
-      color:var(--muted);
-      line-height:1.45;
-    }
-
-    .danger-box{
-      border:1px solid #fecaca;
-      border-radius:12px;
-      background:#fff5f5;
-      padding:12px;
-      color:#991b1b;
-      line-height:1.45;
-    }
-
-    .desktop-table{
-      display:block;
-    }
-
-    .mobile-cards{
-      display:none;
-      flex-direction:column;
-      gap:10px;
-      margin-top:12px;
-    }
-
-    .mobile-card{
-      border:1px solid var(--border);
-      border-radius:12px;
-      background:#fff;
-      padding:12px;
-    }
-
-    .mobile-line{
-      display:flex;
-      justify-content:space-between;
-      gap:10px;
-      margin-bottom:6px;
-    }
-
-    .mobile-line:last-child{
-      margin-bottom:0;
-    }
-
-    .mobile-k{
-      font-size:12px;
-      font-weight:800;
-      color:var(--muted);
-      text-transform:uppercase;
-      letter-spacing:.04em;
-      min-width:95px;
-    }
-
-    .mobile-v{
-      text-align:right;
-      font-size:14px;
-      color:var(--text);
-      word-break:break-word;
-    }
-
-    @media(max-width:980px){
-      .inventory-toolbar{
-        grid-template-columns:1fr 1fr;
-      }
-    }
-
-    @media(max-width:760px){
-      .desktop-table{
-        display:none;
-      }
-
-      .mobile-cards{
-        display:flex;
-      }
-    }
-
-    @media(max-width:700px){
-      .inventory-toolbar{
-        grid-template-columns:1fr;
-      }
-    }
-  </style>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="/js/supabase.js"></script>
-  <script src="/js/app.js"></script>
 </head>
-<body data-page="inventory">
+
+<body data-page="index">
 
 <div class="topbar no-print">
   <div class="inner">
+
     <div class="brand">
       <div class="logo">o</div>
       <div class="title">
         Oegema Logistics
-        <small>Dyyk · Inventarisatie</small>
+        <small>Klant: Dyyk</small>
       </div>
     </div>
 
@@ -182,7 +27,7 @@
       <a href="/scan">In-/Uitscan</a>
       <a href="/stock">Huidige voorraad</a>
       <a href="/outscans">Uitscans</a>
-      <a class="active" href="/inventory">Inventarisatie</a>
+      <a href="/inventory">Inventarisatie</a>
     </nav>
 
     <div class="rightbar">
@@ -190,385 +35,130 @@
         www.voorraaddyyk.nl
       </a>
     </div>
+
   </div>
 </div>
 
 <div class="container">
   <div id="toast" class="notice"></div>
 
-  <div class="card">
-    <h2>Inventarisatie</h2>
-    <div class="muted">
-      Start eerst een inventarisatieronde op basis van de actuele voorraad. Scan daarna alle aanwezige colli.
-      Alles wat wél in de voorraadlijst stond maar níet wordt gescand, kan daarna automatisch worden afgeboekt.
-    </div>
+  <div class="grid">
 
-    <p class="page-url">
-      Actieve omgeving:
-      <strong>www.voorraaddyyk.nl</strong>
-    </p>
+    <div class="card" style="grid-column: span 12;">
+      <h2>Oegema Logistics · Voorraadbeheer</h2>
 
-    <div class="inventory-toolbar" style="margin-top:14px">
-      <div>
-        <label for="scanInput">Scan unieke SKU</label>
-        <input id="scanInput" placeholder="Scan unieke SKU zoals FLSAN-00001"/>
-      </div>
-
-      <div>
-        <label>&nbsp;</label>
-        <button class="btn" id="btnStartSession" type="button" style="width:100%">Start inventarisatie</button>
-      </div>
-
-      <div>
-        <label>&nbsp;</label>
-        <button class="btn" id="btnCompare" type="button" style="width:100%">Vergelijk lijst</button>
-      </div>
-
-      <div>
-        <label>&nbsp;</label>
-        <button class="btn danger" id="btnFinalizeMissing" type="button" style="width:100%" disabled>Niet gescand afboeken</button>
-      </div>
-    </div>
-
-    <div class="row-4" style="margin-top:16px">
-      <div class="card" style="padding:16px">
-        <div class="kpi">
-          <div class="label">Voorraad start</div>
-          <div class="value" id="kpiStartCount">0</div>
-        </div>
-      </div>
-
-      <div class="card" style="padding:16px">
-        <div class="kpi">
-          <div class="label">Geslaagd gescand</div>
-          <div class="value" id="kpiScannedCount">0</div>
-        </div>
-      </div>
-
-      <div class="card" style="padding:16px">
-        <div class="kpi">
-          <div class="label">Niet gescand</div>
-          <div class="value" id="kpiMissingCount">0</div>
-        </div>
-      </div>
-
-      <div class="card" style="padding:16px">
-        <div class="kpi">
-          <div class="label">Dubbele scans</div>
-          <div class="value" id="kpiDuplicateCount">0</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="inventory-stack">
-    <div class="card scan-panel">
-      <h3>Gescande colli</h3>
       <div class="muted">
-        Alleen colli die in de actuele startvoorraad bestaan, tellen mee als geldige scan.
+        Klant: <b>Dyyk</b>. Gebruik de knoppen hieronder om artikelen, scans, voorraad, uitscans en inventarisatie te beheren.
       </div>
 
-      <div class="btnRow" style="margin-top:12px">
-        <button class="btn ghost" id="btnUndoLast" type="button">Laatste weg</button>
-        <button class="btn danger" id="btnClearScans" type="button">Scans leegmaken</button>
+      <div class="btnRow" style="margin-top:16px">
+        <a class="btn primary" href="/products">Artikelen + stickers</a>
+        <a class="btn" href="/scan">Inslag / uitslag scannen</a>
+        <a class="btn" href="/stock">Huidige voorraad</a>
+        <a class="btn" href="/outscans">Uitscans</a>
+        <a class="btn accent" href="/inventory">Inventarisatie</a>
       </div>
-
-      <div id="scannedList" class="scan-list"></div>
     </div>
 
-    <div class="card result-panel">
-      <h3>Niet gescand volgens vergelijking</h3>
-      <div id="resultInfo" class="muted-box">
-        Start eerst een inventarisatie, scan de aanwezige colli en klik daarna op <b>Vergelijk lijst</b>.
+    <div class="card" style="grid-column: span 3;">
+      <div class="kpi">
+        <div class="label">Producten</div>
+        <div class="value" id="kpiProducts">-</div>
       </div>
-
-      <div id="missingTableWrap" style="margin-top:14px"></div>
     </div>
+
+    <div class="card" style="grid-column: span 3;">
+      <div class="kpi">
+        <div class="label">Items op voorraad</div>
+        <div class="value" id="kpiStock">-</div>
+      </div>
+    </div>
+
+    <div class="card" style="grid-column: span 3;">
+      <div class="kpi">
+        <div class="label">Totale uitscans</div>
+        <div class="value" id="kpiOut">-</div>
+      </div>
+    </div>
+
+    <div class="card" style="grid-column: span 3;">
+      <div class="kpi">
+        <div class="label">Laatste uitscan</div>
+        <div class="value" id="kpiLastOut" style="font-size:16px">-</div>
+      </div>
+    </div>
+
+    <div class="card" style="grid-column: span 12;">
+      <h2>Werking</h2>
+
+      <div class="row-4">
+        <div>
+          <b>Artikelen + Stickers</b>
+          <div class="muted">Maak producten aan en genereer unieke stickers met barcode en QR.</div>
+        </div>
+
+        <div>
+          <b>Scan</b>
+          <div class="muted">Verwerk inslag en uitslag in batches met scanner of camera.</div>
+        </div>
+
+        <div>
+          <b>Voorraad / Uitscans</b>
+          <div class="muted">Bekijk actuele voorraad en alle uitgeboekte colli.</div>
+        </div>
+
+        <div>
+          <b>Inventarisatie</b>
+          <div class="muted">Scan aanwezige colli en boek niet-gescande artikelen automatisch af.</div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/js/supabase.js"></script>
+<script src="/js/app.js"></script>
 
 <script>
 setActiveNav();
 
-const client = sb();
-
-const state = {
-  started: false,
-  startItems: [],
-  startMap: new Map(),
-  scanned: [],
-  scannedSet: new Set(),
-  duplicateCount: 0,
-  missing: []
-};
-
-function updateKpis(){
-  byId('kpiStartCount').textContent = String(state.startItems.length);
-  byId('kpiScannedCount').textContent = String(state.scanned.length);
-  byId('kpiMissingCount').textContent = String(state.missing.length);
-  byId('kpiDuplicateCount').textContent = String(state.duplicateCount);
-}
-
-function renderScannedList(){
-  const el = byId('scannedList');
-
-  if(!state.scanned.length){
-    el.innerHTML = `<div class="muted-box">Nog geen colli gescand.</div>`;
-    return;
-  }
-
-  el.innerHTML = state.scanned.map((sku, idx) => `
-    <div class="scan-pill">
-      <b>${escapeHtml(sku)}</b>
-      <span class="small">#${idx + 1}</span>
-    </div>
-  `).join('');
-}
-
-function renderMissing(){
-  const info = byId('resultInfo');
-  const wrap = byId('missingTableWrap');
-
-  if(!state.started){
-    info.innerHTML = 'Start eerst een inventarisatie.';
-    wrap.innerHTML = '';
-    byId('btnFinalizeMissing').disabled = true;
-    updateKpis();
-    return;
-  }
-
-  if(!state.missing.length){
-    info.innerHTML = `<div class="muted-box">Geen verschillen gevonden. Alles uit de startvoorraad is gescand.</div>`;
-    wrap.innerHTML = '';
-    byId('btnFinalizeMissing').disabled = true;
-    updateKpis();
-    return;
-  }
-
-  info.innerHTML = `
-    <div class="danger-box">
-      <b>${state.missing.length}</b> artikel(en) stonden wel in de startvoorraad, maar zijn niet gescand.
-      Deze kunnen met één knop automatisch worden afgeboekt.
-    </div>
-  `;
-
-  wrap.innerHTML = `
-    <div class="table-wrap desktop-table">
-      <table>
-        <thead>
-          <tr>
-            <th>Unieke SKU</th>
-            <th>Locatie</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${state.missing.map(it => `
-            <tr>
-              <td><b>${escapeHtml(it.sku_unique || '')}</b></td>
-              <td>${escapeHtml(it.location || '')}</td>
-              <td>${escapeHtml(it.status || '')}</td>
-            </tr>
-          `).join('')}
-        </tbody>
-      </table>
-    </div>
-
-    <div class="mobile-cards">
-      ${state.missing.map(it => `
-        <div class="mobile-card">
-          <div class="mobile-line">
-            <div class="mobile-k">Unieke SKU</div>
-            <div class="mobile-v"><b>${escapeHtml(it.sku_unique || '')}</b></div>
-          </div>
-          <div class="mobile-line">
-            <div class="mobile-k">Locatie</div>
-            <div class="mobile-v">${escapeHtml(it.location || '')}</div>
-          </div>
-          <div class="mobile-line">
-            <div class="mobile-k">Status</div>
-            <div class="mobile-v">${escapeHtml(it.status || '')}</div>
-          </div>
-        </div>
-      `).join('')}
-    </div>
-  `;
-
-  byId('btnFinalizeMissing').disabled = false;
-  updateKpis();
-}
-
-async function startInventorySession(){
+(async () => {
   try{
-    const { data, error } = await client
-      .from('items')
-      .select('id, product_id, sku_unique, status, location')
-      .eq('status', 'IN_STOCK')
-      .limit(10000);
+    const client = sb();
 
-    if(error) throw error;
+    const [products, stock, outscans, last] = await Promise.all([
+      client.from('products').select('*', { count:'exact', head:true }),
+      client.from('items').select('*', { count:'exact', head:true }).eq('status', 'IN_STOCK'),
+      client.from('movements').select('*', { count:'exact', head:true }).eq('type', 'OUT'),
+      client
+        .from('movements')
+        .select('created_at, order_no, sku_unique')
+        .eq('type', 'OUT')
+        .order('created_at', { ascending:false })
+        .limit(1)
+        .maybeSingle()
+    ]);
 
-    state.started = true;
-    state.startItems = data || [];
-    state.startMap = new Map(state.startItems.map(it => [String(it.sku_unique || '').toUpperCase(), it]));
-    state.scanned = [];
-    state.scannedSet = new Set();
-    state.duplicateCount = 0;
-    state.missing = [];
+    byId('kpiProducts').textContent = products.count || 0;
+    byId('kpiStock').textContent = stock.count || 0;
+    byId('kpiOut').textContent = outscans.count || 0;
 
-    renderScannedList();
-    renderMissing();
-    updateKpis();
+    if(last.data){
+      const extra = String(last.data.order_no || '').toUpperCase() === 'INVENTARISATIE'
+        ? ' · INVENTARISATIE'
+        : '';
 
-    toast(`Inventarisatie gestart met ${state.startItems.length} voorraadregels.`, 'ok');
-    byId('scanInput').focus();
+      byId('kpiLastOut').textContent =
+        `${last.data.sku_unique} · ${last.data.order_no || '-'}${extra}\n${nlTime(last.data.created_at)}`;
+    }else{
+      byId('kpiLastOut').textContent = 'Nog geen';
+    }
   }catch(e){
     toast(e.message || String(e), 'err');
   }
-}
-
-function addScan(){
-  if(!state.started){
-    toast('Start eerst een inventarisatie.', 'err');
-    return;
-  }
-
-  const raw = byId('scanInput').value;
-  const sku = cleanSku(normalizeScan(raw));
-
-  if(!sku) return;
-
-  byId('scanInput').value = '';
-
-  if(!state.startMap.has(sku)){
-    toast(`SKU staat niet in de startvoorraad: ${sku}`, 'err');
-    return;
-  }
-
-  if(state.scannedSet.has(sku)){
-    state.duplicateCount += 1;
-    updateKpis();
-    toast(`SKU ${sku} is al gescand.`, 'err');
-    return;
-  }
-
-  state.scanned.push(sku);
-  state.scannedSet.add(sku);
-
-  renderScannedList();
-  updateKpis();
-}
-
-function undoLastScan(){
-  if(!state.scanned.length) return;
-
-  const last = state.scanned[state.scanned.length - 1];
-  state.scanned.pop();
-  state.scannedSet.delete(last);
-
-  renderScannedList();
-  updateKpis();
-}
-
-function clearScans(){
-  state.scanned = [];
-  state.scannedSet = new Set();
-  state.duplicateCount = 0;
-  state.missing = [];
-
-  renderScannedList();
-  renderMissing();
-  updateKpis();
-}
-
-function compareInventory(){
-  if(!state.started){
-    toast('Start eerst een inventarisatie.', 'err');
-    return;
-  }
-
-  state.missing = state.startItems.filter(it => !state.scannedSet.has(String(it.sku_unique || '').toUpperCase()));
-  renderMissing();
-
-  if(state.missing.length){
-    toast(`${state.missing.length} niet-gescande artikelen gevonden.`, 'ok');
-  }else{
-    toast('Geen verschillen gevonden.', 'ok');
-  }
-}
-
-async function finalizeMissingOutbook(){
-  if(!state.started){
-    toast('Start eerst een inventarisatie.', 'err');
-    return;
-  }
-
-  if(!state.missing.length){
-    toast('Er zijn geen niet-gescande artikelen om af te boeken.', 'err');
-    return;
-  }
-
-  const ok = confirm(
-    `Weet je zeker dat je ${state.missing.length} niet-gescande artikel(en) automatisch wilt afboeken?`
-  );
-  if(!ok) return;
-
-  try{
-    const ids = state.missing.map(it => it.id);
-    const nowIso = new Date().toISOString();
-
-    const { error:updateErr } = await client
-      .from('items')
-      .update({
-        status: 'OUT',
-        out_at: nowIso
-      })
-      .in('id', ids);
-
-    if(updateErr) throw updateErr;
-
-    const movements = state.missing.map(it => ({
-      type: 'OUT',
-      product_id: it.product_id,
-      sku_unique: it.sku_unique,
-      location: it.location || null,
-      order_no: 'INVENTARISATIE'
-    }));
-
-    const { error:moveErr } = await client
-      .from('movements')
-      .insert(movements);
-
-    if(moveErr) throw moveErr;
-
-    toast(`${state.missing.length} niet-gescande artikelen zijn automatisch afgeboekt.`, 'ok');
-
-    await startInventorySession();
-  }catch(e){
-    toast(e.message || String(e), 'err');
-  }
-}
-
-byId('btnStartSession').addEventListener('click', startInventorySession);
-byId('btnCompare').addEventListener('click', compareInventory);
-byId('btnFinalizeMissing').addEventListener('click', finalizeMissingOutbook);
-byId('btnUndoLast').addEventListener('click', undoLastScan);
-byId('btnClearScans').addEventListener('click', clearScans);
-
-byId('scanInput').addEventListener('input', () => {
-  byId('scanInput').value = normalizeScan(byId('scanInput').value);
-});
-
-byId('scanInput').addEventListener('keydown', e => {
-  if(e.key === 'Enter'){
-    e.preventDefault();
-    addScan();
-  }
-});
-
-renderScannedList();
-renderMissing();
-updateKpis();
+})();
 </script>
 
 </body>
