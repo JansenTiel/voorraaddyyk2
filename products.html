@@ -268,8 +268,7 @@
       <a href="/scan">In-/Uitscan</a>
       <a href="/stock">Huidige voorraad</a>
       <a href="/outscans">Uitscans</a>
-      <a href="/picklists">Picklijsten</a>
-      <a href="/online-picklists">Online picklijsten</a>
+      <a href="/inventory">Inventarisatie</a>
     </nav>
 
     <div class="rightbar">
@@ -286,8 +285,8 @@
   <div class="card">
     <h2>Artikelen + Stickers</h2>
     <div class="muted products-intro">
-      Artikelbeheer voor Dyyk. Je kunt nieuwe artikelen aanmaken, bestaande artikelen snel terugvinden,
-      direct stickers genereren en artikelen beheren zonder lang door lijsten te zoeken.
+      Artikelbeheer voor Dyyk. Maak artikelen aan, zoek bestaande artikelen snel terug,
+      genereer stickers en beheer foutieve of verouderde artikelen.
     </div>
 
     <p class="page-url">
@@ -362,7 +361,7 @@
     <div class="card" id="finderCard">
       <h3>3) Snel bestaand artikel kiezen</h3>
       <div class="muted">
-        Zoek direct op SKU, naam of extra info. Je kunt een artikel met één klik selecteren of direct stickers genereren.
+        Zoek op SKU, naam of extra info. Kies een artikel of print direct stickers zonder lang te zoeken.
       </div>
 
       <div class="finder-top" style="margin-top:14px">
@@ -383,7 +382,7 @@
       </div>
 
       <div class="hint-box" style="margin-top:14px">
-        Handig voor herhaalwerk: zoek het artikel hier, klik op <b>Kies artikel</b> om het in het stickerblok te zetten,
+        Zoek het artikel hier, klik op <b>Kies artikel</b> om het in het stickerblok te zetten,
         of gebruik <b>Direct printen</b> om meteen stickers te genereren.
       </div>
 
@@ -399,7 +398,7 @@
     <div class="card">
       <h3>4) Bestaande artikelen beheren</h3>
       <div class="muted">
-        Zoek artikelen op, bewerk gegevens of verwijder een fout aangemaakte SKU.
+        Zoek artikelen op, bewerk gegevens of verwijder fout aangemaakte SKU’s.
       </div>
 
       <div class="row" style="margin-top:14px">
@@ -423,7 +422,7 @@
   <div class="modal-card">
     <h3 class="modal-title">SKU definitief verwijderen</h3>
     <div class="modal-sub">
-      Controleer goed wat je verwijdert. Als er al items of scans gekoppeld zijn, worden die ook mee verwijderd door de database-koppelingen.
+      Controleer goed wat je verwijdert. Als er al items of scans gekoppeld zijn, worden die ook mee verwijderd.
     </div>
     <div class="modal-info" id="deleteModalInfo"></div>
     <div class="btnRow">
@@ -690,6 +689,14 @@ function renderSticker(product, item){
 }
 
 async function generateStickers(productIdOverride = null, qtyOverride = null){
+  if(productIdOverride && typeof productIdOverride !== 'string'){
+    productIdOverride = null;
+  }
+
+  if(qtyOverride && typeof qtyOverride !== 'number'){
+    qtyOverride = null;
+  }
+
   const product_id = productIdOverride || byId('product_select').value;
   const qty = Number(qtyOverride || byId('qty').value || 0);
 
@@ -1098,23 +1105,29 @@ async function deleteProductDefinitive(){
 }
 
 function bindBasicEvents(){
-  byId('btn_create').addEventListener('click', createProduct);
-
-  byId('btn_reload').addEventListener('click', async () => {
-    try{
-      await loadProducts();
-      await loadManageList();
-      await loadQuickFindList();
-    }catch(e){
-      toast(e.message || String(e), 'err');
-    }
+  byId('btn_create').addEventListener('click', () => {
+    createProduct().catch(e => toast(e.message || String(e), 'err'));
   });
 
-  byId('btn_generate').addEventListener('click', generateStickers);
+  byId('btn_reload').addEventListener('click', () => {
+    Promise.all([
+      loadProducts(),
+      loadManageList(),
+      loadQuickFindList()
+    ]).catch(e => toast(e.message || String(e), 'err'));
+  });
+
+  byId('btn_generate').addEventListener('click', () => {
+    generateStickers().catch(e => toast(e.message || String(e), 'err'));
+  });
+
   byId('btn_select_all').addEventListener('click', () => setAllChecks(true));
   byId('btn_select_none').addEventListener('click', () => setAllChecks(false));
   byId('btn_clear').addEventListener('click', clearPreview);
-  byId('btn_pdf').addEventListener('click', downloadSelectedPDF);
+
+  byId('btn_pdf').addEventListener('click', () => {
+    downloadSelectedPDF().catch(e => toast(e.message || String(e), 'err'));
+  });
 
   byId('btn_quick_find_refresh').addEventListener('click', () => {
     loadQuickFindList().catch(e => toast(e.message || String(e), 'err'));
@@ -1144,9 +1157,14 @@ function bindBasicEvents(){
   });
 
   byId('btnCancelDelete').addEventListener('click', closeDeleteModal);
-  byId('btnConfirmDelete').addEventListener('click', deleteProductDefinitive);
+  byId('btnConfirmDelete').addEventListener('click', () => {
+    deleteProductDefinitive().catch(e => toast(e.message || String(e), 'err'));
+  });
+
   byId('btnCancelEdit').addEventListener('click', closeEditModal);
-  byId('btnConfirmEdit').addEventListener('click', saveProductEdit);
+  byId('btnConfirmEdit').addEventListener('click', () => {
+    saveProductEdit().catch(e => toast(e.message || String(e), 'err'));
+  });
 
   byId('deleteModal').addEventListener('click', e => {
     if(e.target === byId('deleteModal')) closeDeleteModal();
