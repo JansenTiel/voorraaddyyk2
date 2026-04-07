@@ -8,10 +8,7 @@
   <link rel="stylesheet" href="/css/theme.css"/>
 
   <style>
-    .compact-topbar .nav{
-      display:none;
-    }
-
+    .compact-topbar .nav,
     .compact-topbar .rightbar{
       display:none;
     }
@@ -21,35 +18,25 @@
       gap:16px;
     }
 
-    .scan-top{
-      display:flex;
-      justify-content:space-between;
-      align-items:flex-start;
-      gap:12px;
-      flex-wrap:wrap;
+    .scan-card{
+      border:1px solid var(--border);
+      border-radius:18px;
+      background:#fff;
+      box-shadow:var(--shadow);
+      padding:18px;
     }
 
-    .page-url{
-      margin:12px 0 0;
-      color:var(--navy);
-      font-size:14px;
-      font-weight:700;
-      display:flex;
-      align-items:center;
-      flex-wrap:wrap;
-      gap:8px;
-    }
-
-    .page-url strong{
-      display:inline-flex;
-      align-items:center;
-      padding:5px 12px;
-      border-radius:999px;
-      background:rgba(196,154,108,.14);
-      border:1px solid rgba(196,154,108,.28);
-      color:#6e4f36;
+    .scan-title{
+      font-size:20px;
       font-weight:900;
-      letter-spacing:.01em;
+      color:var(--navy);
+      margin:0 0 6px 0;
+    }
+
+    .scan-sub{
+      color:var(--muted);
+      line-height:1.45;
+      margin:0;
     }
 
     .status-box{
@@ -57,10 +44,9 @@
       border-radius:14px;
       background:#f8fafc;
       padding:14px;
-      line-height:1.45;
       font-weight:800;
       color:var(--navy);
-      min-width:220px;
+      line-height:1.45;
     }
 
     .status-box.ok{
@@ -81,23 +67,35 @@
       color:#1d4ed8;
     }
 
+    .action-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+
+    .big-btn{
+      min-height:74px;
+      font-size:22px;
+      font-weight:900;
+      border-radius:18px;
+    }
+
     .mode-switch{
       display:grid;
       grid-template-columns:1fr 1fr;
-      gap:10px;
-      margin-top:16px;
+      gap:12px;
     }
 
     .mode-btn{
       border:2px solid var(--border);
-      border-radius:16px;
+      border-radius:18px;
       padding:18px 14px;
       background:#fff;
-      font-size:20px;
-      font-weight:900;
-      cursor:pointer;
       color:var(--navy);
-      min-height:68px;
+      font-size:22px;
+      font-weight:900;
+      min-height:74px;
+      cursor:pointer;
     }
 
     .mode-btn.active{
@@ -106,102 +104,43 @@
       border-color:var(--navy);
     }
 
-    .focus-card{
-      border:1px solid var(--border);
-      border-radius:16px;
-      background:#f8fafc;
-      padding:16px;
-    }
-
-    .focus-title{
-      font-size:20px;
-      font-weight:900;
-      color:var(--navy);
-      margin-bottom:6px;
-    }
-
-    .focus-sub{
+    .focus-line{
+      font-size:15px;
       color:var(--muted);
-      line-height:1.45;
-      margin-bottom:14px;
-    }
-
-    .quick-actions{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:12px;
-    }
-
-    .big-btn{
-      min-height:72px;
-      font-size:20px;
-      font-weight:900;
-      border-radius:16px;
+      line-height:1.5;
     }
 
     .scan-fields{
       display:grid;
       gap:12px;
-      margin-top:14px;
     }
 
     .scan-fields input{
-      min-height:60px;
+      min-height:62px;
       font-size:20px;
       font-weight:700;
       border-radius:16px;
     }
 
-    .batch-actions{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:12px;
-      margin-top:14px;
-    }
-
-    .process-btn{
-      min-height:72px;
-      font-size:20px;
-      font-weight:900;
-      border-radius:16px;
-    }
-
-    .scan-kpis{
-      display:grid;
-      grid-template-columns:repeat(3,1fr);
-      gap:14px;
-      margin-top:16px;
-    }
-
-    .batch-card,
-    .qr-card,
-    .help-card{
+    #qr_reader{
+      margin-top:12px;
       border:1px solid var(--border);
       border-radius:16px;
-      background:#f8fafc;
-      padding:16px;
+      overflow:hidden;
+      background:#fff;
+      min-height:300px;
     }
 
-    .batch-head{
-      display:flex;
-      justify-content:space-between;
-      gap:12px;
-      flex-wrap:wrap;
-      align-items:flex-start;
-    }
-
-    .batch-tools{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
+    .hidden{
+      display:none !important;
     }
 
     .batch-list{
-      margin-top:14px;
       border:1px solid var(--border);
       border-radius:14px;
       background:#fff;
       overflow:hidden;
+      margin-top:12px;
     }
 
     .batch-empty{
@@ -211,7 +150,7 @@
 
     .batch-row{
       display:grid;
-      grid-template-columns:56px 1fr;
+      grid-template-columns:52px 1fr;
       gap:10px;
       padding:14px;
       border-bottom:1px solid #edf2f7;
@@ -231,39 +170,71 @@
     .batch-sku{
       font-weight:900;
       color:var(--navy);
-      word-break:break-word;
       font-size:18px;
+      word-break:break-word;
     }
 
     .batch-meta{
-      font-size:12px;
       color:var(--muted);
+      font-size:12px;
       margin-top:4px;
     }
 
-    #qr_reader{
-      margin-top:12px;
-      border-radius:14px;
-      overflow:hidden;
-      background:#fff;
+    .kpi-grid{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:12px;
+    }
+
+    .kpi-card{
       border:1px solid var(--border);
-      min-height:300px;
+      border-radius:14px;
+      background:#f8fafc;
+      padding:14px;
     }
 
-    .help-card{
-      line-height:1.55;
+    .kpi-label{
+      font-size:12px;
+      color:var(--muted);
+      font-weight:800;
+      text-transform:uppercase;
+      letter-spacing:.04em;
+      margin-bottom:6px;
     }
 
-    .help-card b{
+    .kpi-value{
+      font-size:28px;
+      font-weight:900;
       color:var(--navy);
+      line-height:1.1;
+      word-break:break-word;
     }
 
-    .hidden{
-      display:none !important;
+    .page-url{
+      margin:10px 0 0;
+      color:var(--navy);
+      font-size:13px;
+      font-weight:700;
+      display:flex;
+      align-items:center;
+      flex-wrap:wrap;
+      gap:8px;
     }
 
-    @media(max-width:980px){
-      .scan-kpis{
+    .page-url strong{
+      display:inline-flex;
+      align-items:center;
+      padding:5px 12px;
+      border-radius:999px;
+      background:rgba(196,154,108,.14);
+      border:1px solid rgba(196,154,108,.28);
+      color:#6e4f36;
+      font-weight:900;
+      letter-spacing:.01em;
+    }
+
+    @media(max-width:900px){
+      .kpi-grid{
         grid-template-columns:1fr;
       }
     }
@@ -274,30 +245,21 @@
       }
 
       .container{
-        padding:14px 12px;
+        padding:12px;
       }
 
-      .card{
-        padding:16px;
-      }
-
-      .quick-actions,
-      .batch-actions{
+      .action-grid,
+      .mode-switch{
         grid-template-columns:1fr;
       }
 
-      .mode-btn,
+      .scan-card{
+        padding:16px;
+      }
+
       .big-btn,
-      .process-btn{
+      .mode-btn{
         min-height:76px;
-      }
-
-      .status-box{
-        width:100%;
-      }
-
-      .page-url{
-        font-size:13px;
       }
     }
   </style>
@@ -329,9 +291,7 @@
     </nav>
 
     <div class="rightbar">
-      <a class="site-link" href="https://www.voorraaddyyk.nl" target="_blank" rel="noopener">
-        www.voorraaddyyk.nl
-      </a>
+      <a class="site-link" href="https://www.voorraaddyyk.nl" target="_blank" rel="noopener">www.voorraaddyyk.nl</a>
     </div>
   </div>
 </div>
@@ -341,43 +301,42 @@
 
   <div class="scan-page">
 
-    <div class="card">
-      <div class="scan-top">
-        <div>
-          <h2>Scan Inslag / Uitslag</h2>
-          <div class="muted">
-            Mobiele scanpagina met zo min mogelijk handelingen. Ondersteunt zowel oude stickers zoals
-            <b>FLZWNO-0001</b> als nieuwe stickers zoals <b>FLZWNO77</b>.
-          </div>
+    <div class="scan-card">
+      <h1 class="scan-title">Scan Inslag / Uitslag</h1>
+      <p class="scan-sub">
+        Snel mobiel scannen met zo min mogelijk stappen. Werkt met oude stickers zoals <b>FLZWNO-0001</b>
+        en nieuwe stickers zoals <b>FLZWNO77</b>.
+      </p>
 
-          <p class="page-url">
-            Actieve omgeving:
-            <strong>www.voorraaddyyk.nl</strong>
-          </p>
-        </div>
-
-        <div class="status-box info" id="statusBox">
-          Klaar om te scannen
-        </div>
-      </div>
-
-      <div class="mode-switch">
-        <button class="mode-btn active" id="tabIn" type="button">Inslag</button>
-        <button class="mode-btn" id="tabOut" type="button">Uitslag</button>
-      </div>
+      <p class="page-url">
+        Actieve omgeving:
+        <strong>www.voorraaddyyk.nl</strong>
+      </p>
     </div>
 
-    <div class="card focus-card">
-      <div class="focus-title" id="focusTitle">Inslag</div>
-      <div class="focus-sub" id="focusSub">
-        Scan eerst alle colli van de batch. Vul daarna één keer de locatie in en verwerk de batch.
-      </div>
-
-      <div class="quick-actions">
+    <div class="scan-card">
+      <div class="action-grid">
         <button class="btn primary big-btn" id="btnQr" type="button">QR scannen</button>
         <button class="btn big-btn" id="btnAddScan" type="button">Handmatig toevoegen</button>
       </div>
 
+      <div id="qr_reader" class="hidden"></div>
+    </div>
+
+    <div class="scan-card">
+      <div class="status-box info" id="statusBox">Klaar om te scannen</div>
+
+      <div class="mode-switch" style="margin-top:14px">
+        <button class="mode-btn active" id="tabIn" type="button">Inslag</button>
+        <button class="mode-btn" id="tabOut" type="button">Uitslag</button>
+      </div>
+
+      <div class="focus-line" id="focusLine" style="margin-top:14px">
+        Scan eerst alle colli van de batch. Vul daarna één keer de locatie in en verwerk de batch.
+      </div>
+    </div>
+
+    <div class="scan-card">
       <div class="scan-fields">
         <div>
           <label for="skuInput">Sticker / unieke SKU</label>
@@ -391,79 +350,49 @@
 
         <div id="outBlock" class="hidden">
           <label for="orderInput">Ordernummer</label>
-          <input id="orderInput" placeholder="Na scannen direct ordernummer invullen"/>
+          <input id="orderInput" placeholder="Na scan direct ordernummer invullen"/>
         </div>
       </div>
 
-      <div class="batch-actions">
-        <button class="btn primary process-btn" id="btnProcess" type="button">Batch inboeken</button>
-        <button class="btn process-btn" id="btnClear" type="button">Batch leegmaken</button>
+      <div class="action-grid" style="margin-top:14px">
+        <button class="btn primary big-btn" id="btnProcess" type="button">Batch inboeken</button>
+        <button class="btn big-btn" id="btnClear" type="button">Batch leegmaken</button>
       </div>
+    </div>
 
-      <div class="scan-kpis">
-        <div class="card" style="padding:16px">
-          <div class="kpi">
-            <div class="label">Gescande colli</div>
-            <div class="value" id="batchCount">0</div>
-          </div>
+    <div class="scan-card">
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-label">Gescande colli</div>
+          <div class="kpi-value" id="batchCount">0</div>
         </div>
 
-        <div class="card" style="padding:16px">
-          <div class="kpi">
-            <div class="label">Modus</div>
-            <div class="value" id="modeKpi" style="font-size:20px">Inslag</div>
-          </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Modus</div>
+          <div class="kpi-value" id="modeKpi" style="font-size:22px">Inslag</div>
         </div>
 
-        <div class="card" style="padding:16px">
-          <div class="kpi">
-            <div class="label">Laatste scan</div>
-            <div class="value" id="lastScanKpi" style="font-size:16px">-</div>
-          </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Laatste scan</div>
+          <div class="kpi-value" id="lastScanKpi" style="font-size:18px">-</div>
         </div>
       </div>
     </div>
 
-    <div class="card batch-card">
-      <div class="batch-head">
+    <div class="scan-card">
+      <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-start">
         <div>
-          <h3>Batchlijst</h3>
-          <div class="muted">
-            Hier zie je alle gescande colli die klaarstaan om te verwerken.
-          </div>
+          <h2 class="scan-title" style="font-size:18px;margin-bottom:4px">Batchlijst</h2>
+          <div class="scan-sub">Alles wat hier staat wordt in één keer verwerkt.</div>
         </div>
 
-        <div class="batch-tools">
+        <div class="btnRow">
           <button class="btn ghost" id="btnUndoLast" type="button">Laatste weg</button>
           <button class="btn danger" id="btnClearBatch" type="button">Batch leegmaken</button>
         </div>
       </div>
 
       <div id="batchList" class="batch-list"></div>
-    </div>
-
-    <div class="card qr-card">
-      <h3>QR scanner</h3>
-      <div class="muted">
-        Op mobiel opent deze direct het camerascherm. Na een scan kun je meteen verder.
-      </div>
-
-      <div id="qr_reader" class="hidden"></div>
-    </div>
-
-    <div class="card help-card">
-      <h3>Gebruik</h3>
-      <div>
-        <b>Inslag:</b> scan eerst de hele batch. De focus blijft op het scanveld zodat je snel door kunt.
-        Daarna vul je één keer de locatie in en klik je op batch inboeken.
-      </div>
-      <div style="margin-top:8px">
-        <b>Uitslag:</b> scan de colli. Daarna wil je meestal meteen het ordernummer invullen.
-        Daarom wordt mobiel gebruik extra makkelijk gemaakt voor uitslag.
-      </div>
-      <div style="margin-top:8px">
-        De scanpagina accepteert zowel <b>oude stickers</b> als <b>nieuwe stickers</b>.
-      </div>
     </div>
 
   </div>
@@ -495,8 +424,7 @@ const batchCount = byId('batchCount');
 const batchList = byId('batchList');
 const modeKpi = byId('modeKpi');
 const lastScanKpi = byId('lastScanKpi');
-const focusTitle = byId('focusTitle');
-const focusSub = byId('focusSub');
+const focusLine = byId('focusLine');
 
 let mode = 'IN';
 let qr = null;
@@ -521,13 +449,11 @@ function updateModeUi(){
   btnProcess.textContent = mode === 'IN' ? 'Batch inboeken' : 'Batch uitboeken';
 
   if(mode === 'IN'){
-    focusTitle.textContent = 'Inslag';
-    focusSub.textContent = 'Scan eerst alle colli van de batch. Vul daarna één keer de locatie in en verwerk de batch.';
-    setStatus('Inslag actief. Scan de batch.', 'info');
+    focusLine.textContent = 'Scan eerst alle colli van de batch. Vul daarna één keer de locatie in en verwerk de batch.';
+    setStatus('Inslag actief. Focus blijft op de batch.', 'info');
   }else{
-    focusTitle.textContent = 'Uitslag';
-    focusSub.textContent = 'Scan de colli. Daarna kun je op mobiel direct het ordernummer invullen en de batch verwerken.';
-    setStatus('Uitslag actief. Scan de colli.', 'info');
+    focusLine.textContent = 'Scan de colli. Daarna kun je op mobiel direct het ordernummer invullen en de batch verwerken.';
+    setStatus('Uitslag actief. Scan en vul daarna direct ordernummer in.', 'info');
   }
 }
 
@@ -557,11 +483,7 @@ function clearForm(clearBatchToo = true){
   }
 
   lastScanKpi.textContent = '-';
-  if(mode === 'IN'){
-    skuInput.focus();
-  }else{
-    skuInput.focus();
-  }
+  skuInput.focus();
 }
 
 function renderBatch(){
@@ -743,7 +665,13 @@ async function processBatch(){
     renderBatch();
     skuInput.value = '';
     lastScanKpi.textContent = 'Batch verwerkt';
-    focusAfterScan();
+
+    if(mode === 'OUT'){
+      orderInput.focus();
+      orderInput.select();
+    }else{
+      skuInput.focus();
+    }
   }catch(e){
     toast(e.message || String(e), 'err');
     setStatus(e.message || String(e), 'err');
@@ -763,6 +691,7 @@ async function toggleQrScanner(){
 
   if(!qrRunning){
     qrReader.classList.remove('hidden');
+    qrReader.scrollIntoView({ behavior: 'smooth', block: 'center' });
     btnQr.textContent = 'Stop QR';
     setStatus('Camera wordt geopend…', 'info');
 
@@ -807,7 +736,7 @@ async function stopQrScanner(){
   qrRunning = false;
   qrReader.classList.add('hidden');
   btnQr.textContent = 'QR scannen';
-  setStatus(mode === 'IN' ? 'Inslag actief. Scan de batch.' : 'Uitslag actief. Scan de colli.', 'info');
+  setStatus(mode === 'IN' ? 'Inslag actief. Focus blijft op de batch.' : 'Uitslag actief. Scan en vul daarna direct ordernummer in.', 'info');
 }
 
 btnProcess.addEventListener('click', () => {
@@ -871,26 +800,22 @@ skuInput.addEventListener('keydown', e => {
 });
 
 locInput.addEventListener('keydown', e => {
-  if(e.key === 'Enter'){
+  if(e.key === 'Enter' && mode === 'IN'){
     e.preventDefault();
-    if(mode === 'IN'){
-      processBatch().catch(err => {
-        toast(err.message || String(err), 'err');
-        setStatus(err.message || String(err), 'err');
-      });
-    }
+    processBatch().catch(err => {
+      toast(err.message || String(err), 'err');
+      setStatus(err.message || String(err), 'err');
+    });
   }
 });
 
 orderInput.addEventListener('keydown', e => {
-  if(e.key === 'Enter'){
+  if(e.key === 'Enter' && mode === 'OUT'){
     e.preventDefault();
-    if(mode === 'OUT'){
-      processBatch().catch(err => {
-        toast(err.message || String(err), 'err');
-        setStatus(err.message || String(err), 'err');
-      });
-    }
+    processBatch().catch(err => {
+      toast(err.message || String(err), 'err');
+      setStatus(err.message || String(err), 'err');
+    });
   }
 });
 
