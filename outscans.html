@@ -38,6 +38,22 @@
       align-items:end;
     }
 
+    .scan-badge{
+      display:inline-flex;
+      align-items:center;
+      padding:4px 10px;
+      border-radius:999px;
+      font-size:11px;
+      font-weight:900;
+      letter-spacing:.04em;
+      text-transform:uppercase;
+      margin-left:8px;
+      background:#fff5f5;
+      color:#991b1b;
+      border:1px solid #fecaca;
+      white-space:nowrap;
+    }
+
     .mobile-cards{
       display:none;
       flex-direction:column;
@@ -129,8 +145,7 @@
       <a href="/scan">In-/Uitscan</a>
       <a href="/stock">Huidige voorraad</a>
       <a class="active" href="/outscans">Uitscans</a>
-      <a href="/picklists">Picklijsten</a>
-      <a href="/online-picklists">Online picklijsten</a>
+      <a href="/inventory">Inventarisatie</a>
     </nav>
 
     <div class="rightbar">
@@ -148,6 +163,7 @@
     <h2>Uitscans</h2>
     <div class="muted">
       Overzicht van alle uitscans. Filter op ordernummer, unieke SKU, locatie of productomschrijving.
+      Inventarisatie-afboekingen worden apart gemarkeerd.
     </div>
 
     <p class="page-url">
@@ -216,6 +232,16 @@ function safeText(v){
   return String(v ?? '').trim();
 }
 
+function isInventoryOutscan(row){
+  return String(row.order_no || '').trim().toUpperCase() === 'INVENTARISATIE';
+}
+
+function inventoryBadge(row){
+  return isInventoryOutscan(row)
+    ? `<span class="scan-badge">INVENTARISATIE</span>`
+    : '';
+}
+
 function updateSummary(rows){
   byId('outscanCount').textContent = String(rows.length);
 
@@ -228,7 +254,8 @@ function updateSummary(rows){
   byId('outscanOrderCount').textContent = String(orderSet.size);
 
   if(rows.length){
-    byId('outscanLastTime').textContent = nlTime(rows[0].created_at);
+    const first = rows[0];
+    byId('outscanLastTime').textContent = `${nlTime(first.created_at)}${isInventoryOutscan(first) ? ' · INVENTARISATIE' : ''}`;
   }else{
     byId('outscanLastTime').textContent = '-';
   }
@@ -257,7 +284,10 @@ function buildDesktopTable(rows){
                 <span class="muted">(${escapeHtml(r.products?.sku_base || '')})</span>
               </td>
               <td>${escapeHtml(r.location || '')}</td>
-              <td><b>${escapeHtml(r.order_no || '')}</b></td>
+              <td>
+                <b>${escapeHtml(r.order_no || '')}</b>
+                ${inventoryBadge(r)}
+              </td>
             </tr>
           `).join('')}
         </tbody>
@@ -296,7 +326,10 @@ function buildMobileCards(rows){
 
           <div class="mobile-line">
             <div class="mobile-k">Ordernummer</div>
-            <div class="mobile-v"><b>${escapeHtml(r.order_no || '')}</b></div>
+            <div class="mobile-v">
+              <b>${escapeHtml(r.order_no || '')}</b>
+              ${isInventoryOutscan(r) ? `<br><span class="scan-badge">INVENTARISATIE</span>` : ''}
+            </div>
           </div>
         </div>
       `).join('')}
