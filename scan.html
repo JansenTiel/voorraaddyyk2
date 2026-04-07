@@ -1,404 +1,902 @@
 <!doctype html>
 <html lang="nl">
 <head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+  <title>Scan Inslag / Uitslag</title>
 
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
+  <link rel="stylesheet" href="/css/theme.css"/>
 
-<title>Scan Inslag / Uitslag</title>
+  <style>
+    .compact-topbar .nav{
+      display:none;
+    }
 
-<link rel="stylesheet" href="/css/theme.css"/>
+    .compact-topbar .rightbar{
+      display:none;
+    }
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/js/supabase.js"></script>
-<script src="/js/app.js"></script>
+    .scan-page{
+      display:grid;
+      gap:16px;
+    }
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+    .scan-top{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:12px;
+      flex-wrap:wrap;
+    }
 
+    .page-url{
+      margin:12px 0 0;
+      color:var(--navy);
+      font-size:14px;
+      font-weight:700;
+      display:flex;
+      align-items:center;
+      flex-wrap:wrap;
+      gap:8px;
+    }
+
+    .page-url strong{
+      display:inline-flex;
+      align-items:center;
+      padding:5px 12px;
+      border-radius:999px;
+      background:rgba(196,154,108,.14);
+      border:1px solid rgba(196,154,108,.28);
+      color:#6e4f36;
+      font-weight:900;
+      letter-spacing:.01em;
+    }
+
+    .status-box{
+      border:1px solid var(--border);
+      border-radius:14px;
+      background:#f8fafc;
+      padding:14px;
+      line-height:1.45;
+      font-weight:800;
+      color:var(--navy);
+      min-width:220px;
+    }
+
+    .status-box.ok{
+      border-color:#abefc6;
+      background:#ecfdf3;
+      color:#027a48;
+    }
+
+    .status-box.err{
+      border-color:#fecdca;
+      background:#fef3f2;
+      color:#b42318;
+    }
+
+    .status-box.info{
+      border-color:#bfdbfe;
+      background:#eff6ff;
+      color:#1d4ed8;
+    }
+
+    .mode-switch{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+      margin-top:16px;
+    }
+
+    .mode-btn{
+      border:2px solid var(--border);
+      border-radius:16px;
+      padding:18px 14px;
+      background:#fff;
+      font-size:20px;
+      font-weight:900;
+      cursor:pointer;
+      color:var(--navy);
+      min-height:68px;
+    }
+
+    .mode-btn.active{
+      background:var(--navy);
+      color:#fff;
+      border-color:var(--navy);
+    }
+
+    .focus-card{
+      border:1px solid var(--border);
+      border-radius:16px;
+      background:#f8fafc;
+      padding:16px;
+    }
+
+    .focus-title{
+      font-size:20px;
+      font-weight:900;
+      color:var(--navy);
+      margin-bottom:6px;
+    }
+
+    .focus-sub{
+      color:var(--muted);
+      line-height:1.45;
+      margin-bottom:14px;
+    }
+
+    .quick-actions{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+
+    .big-btn{
+      min-height:72px;
+      font-size:20px;
+      font-weight:900;
+      border-radius:16px;
+    }
+
+    .scan-fields{
+      display:grid;
+      gap:12px;
+      margin-top:14px;
+    }
+
+    .scan-fields input{
+      min-height:60px;
+      font-size:20px;
+      font-weight:700;
+      border-radius:16px;
+    }
+
+    .batch-actions{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+      margin-top:14px;
+    }
+
+    .process-btn{
+      min-height:72px;
+      font-size:20px;
+      font-weight:900;
+      border-radius:16px;
+    }
+
+    .scan-kpis{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:14px;
+      margin-top:16px;
+    }
+
+    .batch-card,
+    .qr-card,
+    .help-card{
+      border:1px solid var(--border);
+      border-radius:16px;
+      background:#f8fafc;
+      padding:16px;
+    }
+
+    .batch-head{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+      align-items:flex-start;
+    }
+
+    .batch-tools{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .batch-list{
+      margin-top:14px;
+      border:1px solid var(--border);
+      border-radius:14px;
+      background:#fff;
+      overflow:hidden;
+    }
+
+    .batch-empty{
+      padding:16px;
+      color:var(--muted);
+    }
+
+    .batch-row{
+      display:grid;
+      grid-template-columns:56px 1fr;
+      gap:10px;
+      padding:14px;
+      border-bottom:1px solid #edf2f7;
+      align-items:center;
+    }
+
+    .batch-row:last-child{
+      border-bottom:none;
+    }
+
+    .batch-index{
+      font-weight:900;
+      color:var(--muted);
+      font-size:16px;
+    }
+
+    .batch-sku{
+      font-weight:900;
+      color:var(--navy);
+      word-break:break-word;
+      font-size:18px;
+    }
+
+    .batch-meta{
+      font-size:12px;
+      color:var(--muted);
+      margin-top:4px;
+    }
+
+    #qr_reader{
+      margin-top:12px;
+      border-radius:14px;
+      overflow:hidden;
+      background:#fff;
+      border:1px solid var(--border);
+      min-height:300px;
+    }
+
+    .help-card{
+      line-height:1.55;
+    }
+
+    .help-card b{
+      color:var(--navy);
+    }
+
+    .hidden{
+      display:none !important;
+    }
+
+    @media(max-width:980px){
+      .scan-kpis{
+        grid-template-columns:1fr;
+      }
+    }
+
+    @media(max-width:760px){
+      .topbar .inner{
+        padding:12px;
+      }
+
+      .container{
+        padding:14px 12px;
+      }
+
+      .card{
+        padding:16px;
+      }
+
+      .quick-actions,
+      .batch-actions{
+        grid-template-columns:1fr;
+      }
+
+      .mode-btn,
+      .big-btn,
+      .process-btn{
+        min-height:76px;
+      }
+
+      .status-box{
+        width:100%;
+      }
+
+      .page-url{
+        font-size:13px;
+      }
+    }
+  </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/js/supabase.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+  <script src="/js/app.js"></script>
 </head>
-
 <body data-page="scan">
 
-<div class="topbar">
-<div class="inner">
+<div class="topbar no-print compact-topbar">
+  <div class="inner">
+    <div class="brand">
+      <div class="logo">o</div>
+      <div class="title">
+        Oegema Logistics
+        <small>Dyyk · Mobiel scannen</small>
+      </div>
+    </div>
 
-<div class="brand">
-<div class="logo">o</div>
-<div class="title">
-Oegema Logistics
-<small>Dyyk · Voorraadbeheer</small>
+    <nav class="nav">
+      <a href="/">Dashboard</a>
+      <a href="/products">Artikelen + Stickers</a>
+      <a class="active" href="/scan">In-/Uitscan</a>
+      <a href="/stock">Huidige voorraad</a>
+      <a href="/outscans">Uitscans</a>
+      <a href="/inventory">Inventarisatie</a>
+    </nav>
+
+    <div class="rightbar">
+      <a class="site-link" href="https://www.voorraaddyyk.nl" target="_blank" rel="noopener">
+        www.voorraaddyyk.nl
+      </a>
+    </div>
+  </div>
 </div>
-</div>
-
-<nav class="nav">
-<a href="/">Dashboard</a>
-<a href="/products">Artikelen + Stickers</a>
-<a class="active" href="/scan">In-/Uitscan</a>
-<a href="/stock">Huidige voorraad</a>
-<a href="/outscans">Uitscans</a>
-<a href="/inventory">Inventarisatie</a>
-</nav>
-
-</div>
-</div>
-
-
 
 <div class="container">
+  <div id="toast" class="notice"></div>
 
-<div id="toast" class="notice"></div>
+  <div class="scan-page">
 
-<div class="card">
+    <div class="card">
+      <div class="scan-top">
+        <div>
+          <h2>Scan Inslag / Uitslag</h2>
+          <div class="muted">
+            Mobiele scanpagina met zo min mogelijk handelingen. Ondersteunt zowel oude stickers zoals
+            <b>FLZWNO-0001</b> als nieuwe stickers zoals <b>FLZWNO77</b>.
+          </div>
 
-<h2>Scan Inslag / Uitslag</h2>
+          <p class="page-url">
+            Actieve omgeving:
+            <strong>www.voorraaddyyk.nl</strong>
+          </p>
+        </div>
 
-<div class="muted">
-Scan eerst alle colli. Daarna verwerk je de batch.
+        <div class="status-box info" id="statusBox">
+          Klaar om te scannen
+        </div>
+      </div>
+
+      <div class="mode-switch">
+        <button class="mode-btn active" id="tabIn" type="button">Inslag</button>
+        <button class="mode-btn" id="tabOut" type="button">Uitslag</button>
+      </div>
+    </div>
+
+    <div class="card focus-card">
+      <div class="focus-title" id="focusTitle">Inslag</div>
+      <div class="focus-sub" id="focusSub">
+        Scan eerst alle colli van de batch. Vul daarna één keer de locatie in en verwerk de batch.
+      </div>
+
+      <div class="quick-actions">
+        <button class="btn primary big-btn" id="btnQr" type="button">QR scannen</button>
+        <button class="btn big-btn" id="btnAddScan" type="button">Handmatig toevoegen</button>
+      </div>
+
+      <div class="scan-fields">
+        <div>
+          <label for="skuInput">Sticker / unieke SKU</label>
+          <input id="skuInput" placeholder="Scan of vul sticker in"/>
+        </div>
+
+        <div>
+          <label for="locInput">Locatie</label>
+          <input id="locInput" placeholder="Eén locatie voor hele batch"/>
+        </div>
+
+        <div id="outBlock" class="hidden">
+          <label for="orderInput">Ordernummer</label>
+          <input id="orderInput" placeholder="Na scannen direct ordernummer invullen"/>
+        </div>
+      </div>
+
+      <div class="batch-actions">
+        <button class="btn primary process-btn" id="btnProcess" type="button">Batch inboeken</button>
+        <button class="btn process-btn" id="btnClear" type="button">Batch leegmaken</button>
+      </div>
+
+      <div class="scan-kpis">
+        <div class="card" style="padding:16px">
+          <div class="kpi">
+            <div class="label">Gescande colli</div>
+            <div class="value" id="batchCount">0</div>
+          </div>
+        </div>
+
+        <div class="card" style="padding:16px">
+          <div class="kpi">
+            <div class="label">Modus</div>
+            <div class="value" id="modeKpi" style="font-size:20px">Inslag</div>
+          </div>
+        </div>
+
+        <div class="card" style="padding:16px">
+          <div class="kpi">
+            <div class="label">Laatste scan</div>
+            <div class="value" id="lastScanKpi" style="font-size:16px">-</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card batch-card">
+      <div class="batch-head">
+        <div>
+          <h3>Batchlijst</h3>
+          <div class="muted">
+            Hier zie je alle gescande colli die klaarstaan om te verwerken.
+          </div>
+        </div>
+
+        <div class="batch-tools">
+          <button class="btn ghost" id="btnUndoLast" type="button">Laatste weg</button>
+          <button class="btn danger" id="btnClearBatch" type="button">Batch leegmaken</button>
+        </div>
+      </div>
+
+      <div id="batchList" class="batch-list"></div>
+    </div>
+
+    <div class="card qr-card">
+      <h3>QR scanner</h3>
+      <div class="muted">
+        Op mobiel opent deze direct het camerascherm. Na een scan kun je meteen verder.
+      </div>
+
+      <div id="qr_reader" class="hidden"></div>
+    </div>
+
+    <div class="card help-card">
+      <h3>Gebruik</h3>
+      <div>
+        <b>Inslag:</b> scan eerst de hele batch. De focus blijft op het scanveld zodat je snel door kunt.
+        Daarna vul je één keer de locatie in en klik je op batch inboeken.
+      </div>
+      <div style="margin-top:8px">
+        <b>Uitslag:</b> scan de colli. Daarna wil je meestal meteen het ordernummer invullen.
+        Daarom wordt mobiel gebruik extra makkelijk gemaakt voor uitslag.
+      </div>
+      <div style="margin-top:8px">
+        De scanpagina accepteert zowel <b>oude stickers</b> als <b>nieuwe stickers</b>.
+      </div>
+    </div>
+
+  </div>
 </div>
-
-
-<div class="tabs" style="margin-top:16px">
-
-<button class="tab active" id="tabIn">Inslag</button>
-<button class="tab" id="tabOut">Uitslag</button>
-
-</div>
-
-
-<div class="row" style="margin-top:16px">
-
-<div>
-<label>Sticker / SKU</label>
-<input id="skuInput" placeholder="Scan sticker"/>
-</div>
-
-<div>
-<label>Locatie</label>
-<input id="locInput" placeholder="Locatie"/>
-</div>
-
-</div>
-
-
-<div id="outBlock" class="hidden" style="margin-top:12px">
-
-<label>Ordernummer</label>
-<input id="orderInput" placeholder="Ordernummer"/>
-
-</div>
-
-
-<div class="btnRow" style="margin-top:16px">
-
-<button class="btn primary" id="btnProcess">
-Batch verwerken
-</button>
-
-<button class="btn" id="btnClear">
-Batch leegmaken
-</button>
-
-<button class="btn ghost" id="btnQR">
-Start QR
-</button>
-
-</div>
-
-
-<div class="card" style="margin-top:20px">
-
-<div class="kpi">
-<div class="label">Gescande colli</div>
-<div class="value" id="batchCount">0</div>
-</div>
-
-<div id="batchList" style="margin-top:12px"></div>
-
-</div>
-
-
-<div class="card" style="margin-top:20px">
-
-<b>QR scanner</b>
-
-<div id="qr_reader" class="hidden" style="margin-top:10px"></div>
-
-</div>
-
-
-</div>
-</div>
-
-
 
 <script>
+setActiveNav();
 
-setActiveNav()
+const client = sb();
 
-const client = sb()
+const tabIn = byId('tabIn');
+const tabOut = byId('tabOut');
+const outBlock = byId('outBlock');
 
-const skuInput = byId("skuInput")
-const locInput = byId("locInput")
-const orderInput = byId("orderInput")
+const btnProcess = byId('btnProcess');
+const btnClear = byId('btnClear');
+const btnQr = byId('btnQr');
+const btnAddScan = byId('btnAddScan');
+const btnUndoLast = byId('btnUndoLast');
+const btnClearBatch = byId('btnClearBatch');
 
-const batchCount = byId("batchCount")
-const batchList = byId("batchList")
+const skuInput = byId('skuInput');
+const locInput = byId('locInput');
+const orderInput = byId('orderInput');
+const qrReader = byId('qr_reader');
 
-const tabIn = byId("tabIn")
-const tabOut = byId("tabOut")
+const statusBox = byId('statusBox');
+const batchCount = byId('batchCount');
+const batchList = byId('batchList');
+const modeKpi = byId('modeKpi');
+const lastScanKpi = byId('lastScanKpi');
+const focusTitle = byId('focusTitle');
+const focusSub = byId('focusSub');
 
-const outBlock = byId("outBlock")
+let mode = 'IN';
+let qr = null;
+let qrRunning = false;
+let batch = [];
 
-let mode = "IN"
-let batch = []
+function safeText(v){
+  return String(v ?? '').trim();
+}
 
+function setStatus(message, type='info'){
+  statusBox.className = `status-box ${type}`;
+  statusBox.textContent = message;
+}
+
+function updateModeUi(){
+  tabIn.classList.toggle('active', mode === 'IN');
+  tabOut.classList.toggle('active', mode === 'OUT');
+  outBlock.classList.toggle('hidden', mode !== 'OUT');
+
+  modeKpi.textContent = mode === 'IN' ? 'Inslag' : 'Uitslag';
+  btnProcess.textContent = mode === 'IN' ? 'Batch inboeken' : 'Batch uitboeken';
+
+  if(mode === 'IN'){
+    focusTitle.textContent = 'Inslag';
+    focusSub.textContent = 'Scan eerst alle colli van de batch. Vul daarna één keer de locatie in en verwerk de batch.';
+    setStatus('Inslag actief. Scan de batch.', 'info');
+  }else{
+    focusTitle.textContent = 'Uitslag';
+    focusSub.textContent = 'Scan de colli. Daarna kun je op mobiel direct het ordernummer invullen en de batch verwerken.';
+    setStatus('Uitslag actief. Scan de colli.', 'info');
+  }
+}
+
+function setMode(nextMode){
+  mode = nextMode;
+  updateModeUi();
+  clearForm(false);
+}
+
+function focusAfterScan(){
+  if(mode === 'OUT'){
+    orderInput.focus();
+    orderInput.select();
+  }else{
+    skuInput.focus();
+  }
+}
+
+function clearForm(clearBatchToo = true){
+  skuInput.value = '';
+  locInput.value = '';
+  orderInput.value = '';
+
+  if(clearBatchToo){
+    batch = [];
+    renderBatch();
+  }
+
+  lastScanKpi.textContent = '-';
+  if(mode === 'IN'){
+    skuInput.focus();
+  }else{
+    skuInput.focus();
+  }
+}
 
 function renderBatch(){
+  batchCount.textContent = String(batch.length);
 
-batchCount.textContent = batch.length
+  if(!batch.length){
+    batchList.innerHTML = `<div class="batch-empty">Nog geen colli gescand.</div>`;
+    return;
+  }
 
-if(!batch.length){
-
-batchList.innerHTML =
-"<div class='muted'>Nog geen colli gescand.</div>"
-
-return
-
+  batchList.innerHTML = batch.map((sku, i) => `
+    <div class="batch-row">
+      <div class="batch-index">#${i + 1}</div>
+      <div>
+        <div class="batch-sku">${escapeHtml(sku)}</div>
+        <div class="batch-meta">${mode === 'IN' ? 'Klaar voor inslag' : 'Klaar voor uitslag'}</div>
+      </div>
+    </div>
+  `).join('');
 }
 
-batchList.innerHTML = `
-<table>
-<thead>
-<tr>
-<th>#</th>
-<th>SKU</th>
-</tr>
-</thead>
-<tbody>
-
-${batch.map((s,i)=>`
-<tr>
-<td>${i+1}</td>
-<td><b>${escapeHtml(s)}</b></td>
-</tr>
-`).join("")}
-
-</tbody>
-</table>
-`
-
+function normalizeScannedValue(value){
+  return normalizeScan(value);
 }
 
+function addScanToBatch(rawValue){
+  const sku = normalizeScannedValue(rawValue);
 
+  if(!sku) return;
 
-function addScan(){
+  if(batch.includes(sku)){
+    toast(`Sticker ${sku} is al gescand in deze batch.`, 'err');
+    setStatus(`Dubbele scan: ${sku}`, 'err');
+    skuInput.value = '';
+    focusAfterScan();
+    return;
+  }
 
-const sku = normalizeScan(skuInput.value)
+  batch.push(sku);
+  renderBatch();
 
-if(!sku) return
+  skuInput.value = '';
+  lastScanKpi.textContent = sku;
 
-if(batch.includes(sku)){
-toast("Sticker al gescand","err")
-skuInput.value=""
-return
+  if(mode === 'IN'){
+    setStatus(`${batch.length} colli gescand voor inslag.`, 'ok');
+  }else{
+    setStatus(`${batch.length} colli gescand voor uitslag.`, 'ok');
+  }
+
+  focusAfterScan();
 }
 
-batch.push(sku)
+async function doInSingle(skuUnique, location){
+  const { data:item, error } = await client
+    .from('items')
+    .select('id, product_id, sku_unique, status')
+    .eq('sku_unique', skuUnique)
+    .maybeSingle();
 
-renderBatch()
+  if(error) throw error;
+  if(!item) throw new Error(`Sticker niet gevonden: ${skuUnique}`);
+  if(item.status === 'IN_STOCK') throw new Error(`Item staat al op voorraad: ${skuUnique}`);
 
-skuInput.value=""
-skuInput.focus()
+  const { error:updateErr } = await client
+    .from('items')
+    .update({
+      status: 'IN_STOCK',
+      location,
+      in_at: new Date().toISOString(),
+      out_at: null
+    })
+    .eq('id', item.id);
 
+  if(updateErr) throw updateErr;
+
+  const { error:moveErr } = await client
+    .from('movements')
+    .insert([{
+      type: 'IN',
+      product_id: item.product_id,
+      sku_unique: skuUnique,
+      location,
+      order_no: null
+    }]);
+
+  if(moveErr) throw moveErr;
 }
 
+async function doOutSingle(skuUnique, orderNo){
+  const { data:item, error } = await client
+    .from('items')
+    .select('id, product_id, sku_unique, status, location')
+    .eq('sku_unique', skuUnique)
+    .maybeSingle();
 
+  if(error) throw error;
+  if(!item) throw new Error(`Sticker niet gevonden: ${skuUnique}`);
+  if(item.status !== 'IN_STOCK') throw new Error(`Uitslag niet mogelijk: ${skuUnique} staat niet op voorraad.`);
 
-skuInput.addEventListener("keydown",e=>{
+  const { error:updateErr } = await client
+    .from('items')
+    .update({
+      status: 'OUT',
+      out_at: new Date().toISOString()
+    })
+    .eq('id', item.id);
 
-if(e.key==="Enter"){
+  if(updateErr) throw updateErr;
 
-e.preventDefault()
+  const { error:moveErr } = await client
+    .from('movements')
+    .insert([{
+      type: 'OUT',
+      product_id: item.product_id,
+      sku_unique: skuUnique,
+      location: item.location || null,
+      order_no: orderNo
+    }]);
 
-addScan()
-
-if(mode==="OUT") orderInput.focus()
-
+  if(moveErr) throw moveErr;
 }
-
-})
-
-
-
-tabIn.onclick = ()=>{
-
-mode="IN"
-
-tabIn.classList.add("active")
-tabOut.classList.remove("active")
-
-outBlock.classList.add("hidden")
-
-}
-
-tabOut.onclick = ()=>{
-
-mode="OUT"
-
-tabOut.classList.add("active")
-tabIn.classList.remove("active")
-
-outBlock.classList.remove("hidden")
-
-}
-
-
 
 async function processBatch(){
+  if(!batch.length){
+    toast('Scan eerst één of meerdere colli.', 'err');
+    setStatus('Geen batch om te verwerken.', 'err');
+    return;
+  }
 
-if(!batch.length){
-toast("Geen scans","err")
-return
+  const location = safeText(locInput.value);
+  const orderNo = safeText(orderInput.value);
+
+  try{
+    if(mode === 'IN'){
+      if(!location){
+        toast('Locatie is verplicht bij inslag.', 'err');
+        setStatus('Locatie ontbreekt voor inslag.', 'err');
+        locInput.focus();
+        return;
+      }
+
+      setStatus('Batch wordt ingeboekt…', 'info');
+
+      for(const sku of batch){
+        await doInSingle(sku, location);
+      }
+
+      toast(`${batch.length} colli ingeboekt op locatie ${location}.`, 'ok');
+      setStatus(`${batch.length} colli succesvol ingeboekt.`, 'ok');
+    }else{
+      if(!orderNo){
+        toast('Ordernummer is verplicht bij uitslag.', 'err');
+        setStatus('Ordernummer ontbreekt voor uitslag.', 'err');
+        orderInput.focus();
+        return;
+      }
+
+      const used = await countOrderUses(client, orderNo).catch(() => 0);
+      if(used > 0){
+        const ok = confirm(`Ordernummer ${orderNo} is al ${used}x gebruikt. Doorgaan?`);
+        if(!ok){
+          setStatus('Uitslag geannuleerd.', 'info');
+          return;
+        }
+      }
+
+      setStatus('Batch wordt uitgeboekt…', 'info');
+
+      for(const sku of batch){
+        await doOutSingle(sku, orderNo);
+      }
+
+      toast(`${batch.length} colli uitgeboekt op order ${orderNo}.`, 'ok');
+      setStatus(`${batch.length} colli succesvol uitgeboekt.`, 'ok');
+    }
+
+    batch = [];
+    renderBatch();
+    skuInput.value = '';
+    lastScanKpi.textContent = 'Batch verwerkt';
+    focusAfterScan();
+  }catch(e){
+    toast(e.message || String(e), 'err');
+    setStatus(e.message || String(e), 'err');
+  }
 }
 
-const location = locInput.value.trim()
-const orderNo = orderInput.value.trim()
+async function toggleQrScanner(){
+  if(typeof Html5Qrcode !== 'function'){
+    toast('QR library ontbreekt.', 'err');
+    setStatus('QR library ontbreekt.', 'err');
+    return;
+  }
 
-try{
+  if(!qr){
+    qr = new Html5Qrcode('qr_reader');
+  }
 
-for(const sku of batch){
+  if(!qrRunning){
+    qrReader.classList.remove('hidden');
+    btnQr.textContent = 'Stop QR';
+    setStatus('Camera wordt geopend…', 'info');
 
-const {data:item,error} = await client
-.from("items")
-.select("*")
-.eq("sku_unique",sku)
-.maybeSingle()
+    try{
+      const cams = await Html5Qrcode.getCameras();
+      if(!cams || !cams.length){
+        throw new Error('Geen camera gevonden');
+      }
 
-if(error) throw error
+      const preferred = cams.find(c => /back|rear|environment/i.test(c.label)) || cams[0];
 
-if(!item){
-throw new Error("Sticker niet gevonden: "+sku)
+      qrRunning = true;
+
+      await qr.start(
+        preferred.id,
+        { fps: 10, qrbox: { width: 260, height: 260 } },
+        (decodedText) => {
+          addScanToBatch(decodedText);
+        }
+      );
+
+      setStatus('QR scanner actief.', 'ok');
+    }catch(e){
+      qrRunning = false;
+      qrReader.classList.add('hidden');
+      btnQr.textContent = 'QR scannen';
+      toast('Camera start niet. Gebruik https en sta camera toe.', 'err');
+      setStatus('Camera start niet.', 'err');
+    }
+  }else{
+    await stopQrScanner();
+  }
 }
 
+async function stopQrScanner(){
+  try{
+    if(qr && qrRunning){
+      await qr.stop();
+    }
+  }catch(_){}
 
-if(mode==="IN"){
-
-await client
-.from("items")
-.update({
-status:"IN_STOCK",
-location,
-in_at:new Date().toISOString(),
-out_at:null
-})
-.eq("id",item.id)
-
-await client
-.from("movements")
-.insert({
-type:"IN",
-product_id:item.product_id,
-sku_unique:sku,
-location
-})
-
+  qrRunning = false;
+  qrReader.classList.add('hidden');
+  btnQr.textContent = 'QR scannen';
+  setStatus(mode === 'IN' ? 'Inslag actief. Scan de batch.' : 'Uitslag actief. Scan de colli.', 'info');
 }
 
+btnProcess.addEventListener('click', () => {
+  processBatch().catch(e => {
+    toast(e.message || String(e), 'err');
+    setStatus(e.message || String(e), 'err');
+  });
+});
 
-else{
+btnClear.addEventListener('click', () => {
+  clearForm(true);
+  setStatus('Batch gewist.', 'info');
+});
 
-await client
-.from("items")
-.update({
-status:"OUT",
-out_at:new Date().toISOString()
-})
-.eq("id",item.id)
+btnQr.addEventListener('click', () => {
+  toggleQrScanner().catch(e => {
+    toast(e.message || String(e), 'err');
+    setStatus(e.message || String(e), 'err');
+  });
+});
 
-await client
-.from("movements")
-.insert({
-type:"OUT",
-product_id:item.product_id,
-sku_unique:sku,
-location:item.location,
-order_no:orderNo
-})
+btnAddScan.addEventListener('click', () => {
+  addScanToBatch(skuInput.value);
+});
 
-}
+btnUndoLast.addEventListener('click', () => {
+  if(!batch.length) return;
+  const removed = batch[batch.length - 1];
+  batch.pop();
+  renderBatch();
+  lastScanKpi.textContent = batch.length ? batch[batch.length - 1] : '-';
+  setStatus(`Laatste scan verwijderd: ${removed}`, 'info');
+  skuInput.focus();
+});
 
-}
+btnClearBatch.addEventListener('click', () => {
+  batch = [];
+  renderBatch();
+  lastScanKpi.textContent = '-';
+  setStatus('Batch leeggemaakt.', 'info');
+  skuInput.focus();
+});
 
-toast(batch.length+" colli verwerkt")
+tabIn.addEventListener('click', () => {
+  setMode('IN');
+});
 
-batch=[]
-renderBatch()
+tabOut.addEventListener('click', () => {
+  setMode('OUT');
+});
 
-}
-catch(e){
+skuInput.addEventListener('input', () => {
+  skuInput.value = normalizeScannedValue(skuInput.value);
+});
 
-toast(e.message,"err")
+skuInput.addEventListener('keydown', e => {
+  if(e.key === 'Enter'){
+    e.preventDefault();
+    addScanToBatch(skuInput.value);
+  }
+});
 
-}
+locInput.addEventListener('keydown', e => {
+  if(e.key === 'Enter'){
+    e.preventDefault();
+    if(mode === 'IN'){
+      processBatch().catch(err => {
+        toast(err.message || String(err), 'err');
+        setStatus(err.message || String(err), 'err');
+      });
+    }
+  }
+});
 
-}
+orderInput.addEventListener('keydown', e => {
+  if(e.key === 'Enter'){
+    e.preventDefault();
+    if(mode === 'OUT'){
+      processBatch().catch(err => {
+        toast(err.message || String(err), 'err');
+        setStatus(err.message || String(err), 'err');
+      });
+    }
+  }
+});
 
-
-
-byId("btnProcess").onclick = processBatch
-
-byId("btnClear").onclick = ()=>{
-
-batch=[]
-renderBatch()
-
-}
-
-
-
-let qr
-let qrRunning=false
-
-byId("btnQR").onclick = async ()=>{
-
-if(!qr){
-qr = new Html5Qrcode("qr_reader")
-}
-
-if(!qrRunning){
-
-const cams = await Html5Qrcode.getCameras()
-
-await qr.start(
-cams[0].id,
-{fps:10,qrbox:250},
-txt=>{
-skuInput.value = txt
-addScan()
-}
-)
-
-qrRunning=true
-byId("qr_reader").classList.remove("hidden")
-
-}
-
-else{
-
-await qr.stop()
-qrRunning=false
-
-byId("qr_reader").classList.add("hidden")
-
-}
-
-}
-
-
-
-renderBatch()
-skuInput.focus()
-
+setMode('IN');
+renderBatch();
+clearForm(false);
 </script>
 
 </body>
