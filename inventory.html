@@ -2,10 +2,14 @@
 <html lang="nl">
 <head>
   <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Inventarisatie</title>
 
   <link rel="stylesheet" href="/css/theme.css"/>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/js/supabase.js"></script>
+  <script src="/js/app.js"></script>
 
   <style>
     .page-url{
@@ -44,7 +48,35 @@
       align-items:end;
     }
 
+    .status-box{
+      border:1px solid var(--border);
+      border-radius:14px;
+      background:#f8fafc;
+      padding:14px;
+      margin-top:14px;
+      line-height:1.5;
+    }
+
+    .status-box.ok{
+      border-color:#abefc6;
+      background:#ecfdf3;
+      color:#027a48;
+    }
+
+    .status-box.err{
+      border-color:#fecdca;
+      background:#fef3f2;
+      color:#b42318;
+    }
+
+    .status-box.info{
+      border-color:#bfdbfe;
+      background:#eff6ff;
+      color:#1d4ed8;
+    }
+
     .scan-panel,
+    .bulk-panel,
     .result-panel{
       border:1px solid var(--border);
       border-radius:14px;
@@ -56,6 +88,8 @@
       display:grid;
       gap:10px;
       margin-top:12px;
+      max-height:360px;
+      overflow:auto;
     }
 
     .scan-pill{
@@ -90,6 +124,40 @@
       padding:12px;
       color:#991b1b;
       line-height:1.45;
+    }
+
+    .bulk-table-wrap{
+      margin-top:12px;
+      overflow:auto;
+      border:1px solid var(--border);
+      border-radius:12px;
+      background:#fff;
+    }
+
+    .bulk-table{
+      width:100%;
+      border-collapse:collapse;
+    }
+
+    .bulk-table th,
+    .bulk-table td{
+      padding:12px 14px;
+      border-bottom:1px solid #edf2f7;
+      text-align:left;
+      font-size:14px;
+      vertical-align:middle;
+    }
+
+    .bulk-table th{
+      background:#f8fafc;
+      color:#334155;
+      font-size:12px;
+      text-transform:uppercase;
+      letter-spacing:.04em;
+    }
+
+    .bulk-table input{
+      width:100px;
     }
 
     .desktop-table{
@@ -159,10 +227,6 @@
       }
     }
   </style>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="/js/supabase.js"></script>
-  <script src="/js/app.js"></script>
 </head>
 <body data-page="inventory">
 
@@ -200,7 +264,7 @@
     <h2>Inventarisatie</h2>
     <div class="muted">
       Start eerst een inventarisatieronde op basis van de actuele voorraad. Scan daarna alle aanwezige colli.
-      Alles wat wél in de voorraadlijst stond maar níet wordt gescand, kan daarna automatisch worden afgeboekt.
+      Je hoeft geen locaties te scannen. Niet-gescande artikelen kunnen daarna automatisch worden afgeboekt.
     </div>
 
     <p class="page-url">
@@ -230,6 +294,10 @@
       </div>
     </div>
 
+    <div id="liveStatus" class="status-box info">
+      Nog niet gestart.
+    </div>
+
     <div class="row-4" style="margin-top:16px">
       <div class="card" style="padding:16px">
         <div class="kpi">
@@ -240,15 +308,15 @@
 
       <div class="card" style="padding:16px">
         <div class="kpi">
-          <div class="label">Geslaagd gescand</div>
+          <div class="label">Bevestigd aanwezig</div>
           <div class="value" id="kpiScannedCount">0</div>
         </div>
       </div>
 
       <div class="card" style="padding:16px">
         <div class="kpi">
-          <div class="label">Niet gescand</div>
-          <div class="value" id="kpiMissingCount">0</div>
+          <div class="label">Nog te controleren</div>
+          <div class="value" id="kpiRemainingCount">0</div>
         </div>
       </div>
 
@@ -263,17 +331,36 @@
 
   <div class="inventory-stack">
     <div class="card scan-panel">
-      <h3>Gescande colli</h3>
+      <h3>Gescande / handmatig bevestigde colli</h3>
       <div class="muted">
-        Alleen colli die in de actuele startvoorraad bestaan, tellen mee als geldige scan.
+        Scan gewoon de stickers terwijl je door het magazijn loopt. Niet-scanbare stickers kun je handmatig invoeren.
       </div>
 
       <div class="btnRow" style="margin-top:12px">
+        <button class="btn primary" id="btnAddManual" type="button">Handmatig toevoegen</button>
         <button class="btn ghost" id="btnUndoLast" type="button">Laatste weg</button>
         <button class="btn danger" id="btnClearScans" type="button">Scans leegmaken</button>
       </div>
 
       <div id="scannedList" class="scan-list"></div>
+    </div>
+
+    <div class="card bulk-panel">
+      <h3>Bulk bevestiging per SKU-basis</h3>
+      <div class="muted">
+        Gebruik dit als je van een artikel wel weet hoeveel er fysiek staan, maar je niet alles afzonderlijk kunt scannen.
+        Bijvoorbeeld: 98 van de 100 aanwezig.
+      </div>
+
+      <div id="bulkInfo" class="muted-box" style="margin-top:12px">
+        Start eerst een inventarisatie om de startvoorraad per SKU-basis op te halen.
+      </div>
+
+      <div id="bulkTableWrap" class="bulk-table-wrap"></div>
+
+      <div class="btnRow" style="margin-top:12px">
+        <button class="btn" id="btnApplyBulk" type="button">Bulk bevestiging verwerken</button>
+      </div>
     </div>
 
     <div class="card result-panel">
@@ -299,13 +386,35 @@ const state = {
   scanned: [],
   scannedSet: new Set(),
   duplicateCount: 0,
-  missing: []
+  missing: [],
+  skuGroups: new Map()
 };
+
+function safeText(v){
+  return String(v ?? '').trim();
+}
+
+function normalizeSku(v){
+  return cleanSku(normalizeScan(v));
+}
+
+function getSkuBaseFromUniqueLocal(uniqueSku){
+  const value = normalizeSku(uniqueSku);
+  const match = value.match(/^(.*)-(\d{5})$/);
+  if(match) return match[1];
+  return value;
+}
+
+function setLiveStatus(message, type='info'){
+  const el = byId('liveStatus');
+  el.className = `status-box ${type}`;
+  el.textContent = message;
+}
 
 function updateKpis(){
   byId('kpiStartCount').textContent = String(state.startItems.length);
   byId('kpiScannedCount').textContent = String(state.scanned.length);
-  byId('kpiMissingCount').textContent = String(state.missing.length);
+  byId('kpiRemainingCount').textContent = String(Math.max(0, state.startItems.length - state.scanned.length));
   byId('kpiDuplicateCount').textContent = String(state.duplicateCount);
 }
 
@@ -313,7 +422,7 @@ function renderScannedList(){
   const el = byId('scannedList');
 
   if(!state.scanned.length){
-    el.innerHTML = `<div class="muted-box">Nog geen colli gescand.</div>`;
+    el.innerHTML = `<div class="muted-box">Nog geen colli bevestigd.</div>`;
     return;
   }
 
@@ -323,6 +432,72 @@ function renderScannedList(){
       <span class="small">#${idx + 1}</span>
     </div>
   `).join('');
+}
+
+function buildSkuGroups(){
+  const map = new Map();
+
+  state.startItems.forEach(it => {
+    const base = getSkuBaseFromUniqueLocal(it.sku_unique);
+    if(!map.has(base)){
+      map.set(base, []);
+    }
+    map.get(base).push(it);
+  });
+
+  state.skuGroups = map;
+}
+
+function renderBulkTable(){
+  const info = byId('bulkInfo');
+  const wrap = byId('bulkTableWrap');
+
+  if(!state.started){
+    info.textContent = 'Start eerst een inventarisatie om de startvoorraad per SKU-basis op te halen.';
+    wrap.innerHTML = '';
+    return;
+  }
+
+  const rows = Array.from(state.skuGroups.entries())
+    .sort((a,b) => a[0].localeCompare(b[0], 'nl'))
+    .map(([skuBase, items]) => {
+      const confirmed = items.filter(it => state.scannedSet.has(normalizeSku(it.sku_unique))).length;
+
+      return `
+        <tr>
+          <td><b>${escapeHtml(skuBase)}</b></td>
+          <td>${items.length}</td>
+          <td>${confirmed}</td>
+          <td>
+            <input
+              type="number"
+              min="0"
+              max="${items.length}"
+              value=""
+              placeholder="${confirmed}"
+              data-bulk-sku="${escapeHtml(skuBase)}"
+            />
+          </td>
+        </tr>
+      `;
+    }).join('');
+
+  info.innerHTML = 'Vul per SKU-basis het totaal aantal <b>fysiek aanwezige</b> artikelen in. De pagina gebruikt eerst je scans en vult daarna automatisch aan tot dat aantal.';
+  wrap.innerHTML = `
+    <table class="bulk-table">
+      <thead>
+        <tr>
+          <th>SKU-basis</th>
+          <th>Startvoorraad</th>
+          <th>Nu bevestigd</th>
+          <th>Fysiek aanwezig</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rows}
+      </tbody>
+    </table>
+  `;
 }
 
 function renderMissing(){
@@ -338,7 +513,7 @@ function renderMissing(){
   }
 
   if(!state.missing.length){
-    info.innerHTML = `<div class="muted-box">Geen verschillen gevonden. Alles uit de startvoorraad is gescand.</div>`;
+    info.innerHTML = `<div class="muted-box">Geen verschillen gevonden. Alles uit de startvoorraad is bevestigd als aanwezig.</div>`;
     wrap.innerHTML = '';
     byId('btnFinalizeMissing').disabled = true;
     updateKpis();
@@ -347,7 +522,7 @@ function renderMissing(){
 
   info.innerHTML = `
     <div class="danger-box">
-      <b>${state.missing.length}</b> artikel(en) stonden wel in de startvoorraad, maar zijn niet gescand.
+      <b>${state.missing.length}</b> artikel(en) stonden wel in de startvoorraad, maar zijn niet bevestigd.
       Deze kunnen met één knop automatisch worden afgeboekt.
     </div>
   `;
@@ -358,6 +533,7 @@ function renderMissing(){
         <thead>
           <tr>
             <th>Unieke SKU</th>
+            <th>SKU-basis</th>
             <th>Locatie</th>
             <th>Status</th>
           </tr>
@@ -366,6 +542,7 @@ function renderMissing(){
           ${state.missing.map(it => `
             <tr>
               <td><b>${escapeHtml(it.sku_unique || '')}</b></td>
+              <td>${escapeHtml(getSkuBaseFromUniqueLocal(it.sku_unique || ''))}</td>
               <td>${escapeHtml(it.location || '')}</td>
               <td>${escapeHtml(it.status || '')}</td>
             </tr>
@@ -380,6 +557,10 @@ function renderMissing(){
           <div class="mobile-line">
             <div class="mobile-k">Unieke SKU</div>
             <div class="mobile-v"><b>${escapeHtml(it.sku_unique || '')}</b></div>
+          </div>
+          <div class="mobile-line">
+            <div class="mobile-k">SKU-basis</div>
+            <div class="mobile-v">${escapeHtml(getSkuBaseFromUniqueLocal(it.sku_unique || ''))}</div>
           </div>
           <div class="mobile-line">
             <div class="mobile-k">Locatie</div>
@@ -410,45 +591,49 @@ async function startInventorySession(){
 
     state.started = true;
     state.startItems = data || [];
-    state.startMap = new Map(state.startItems.map(it => [String(it.sku_unique || '').toUpperCase(), it]));
+    state.startMap = new Map(state.startItems.map(it => [normalizeSku(it.sku_unique || ''), it]));
     state.scanned = [];
     state.scannedSet = new Set();
     state.duplicateCount = 0;
     state.missing = [];
 
+    buildSkuGroups();
     renderScannedList();
+    renderBulkTable();
     renderMissing();
     updateKpis();
 
+    setLiveStatus(`Inventarisatie gestart. ${state.startItems.length} artikelen in startvoorraad.`, 'ok');
     toast(`Inventarisatie gestart met ${state.startItems.length} voorraadregels.`, 'ok');
     byId('scanInput').focus();
   }catch(e){
+    setLiveStatus(e.message || String(e), 'err');
     toast(e.message || String(e), 'err');
   }
 }
 
-function addScan(){
+function addConfirmedSku(rawValue){
   if(!state.started){
     toast('Start eerst een inventarisatie.', 'err');
+    setLiveStatus('Start eerst een inventarisatie.', 'err');
     return;
   }
 
-  const raw = byId('scanInput').value;
-  const sku = cleanSku(normalizeScan(raw));
+  const sku = normalizeSku(rawValue);
 
   if(!sku) return;
 
-  byId('scanInput').value = '';
-
   if(!state.startMap.has(sku)){
     toast(`SKU staat niet in de startvoorraad: ${sku}`, 'err');
+    setLiveStatus(`Niet bekend in startvoorraad: ${sku}`, 'err');
     return;
   }
 
   if(state.scannedSet.has(sku)){
     state.duplicateCount += 1;
     updateKpis();
-    toast(`SKU ${sku} is al gescand.`, 'err');
+    toast(`SKU ${sku} is al bevestigd.`, 'err');
+    setLiveStatus(`Dubbele scan: ${sku}`, 'err');
     return;
   }
 
@@ -456,7 +641,18 @@ function addScan(){
   state.scannedSet.add(sku);
 
   renderScannedList();
+  renderBulkTable();
   updateKpis();
+
+  toast(`Bevestigd: ${sku}`, 'ok');
+  setLiveStatus(`Bevestigd aanwezig: ${sku}`, 'ok');
+}
+
+function addScanFromInput(){
+  const input = byId('scanInput');
+  const raw = input.value;
+  input.value = '';
+  addConfirmedSku(raw);
 }
 
 function undoLastScan(){
@@ -467,7 +663,9 @@ function undoLastScan(){
   state.scannedSet.delete(last);
 
   renderScannedList();
+  renderBulkTable();
   updateKpis();
+  setLiveStatus(`Laatste bevestiging verwijderd: ${last}`, 'info');
 }
 
 function clearScans(){
@@ -477,8 +675,56 @@ function clearScans(){
   state.missing = [];
 
   renderScannedList();
+  renderBulkTable();
   renderMissing();
   updateKpis();
+  setLiveStatus('Alle bevestigingen gewist.', 'info');
+}
+
+function applyBulkCounts(){
+  if(!state.started){
+    toast('Start eerst een inventarisatie.', 'err');
+    return;
+  }
+
+  const inputs = document.querySelectorAll('[data-bulk-sku]');
+  let changes = 0;
+
+  inputs.forEach(input => {
+    const skuBase = input.getAttribute('data-bulk-sku');
+    const entered = safeText(input.value);
+
+    if(entered === '') return;
+
+    const desiredCount = Number(entered);
+    const items = state.skuGroups.get(skuBase) || [];
+
+    if(Number.isNaN(desiredCount) || desiredCount < 0){
+      return;
+    }
+
+    const cappedDesired = Math.min(desiredCount, items.length);
+
+    const alreadyConfirmed = items.filter(it => state.scannedSet.has(normalizeSku(it.sku_unique))).length;
+    const needToAdd = Math.max(0, cappedDesired - alreadyConfirmed);
+
+    if(needToAdd > 0){
+      const candidates = items.filter(it => !state.scannedSet.has(normalizeSku(it.sku_unique)));
+      candidates.slice(0, needToAdd).forEach(it => {
+        const sku = normalizeSku(it.sku_unique);
+        state.scanned.push(sku);
+        state.scannedSet.add(sku);
+        changes++;
+      });
+    }
+  });
+
+  renderScannedList();
+  renderBulkTable();
+  updateKpis();
+
+  setLiveStatus(`${changes} extra artikelen via bulk bevestigd.`, 'ok');
+  toast(`${changes} extra artikelen via bulk bevestigd.`, 'ok');
 }
 
 function compareInventory(){
@@ -487,12 +733,14 @@ function compareInventory(){
     return;
   }
 
-  state.missing = state.startItems.filter(it => !state.scannedSet.has(String(it.sku_unique || '').toUpperCase()));
+  state.missing = state.startItems.filter(it => !state.scannedSet.has(normalizeSku(it.sku_unique)));
   renderMissing();
 
   if(state.missing.length){
-    toast(`${state.missing.length} niet-gescande artikelen gevonden.`, 'ok');
+    setLiveStatus(`${state.missing.length} artikelen niet bevestigd gevonden.`, 'err');
+    toast(`${state.missing.length} niet-bevestigde artikelen gevonden.`, 'ok');
   }else{
+    setLiveStatus('Geen verschillen gevonden. Inventarisatie compleet.', 'ok');
     toast('Geen verschillen gevonden.', 'ok');
   }
 }
@@ -504,12 +752,12 @@ async function finalizeMissingOutbook(){
   }
 
   if(!state.missing.length){
-    toast('Er zijn geen niet-gescande artikelen om af te boeken.', 'err');
+    toast('Er zijn geen niet-bevestigde artikelen om af te boeken.', 'err');
     return;
   }
 
   const ok = confirm(
-    `Weet je zeker dat je ${state.missing.length} niet-gescande artikel(en) automatisch wilt afboeken?`
+    `Weet je zeker dat je ${state.missing.length} niet-bevestigde artikel(en) automatisch wilt afboeken?`
   );
   if(!ok) return;
 
@@ -541,10 +789,12 @@ async function finalizeMissingOutbook(){
 
     if(moveErr) throw moveErr;
 
-    toast(`${state.missing.length} niet-gescande artikelen zijn automatisch afgeboekt.`, 'ok');
+    toast(`${state.missing.length} niet-bevestigde artikelen zijn automatisch afgeboekt.`, 'ok');
+    setLiveStatus(`${state.missing.length} artikelen afgeboekt via inventarisatie.`, 'ok');
 
     await startInventorySession();
   }catch(e){
+    setLiveStatus(e.message || String(e), 'err');
     toast(e.message || String(e), 'err');
   }
 }
@@ -554,6 +804,8 @@ byId('btnCompare').addEventListener('click', compareInventory);
 byId('btnFinalizeMissing').addEventListener('click', finalizeMissingOutbook);
 byId('btnUndoLast').addEventListener('click', undoLastScan);
 byId('btnClearScans').addEventListener('click', clearScans);
+byId('btnAddManual').addEventListener('click', addScanFromInput);
+byId('btnApplyBulk').addEventListener('click', applyBulkCounts);
 
 byId('scanInput').addEventListener('input', () => {
   byId('scanInput').value = normalizeScan(byId('scanInput').value);
@@ -562,11 +814,12 @@ byId('scanInput').addEventListener('input', () => {
 byId('scanInput').addEventListener('keydown', e => {
   if(e.key === 'Enter'){
     e.preventDefault();
-    addScan();
+    addScanFromInput();
   }
 });
 
 renderScannedList();
+renderBulkTable();
 renderMissing();
 updateKpis();
 </script>
