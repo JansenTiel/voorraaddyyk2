@@ -4,18 +4,372 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Uitscans</title>
-  <link rel="stylesheet" href="theme.css"/>
-  <script src="supabase-config.js"></script>
+
+  <link rel="stylesheet" href="/css/theme.css"/>
+
+  <style>
+    .page-url{
+      margin:12px 0 0;
+      color:var(--navy);
+      font-size:14px;
+      font-weight:700;
+      display:flex;
+      align-items:center;
+      flex-wrap:wrap;
+      gap:8px;
+    }
+
+    .page-url strong{
+      display:inline-flex;
+      align-items:center;
+      padding:5px 12px;
+      border-radius:999px;
+      background:rgba(196,154,108,.14);
+      border:1px solid rgba(196,154,108,.28);
+      color:#6e4f36;
+      font-weight:900;
+      letter-spacing:.01em;
+    }
+
+    .outscan-toolbar{
+      display:grid;
+      grid-template-columns:1fr 220px auto;
+      gap:14px;
+      align-items:end;
+    }
+
+    .mobile-cards{
+      display:none;
+      flex-direction:column;
+      gap:10px;
+      margin-top:12px;
+    }
+
+    .mobile-card{
+      border:1px solid var(--border);
+      border-radius:12px;
+      background:#fff;
+      padding:12px;
+    }
+
+    .mobile-line{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:6px;
+    }
+
+    .mobile-line:last-child{
+      margin-bottom:0;
+    }
+
+    .mobile-k{
+      font-size:12px;
+      font-weight:800;
+      color:var(--muted);
+      text-transform:uppercase;
+      letter-spacing:.04em;
+      min-width:95px;
+    }
+
+    .mobile-v{
+      text-align:right;
+      font-size:14px;
+      color:var(--text);
+      word-break:break-word;
+    }
+
+    .outscan-empty{
+      padding:18px 0;
+      color:var(--muted);
+    }
+
+    @media(max-width:900px){
+      .outscan-toolbar{
+        grid-template-columns:1fr 1fr;
+      }
+    }
+
+    @media(max-width:760px){
+      .desktop-table{
+        display:none;
+      }
+
+      .mobile-cards{
+        display:flex;
+      }
+    }
+
+    @media(max-width:700px){
+      .outscan-toolbar{
+        grid-template-columns:1fr;
+      }
+    }
+  </style>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="app.js"></script>
+  <script src="/js/supabase.js"></script>
+  <script src="/js/app.js"></script>
 </head>
-<body>
-<div class="topbar no-print"><div class="inner"><div class="brand"><div class="logo">o</div><div class="title">Oegema Logistics<small>Klant: Dyyk</small></div></div><nav class="nav"><a href='index.html'>Dashboard</a><a href='products.html'>Artikelen + Stickers</a><a href='scan.html'>Inslag / Uitslag (Scan)</a><a href='stock.html'>Huidige voorraad</a><a href='outscans.html'>Uitscans</a></nav></div></div>
-<div class="container"><div id="toast" class="notice"></div><div class="card"><h2>Uitscans</h2><div class="muted">Filterbaar op ordernummer, SKU en omschrijving.</div><div class="row" style="margin-top:12px"><input id="q" placeholder="Zoek op SKU / ordernummer / omschrijving..." /><button class="btn" id="btn_refresh">Verversen</button></div></div><div class="card" style="margin-top:16px"><div class="table-wrap"><div id="list"></div></div></div></div>
+<body data-page="outscans">
+
+<div class="topbar no-print">
+  <div class="inner">
+    <div class="brand">
+      <div class="logo">o</div>
+      <div class="title">
+        Oegema Logistics
+        <small>Dyyk · Voorraadbeheer</small>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <a href="/">Dashboard</a>
+      <a href="/products">Artikelen + Stickers</a>
+      <a href="/scan">In-/Uitscan</a>
+      <a href="/stock">Huidige voorraad</a>
+      <a class="active" href="/outscans">Uitscans</a>
+      <a href="/picklists">Picklijsten</a>
+      <a href="/online-picklists">Online picklijsten</a>
+    </nav>
+
+    <div class="rightbar">
+      <a class="site-link" href="https://www.voorraaddyyk.nl" target="_blank" rel="noopener">
+        www.voorraaddyyk.nl
+      </a>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <div id="toast" class="notice"></div>
+
+  <div class="card">
+    <h2>Uitscans</h2>
+    <div class="muted">
+      Overzicht van alle uitscans. Filter op ordernummer, unieke SKU, locatie of productomschrijving.
+    </div>
+
+    <p class="page-url">
+      Actieve omgeving:
+      <strong>www.voorraaddyyk.nl</strong>
+    </p>
+
+    <div class="outscan-toolbar" style="margin-top:14px">
+      <div>
+        <label for="q">Zoeken</label>
+        <input id="q" placeholder="Zoek op SKU / ordernummer / omschrijving / locatie"/>
+      </div>
+
+      <div>
+        <label for="limit">Aantal tonen</label>
+        <select id="limit">
+          <option value="100">100</option>
+          <option value="250" selected>250</option>
+          <option value="500">500</option>
+          <option value="1000">1000</option>
+          <option value="5000">5000</option>
+        </select>
+      </div>
+
+      <div>
+        <label>&nbsp;</label>
+        <button class="btn primary" id="btn_refresh" type="button" style="width:100%">Verversen</button>
+      </div>
+    </div>
+
+    <div class="row-3" style="margin-top:16px">
+      <div class="card" style="padding:16px">
+        <div class="kpi">
+          <div class="label">Totaal gevonden</div>
+          <div class="value" id="outscanCount">0</div>
+        </div>
+      </div>
+
+      <div class="card" style="padding:16px">
+        <div class="kpi">
+          <div class="label">Unieke orders</div>
+          <div class="value" id="outscanOrderCount">0</div>
+        </div>
+      </div>
+
+      <div class="card" style="padding:16px">
+        <div class="kpi">
+          <div class="label">Laatste uitscan</div>
+          <div class="value" id="outscanLastTime" style="font-size:16px">-</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <div id="list"></div>
+  </div>
+</div>
+
 <script>
 setActiveNav();
-const client=sb();
-async function load(){ const q=(byId('q').value||'').trim(); let query=client.from('movements').select('created_at, sku_unique, order_no, location, products(name, sku_base)').eq('type','OUT').order('created_at',{ascending:false}).limit(5000); if(q){ query=query.or(`sku_unique.ilike.%${q}%,order_no.ilike.%${q}%`); } const {data,error}=await query; if(error) throw error; let rows=data||[]; if(q){ const qq=q.toLowerCase(); rows=rows.filter(r=>String(r.products?.name||'').toLowerCase().includes(qq)||String(r.sku_unique||'').toLowerCase().includes(qq)||String(r.order_no||'').toLowerCase().includes(qq)); } const el=byId('list'); if(!rows.length){ el.innerHTML='<div class="muted">Nog geen uitscans.</div>'; return; } el.innerHTML=`<table><thead><tr><th>Tijd</th><th>SKU uniek</th><th>Product</th><th>Locatie</th><th>Ordernummer</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${nlTime(r.created_at)}</td><td><b>${escapeHtml(r.sku_unique)}</b></td><td>${escapeHtml(r.products?.name||'')} <span class="muted">(${escapeHtml(r.products?.sku_base||'')})</span></td><td>${escapeHtml(r.location||'')}</td><td><b>${escapeHtml(r.order_no||'')}</b></td></tr>`).join('')}</tbody></table>`; }
-byId('btn_refresh').addEventListener('click',()=>load().catch(e=>toast(e.message||String(e),'err'))); byId('q').addEventListener('keydown',e=>{ if(e.key==='Enter') load().catch(err=>toast(err.message||String(err),'err')); }); load().catch(e=>toast(e.message||String(e),'err'));
+
+const client = sb();
+
+function safeText(v){
+  return String(v ?? '').trim();
+}
+
+function updateSummary(rows){
+  byId('outscanCount').textContent = String(rows.length);
+
+  const orderSet = new Set(
+    rows
+      .map(r => safeText(r.order_no))
+      .filter(Boolean)
+  );
+
+  byId('outscanOrderCount').textContent = String(orderSet.size);
+
+  if(rows.length){
+    byId('outscanLastTime').textContent = nlTime(rows[0].created_at);
+  }else{
+    byId('outscanLastTime').textContent = '-';
+  }
+}
+
+function buildDesktopTable(rows){
+  return `
+    <div class="table-wrap desktop-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Tijd</th>
+            <th>Unieke SKU</th>
+            <th>Product</th>
+            <th>Locatie</th>
+            <th>Ordernummer</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows.map(r => `
+            <tr>
+              <td>${nlTime(r.created_at)}</td>
+              <td><b>${escapeHtml(r.sku_unique || '')}</b></td>
+              <td>
+                ${escapeHtml(r.products?.name || '')}
+                <span class="muted">(${escapeHtml(r.products?.sku_base || '')})</span>
+              </td>
+              <td>${escapeHtml(r.location || '')}</td>
+              <td><b>${escapeHtml(r.order_no || '')}</b></td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function buildMobileCards(rows){
+  return `
+    <div class="mobile-cards">
+      ${rows.map(r => `
+        <div class="mobile-card">
+          <div class="mobile-line">
+            <div class="mobile-k">Tijd</div>
+            <div class="mobile-v">${nlTime(r.created_at)}</div>
+          </div>
+
+          <div class="mobile-line">
+            <div class="mobile-k">Unieke SKU</div>
+            <div class="mobile-v"><b>${escapeHtml(r.sku_unique || '')}</b></div>
+          </div>
+
+          <div class="mobile-line">
+            <div class="mobile-k">Product</div>
+            <div class="mobile-v">
+              ${escapeHtml(r.products?.name || '')}
+              ${r.products?.sku_base ? `<br><span class="muted">${escapeHtml(r.products.sku_base)}</span>` : ''}
+            </div>
+          </div>
+
+          <div class="mobile-line">
+            <div class="mobile-k">Locatie</div>
+            <div class="mobile-v">${escapeHtml(r.location || '')}</div>
+          </div>
+
+          <div class="mobile-line">
+            <div class="mobile-k">Ordernummer</div>
+            <div class="mobile-v"><b>${escapeHtml(r.order_no || '')}</b></div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+async function load(){
+  const q = safeText(byId('q').value).toLowerCase();
+  const limit = Number(byId('limit').value || 250);
+
+  let query = client
+    .from('movements')
+    .select('created_at, sku_unique, order_no, location, products(name, sku_base)')
+    .eq('type', 'OUT')
+    .order('created_at', { ascending:false })
+    .limit(limit);
+
+  if(q){
+    query = query.or(`sku_unique.ilike.%${q}%,order_no.ilike.%${q}%,location.ilike.%${q}%`);
+  }
+
+  const { data, error } = await query;
+  if(error) throw error;
+
+  let rows = data || [];
+
+  if(q){
+    rows = rows.filter(r => {
+      const productName = String(r.products?.name || '').toLowerCase();
+      const productSku = String(r.products?.sku_base || '').toLowerCase();
+      const uniqueSku = String(r.sku_unique || '').toLowerCase();
+      const orderNo = String(r.order_no || '').toLowerCase();
+      const location = String(r.location || '').toLowerCase();
+
+      return (
+        productName.includes(q) ||
+        productSku.includes(q) ||
+        uniqueSku.includes(q) ||
+        orderNo.includes(q) ||
+        location.includes(q)
+      );
+    });
+  }
+
+  updateSummary(rows);
+
+  const el = byId('list');
+
+  if(!rows.length){
+    el.innerHTML = `<div class="outscan-empty">Nog geen uitscans gevonden.</div>`;
+    return;
+  }
+
+  el.innerHTML = buildDesktopTable(rows) + buildMobileCards(rows);
+}
+
+byId('btn_refresh').addEventListener('click', () => {
+  load().catch(e => toast(e.message || String(e), 'err'));
+});
+
+byId('q').addEventListener('keydown', e => {
+  if(e.key === 'Enter'){
+    load().catch(err => toast(err.message || String(err), 'err'));
+  }
+});
+
+byId('limit').addEventListener('change', () => {
+  load().catch(e => toast(e.message || String(e), 'err'));
+});
+
+load().catch(e => toast(e.message || String(e), 'err'));
 </script>
-</body></html>
+
+</body>
+</html>
