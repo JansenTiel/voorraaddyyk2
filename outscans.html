@@ -38,6 +38,13 @@
       align-items:end;
     }
 
+    .badge-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:6px;
+      justify-content:flex-end;
+    }
+
     .scan-badge{
       display:inline-flex;
       align-items:center;
@@ -47,11 +54,26 @@
       font-weight:900;
       letter-spacing:.04em;
       text-transform:uppercase;
-      margin-left:8px;
+      border:1px solid transparent;
+      white-space:nowrap;
+    }
+
+    .badge-inventory{
       background:#fff5f5;
       color:#991b1b;
-      border:1px solid #fecaca;
-      white-space:nowrap;
+      border-color:#fecaca;
+    }
+
+    .badge-return{
+      background:#eff6ff;
+      color:#1d4ed8;
+      border-color:#bfdbfe;
+    }
+
+    .badge-manual{
+      background:#f5f3ff;
+      color:#6d28d9;
+      border-color:#ddd6fe;
     }
 
     .mobile-cards{
@@ -85,7 +107,7 @@
       color:var(--muted);
       text-transform:uppercase;
       letter-spacing:.04em;
-      min-width:95px;
+      min-width:110px;
     }
 
     .mobile-v{
@@ -110,7 +132,6 @@
       .desktop-table{
         display:none;
       }
-
       .mobile-cards{
         display:flex;
       }
@@ -119,6 +140,9 @@
     @media(max-width:700px){
       .outscan-toolbar{
         grid-template-columns:1fr;
+      }
+      .badge-row{
+        justify-content:flex-start;
       }
     }
   </style>
@@ -135,7 +159,7 @@
       <div class="logo">o</div>
       <div class="title">
         Oegema Logistics
-        <small>Dyyk · Voorraadbeheer</small>
+        <small>Ronald Verdult Design · Voorraadbeheer</small>
       </div>
     </div>
 
@@ -145,12 +169,13 @@
       <a href="/scan">In-/Uitscan</a>
       <a href="/stock">Huidige voorraad</a>
       <a class="active" href="/outscans">Uitscans</a>
-      <a href="/inventory">Inventarisatie</a>
+      <a href="/picklists">Picklijsten</a>
+      <a href="/online-picklists">Online picklijsten</a>
     </nav>
 
     <div class="rightbar">
-      <a class="site-link" href="https://www.voorraaddyyk.nl" target="_blank" rel="noopener">
-        www.voorraaddyyk.nl
+      <a class="site-link" href="https://www.rv-voorraad.nl" target="_blank" rel="noopener">
+        www.rv-voorraad.nl
       </a>
     </div>
   </div>
@@ -162,19 +187,19 @@
   <div class="card">
     <h2>Uitscans</h2>
     <div class="muted">
-      Overzicht van alle uitscans. Filter op ordernummer, unieke SKU, locatie of productomschrijving.
-      Inventarisatie-afboekingen worden apart gemarkeerd.
+      Overzicht van alle afboekingen en uitscans. Filter op ordernummer, unieke SKU, locatie, productomschrijving of bestemming.
+      Inventarisatie, handmatig uitboeken en retour Huizen worden apart gemarkeerd.
     </div>
 
     <p class="page-url">
       Actieve omgeving:
-      <strong>www.voorraaddyyk.nl</strong>
+      <strong>www.rv-voorraad.nl</strong>
     </p>
 
     <div class="outscan-toolbar" style="margin-top:14px">
       <div>
         <label for="q">Zoeken</label>
-        <input id="q" placeholder="Zoek op SKU / ordernummer / omschrijving / locatie"/>
+        <input id="q" placeholder="Zoek op SKU / ordernummer / omschrijving / locatie / bestemming"/>
       </div>
 
       <div>
@@ -232,14 +257,47 @@ function safeText(v){
   return String(v ?? '').trim();
 }
 
-function isInventoryOutscan(row){
-  return String(row.order_no || '').trim().toUpperCase() === 'INVENTARISATIE';
+function upper(v){
+  return safeText(v).toUpperCase();
 }
 
-function inventoryBadge(row){
-  return isInventoryOutscan(row)
-    ? `<span class="scan-badge">INVENTARISATIE</span>`
-    : '';
+function isInventoryOutscan(row){
+  return upper(row.order_no) === 'INVENTARISATIE';
+}
+
+function isReturnHuizen(row){
+  return upper(row.action_type) === 'RETURN_TO_HUIZEN' || upper(row.destination) === 'RETOUR HUIZEN';
+}
+
+function isManualOut(row){
+  return upper(row.action_type) === 'OUT';
+}
+
+function buildBadges(row){
+  const badges = [];
+
+  if(isInventoryOutscan(row)){
+    badges.push(`<span class="scan-badge badge-inventory">INVENTARISATIE</span>`);
+  }
+
+  if(isReturnHuizen(row)){
+    badges.push(`<span class="scan-badge badge-return">RETOUR HUIZEN</span>`);
+  }
+
+  if(isManualOut(row)){
+    badges.push(`<span class="scan-badge badge-manual">HANDMATIG UITGEBOEKT</span>`);
+  }
+
+  return badges.join('');
+}
+
+function prettyAction(row){
+  const action = upper(row.action_type);
+
+  if(action === 'RETURN_TO_HUIZEN') return 'Retour Huizen';
+  if(action === 'ALLOCATE_ORDER') return 'Toegewezen aan order';
+  if(action === 'OUT') return 'Handmatig uitgeboekt';
+  return safeText(row.action_type) || '-';
 }
 
 function updateSummary(rows){
@@ -255,7 +313,7 @@ function updateSummary(rows){
 
   if(rows.length){
     const first = rows[0];
-    byId('outscanLastTime').textContent = `${nlTime(first.created_at)}${isInventoryOutscan(first) ? ' · INVENTARISATIE' : ''}`;
+    byId('outscanLastTime').textContent = nlTime(first.created_at);
   }else{
     byId('outscanLastTime').textContent = '-';
   }
@@ -272,6 +330,9 @@ function buildDesktopTable(rows){
             <th>Product</th>
             <th>Locatie</th>
             <th>Ordernummer</th>
+            <th>Actie</th>
+            <th>Bestemming</th>
+            <th>Markering</th>
           </tr>
         </thead>
         <tbody>
@@ -284,10 +345,10 @@ function buildDesktopTable(rows){
                 <span class="muted">(${escapeHtml(r.products?.sku_base || '')})</span>
               </td>
               <td>${escapeHtml(r.location || '')}</td>
-              <td>
-                <b>${escapeHtml(r.order_no || '')}</b>
-                ${inventoryBadge(r)}
-              </td>
+              <td><b>${escapeHtml(r.order_no || '')}</b></td>
+              <td>${escapeHtml(prettyAction(r))}</td>
+              <td>${escapeHtml(r.destination || '')}</td>
+              <td><div class="badge-row">${buildBadges(r)}</div></td>
             </tr>
           `).join('')}
         </tbody>
@@ -326,10 +387,22 @@ function buildMobileCards(rows){
 
           <div class="mobile-line">
             <div class="mobile-k">Ordernummer</div>
-            <div class="mobile-v">
-              <b>${escapeHtml(r.order_no || '')}</b>
-              ${isInventoryOutscan(r) ? `<br><span class="scan-badge">INVENTARISATIE</span>` : ''}
-            </div>
+            <div class="mobile-v"><b>${escapeHtml(r.order_no || '')}</b></div>
+          </div>
+
+          <div class="mobile-line">
+            <div class="mobile-k">Actie</div>
+            <div class="mobile-v">${escapeHtml(prettyAction(r))}</div>
+          </div>
+
+          <div class="mobile-line">
+            <div class="mobile-k">Bestemming</div>
+            <div class="mobile-v">${escapeHtml(r.destination || '')}</div>
+          </div>
+
+          <div class="mobile-line">
+            <div class="mobile-k">Markering</div>
+            <div class="mobile-v"><div class="badge-row">${buildBadges(r)}</div></div>
           </div>
         </div>
       `).join('')}
@@ -343,13 +416,13 @@ async function load(){
 
   let query = client
     .from('movements')
-    .select('created_at, sku_unique, order_no, location, products(name, sku_base)')
+    .select('created_at, sku_unique, order_no, location, action_type, destination, note, products(name, sku_base)')
     .eq('type', 'OUT')
     .order('created_at', { ascending:false })
     .limit(limit);
 
   if(q){
-    query = query.or(`sku_unique.ilike.%${q}%,order_no.ilike.%${q}%,location.ilike.%${q}%`);
+    query = query.or(`sku_unique.ilike.%${q}%,order_no.ilike.%${q}%,location.ilike.%${q}%,destination.ilike.%${q}%`);
   }
 
   const { data, error } = await query;
@@ -364,13 +437,17 @@ async function load(){
       const uniqueSku = String(r.sku_unique || '').toLowerCase();
       const orderNo = String(r.order_no || '').toLowerCase();
       const location = String(r.location || '').toLowerCase();
+      const destination = String(r.destination || '').toLowerCase();
+      const actionType = String(r.action_type || '').toLowerCase();
 
       return (
         productName.includes(q) ||
         productSku.includes(q) ||
         uniqueSku.includes(q) ||
         orderNo.includes(q) ||
-        location.includes(q)
+        location.includes(q) ||
+        destination.includes(q) ||
+        actionType.includes(q)
       );
     });
   }
