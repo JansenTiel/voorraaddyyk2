@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="nl" class="auth-pending">
+<html lang="nl">
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
@@ -8,9 +8,6 @@
   <link rel="stylesheet" href="/css/theme.css"/>
 
   <style>
-    html.auth-pending body{visibility:hidden}
-    html.auth-ready body{visibility:visible}
-
     .page-url{
       margin:12px 0 0;
       color:var(--navy);
@@ -434,16 +431,10 @@
     }
   </style>
 
-  <script>
-    document.documentElement.classList.add("auth-pending");
-    document.documentElement.classList.remove("auth-ready");
-  </script>
-
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="/js/supabase.js"></script>
   <script src="/js/app.js"></script>
-  <script src="/js/auth.js"></script>
 </head>
 
 <body data-page="stock">
@@ -454,7 +445,7 @@
       <div class="logo">o</div>
       <div class="title">
         Oegema Logistics
-        <small>Ronald Verdult Design · Voorraadbeheer</small>
+        <small>Dyyk · Voorraadbeheer</small>
       </div>
     </div>
 
@@ -464,20 +455,13 @@
       <a href="/scan">In-/Uitscan</a>
       <a class="active" href="/stock">Huidige voorraad</a>
       <a href="/outscans">Uitscans</a>
-      <a href="/picklists">Picklijsten</a>
-      <a href="/online-picklists">Online picklijsten</a>
+      <a href="/inventory">Inventarisatie</a>
     </nav>
 
     <div class="rightbar">
-      <a class="site-link" href="https://www.rv-voorraad.nl" target="_blank" rel="noopener">
-        www.rv-voorraad.nl
+      <a class="site-link" href="https://www.voorraaddyyk.nl" target="_blank" rel="noopener">
+        www.voorraaddyyk.nl
       </a>
-
-      <span class="pill">
-        <span id="userEmail"></span>
-      </span>
-
-      <button class="btn" id="btnLogout" type="button">Uitloggen</button>
     </div>
   </div>
 </div>
@@ -489,15 +473,15 @@
     <h2>Huidige voorraad</h2>
     <div class="muted">
       Overzicht per <b>SKU</b> met totaal aantal op voorraad. Klik op een regel om alle geregistreerde items van die SKU te tonen.
-      Bevoegde gebruikers kunnen per regel of in bulk uitboeken, aan een order toewijzen of als <b>retour Huizen</b> afboeken.
-      Bij toewijzen aan order of retour Huizen wordt automatisch een <b>navigatie-picklijst</b> aangemaakt met standaard <b>customer_name = Ronald Verdult Design</b>.
+      Artikelen kunnen per regel of in bulk worden <b>uitgeboekt</b>, <b>toegewezen aan order</b> of als <b>retour Huizen</b> worden afgeboekt.
+      Bij toewijzen aan order of retour Huizen wordt automatisch een <b>navigatie-picklijst</b> aangemaakt.
       <br><br>
       <b>Eventuele foutmeldingen worden direct weergegeven.</b>
     </div>
 
     <p class="page-url">
       Actieve omgeving:
-      <strong>www.rv-voorraad.nl</strong>
+      <strong>www.voorraaddyyk.nl</strong>
     </p>
 
     <div class="stock-toolbar" style="margin-top:14px">
@@ -528,7 +512,7 @@
       </div>
     </div>
 
-    <div id="specialActionsPanel" class="bulk-panel hidden">
+    <div id="specialActionsPanel" class="bulk-panel">
       <div class="bulk-panel-top">
         <div class="bulk-summary" id="bulkSummary">Geselecteerd: 0 artikelen</div>
 
@@ -537,11 +521,12 @@
           <button class="btn" id="btnSelectNone" type="button">Selectie wissen</button>
           <button class="btn primary" id="btnBulkAllocate" type="button">Bulk: toewijzen aan order</button>
           <button class="btn accent" id="btnBulkReturn" type="button">Bulk: retour Huizen</button>
+          <button class="btn" id="btnBulkOut" type="button">Bulk: uitboeken</button>
         </div>
       </div>
 
       <div class="bulk-note">
-        Alleen zichtbaar voor geautoriseerde accounts. Retour Huizen en ordertoewijzingen worden direct afgeboekt en vastgelegd in de uitscans.
+        Alle acties boeken direct af vanuit de huidige voorraad. Bij ordertoewijzing en retour Huizen wordt daarnaast automatisch een navigatie-picklijst aangemaakt.
       </div>
     </div>
 
@@ -595,7 +580,7 @@
       <div>
         <label for="modalNote">Opmerking</label>
         <textarea id="modalNote" placeholder="Optioneel"></textarea>
-        <div class="modal-hint">Bij toewijzen aan order of retour Huizen wordt automatisch een navigatie-picklijst gemaakt.</div>
+        <div class="modal-hint" id="modalHint">Bij toewijzen aan order of retour Huizen wordt automatisch een navigatie-picklijst gemaakt.</div>
       </div>
 
       <div class="btnRow" style="margin-top:4px">
@@ -620,16 +605,9 @@ setActiveNav();
 const client = sb();
 const STORAGE_BUCKET = 'product-images';
 const ONLINE_PICK_PATH = '/online-picklists.html';
-const DEFAULT_CUSTOMER_NAME = 'Ronald Verdult Design';
-
-const SPECIAL_ACTION_USERS = [
-  'sales@ronaldverdultdesign.nl',
-  'cmjinhuur@gmail.com'
-];
+const DEFAULT_CUSTOMER_NAME = 'Dyyk';
 
 let currentGroups = [];
-let currentUserEmail = '';
-let canUseSpecialActions = false;
 let currentActionContext = null;
 const selectedItemIds = new Set();
 
@@ -821,8 +799,6 @@ function makeBodyPhotoHtml(group){
 }
 
 function makeSkuBulkBar(group){
-  if(!canUseSpecialActions) return '';
-
   return `
     <div class="sku-bulk-bar">
       <div class="sku-bulk-left">
@@ -837,6 +813,9 @@ function makeSkuBulkBar(group){
       </div>
 
       <div class="btnRow">
+        <button class="btn small-btn" type="button" data-action-sku="OUT" data-sku-base="${esc(group.sku_base)}">
+          Deze SKU uitboeken
+        </button>
         <button class="btn primary small-btn" type="button" data-action-sku="ALLOCATE_ORDER" data-sku-base="${esc(group.sku_base)}">
           Deze SKU toewijzen aan order
         </button>
@@ -849,16 +828,10 @@ function makeSkuBulkBar(group){
 }
 
 function makeActionButtons(item){
-  const outBtn = `
+  return `
     <button class="btn small-btn" type="button" data-action-row="OUT" data-item-id="${esc(item.id)}">
       Uitboeken
     </button>
-  `;
-
-  if(!canUseSpecialActions) return outBtn;
-
-  return `
-    ${outBtn}
     <button class="btn primary small-btn" type="button" data-action-row="ALLOCATE_ORDER" data-item-id="${esc(item.id)}">
       Toewijzen order
     </button>
@@ -869,12 +842,10 @@ function makeActionButtons(item){
 }
 
 function makeSelectCell(item){
-  if(!canUseSpecialActions) return '';
   return `<td><input class="row-check" type="checkbox" data-select-item-id="${esc(item.id)}"/></td>`;
 }
 
 function makeMobileSelect(item){
-  if(!canUseSpecialActions) return '';
   return `
     <div class="mobile-line">
       <div class="mobile-k">Selectie</div>
@@ -918,7 +889,7 @@ function makeGroupHtml(group, idx){
           <table>
             <thead>
               <tr>
-                ${canUseSpecialActions ? '<th>Selectie</th>' : ''}
+                <th>Selectie</th>
                 <th>Inslag tijd</th>
                 <th>Unieke SKU</th>
                 <th>Locatie</th>
@@ -1045,7 +1016,7 @@ function buildAutoPickNo(actionType, orderNo=''){
     .replace(/-+/g, '-')
     .replace(/^-|-$/g, '');
 
-  return `RVD-${cleanOrder || 'ORDER'}-${stamp}`;
+  return `DYYK-${cleanOrder || 'ORDER'}-${stamp}`;
 }
 
 function buildMovementNote(userNote='', pickNo=''){
@@ -1081,7 +1052,7 @@ async function createNavigationPicklist(actionType, visibleItems, options = {}){
   const pickNo = buildAutoPickNo(actionType, orderNo);
 
   const pickOrderNoteParts = [
-    `Automatisch aangemaakt vanuit voorraadverzoek door ${currentUserEmail || 'onbekend'}.`
+    'Automatisch aangemaakt vanuit voorraadverzoek.'
   ];
 
   if(actionType === 'ALLOCATE_ORDER'){
@@ -1159,13 +1130,19 @@ function openActionModal(actionType, itemIds){
     RETURN_TO_HUIZEN: 'De geselecteerde artikelen worden direct afgeboekt voor Retour Huizen. Daarnaast wordt automatisch een navigatie-picklijst aangemaakt.'
   };
 
+  const hints = {
+    OUT: 'Bij deze actie wordt geen navigatie-picklijst gemaakt.',
+    ALLOCATE_ORDER: 'Bij toewijzen aan order wordt automatisch een navigatie-picklijst gemaakt.',
+    RETURN_TO_HUIZEN: 'Bij retour Huizen wordt automatisch een navigatie-picklijst gemaakt.'
+  };
+
   byIdLocal('actionModalTitle').textContent = titles[actionType] || 'Actie uitvoeren';
   byIdLocal('actionModalSub').textContent = subs[actionType] || '';
+  byIdLocal('modalHint').textContent = hints[actionType] || '';
 
   byIdLocal('actionModalInfo').innerHTML = `
     <div><b>Aantal artikelen:</b> ${itemIds.length}</div>
     <div><b>SKU's:</b> ${esc(skuBases.join(', '))}</div>
-    <div><b>Uitgevoerd door:</b> ${esc(currentUserEmail || '-')}</div>
   `;
 
   byIdLocal('modalOrderNo').value = '';
@@ -1250,7 +1227,6 @@ async function performStockAction(actionType, itemIds, options = {}){
     }
 
     let pickNo = '';
-    let pickUrl = '';
 
     if(actionType === 'ALLOCATE_ORDER' || actionType === 'RETURN_TO_HUIZEN'){
       const navigation = await createNavigationPicklist(actionType, visibleItems, {
@@ -1258,9 +1234,7 @@ async function performStockAction(actionType, itemIds, options = {}){
         destination,
         note
       });
-
       pickNo = navigation.pickNo;
-      pickUrl = navigation.pickUrl;
     }
 
     const movementNote = buildMovementNote(note, pickNo);
@@ -1284,8 +1258,7 @@ async function performStockAction(actionType, itemIds, options = {}){
       location: it.location || null,
       order_no: orderNo || null,
       destination: destination || null,
-      note: movementNote,
-      handled_by_email: currentUserEmail || null
+      note: movementNote
     }));
 
     const { error:moveErr } = await client
@@ -1407,24 +1380,6 @@ function exportGroupedToExcel(groups){
   XLSX.writeFile(wb, filename);
 }
 
-async function resolveCurrentUser(){
-  try{
-    const { data, error } = await client.auth.getUser();
-    if(error) throw error;
-
-    currentUserEmail = String(data?.user?.email || '').toLowerCase().trim();
-    canUseSpecialActions = SPECIAL_ACTION_USERS.includes(currentUserEmail);
-
-    byIdLocal('specialActionsPanel').classList.toggle('hidden', !canUseSpecialActions);
-    updateBulkSummary();
-  }catch(e){
-    console.warn('Gebruiker ophalen mislukt:', e);
-    currentUserEmail = '';
-    canUseSpecialActions = false;
-    byIdLocal('specialActionsPanel').classList.add('hidden');
-  }
-}
-
 async function load(){
   const q = (byIdLocal('q').value || '').trim();
   const sort = byIdLocal('sort').value;
@@ -1487,6 +1442,7 @@ byIdLocal('btnSelectAllVisible').addEventListener('click', selectAllVisibleItems
 byIdLocal('btnSelectNone').addEventListener('click', clearSelection);
 byIdLocal('btnBulkAllocate').addEventListener('click', () => openActionModal('ALLOCATE_ORDER', [...selectedItemIds]));
 byIdLocal('btnBulkReturn').addEventListener('click', () => openActionModal('RETURN_TO_HUIZEN', [...selectedItemIds]));
+byIdLocal('btnBulkOut').addEventListener('click', () => openActionModal('OUT', [...selectedItemIds]));
 
 byIdLocal('btnCancelAction').addEventListener('click', closeActionModal);
 
@@ -1549,15 +1505,10 @@ document.addEventListener('keydown', e => {
   }
 });
 
-(async function init(){
-  try{
-    await resolveCurrentUser();
-    await load();
-  }catch(e){
-    console.error('Init fout:', e);
-    showToast(e.message || String(e), 'err');
-  }
-})();
+load().catch(e => {
+  console.error('Init fout:', e);
+  showToast(e.message || String(e), 'err');
+});
 </script>
 
 </body>
