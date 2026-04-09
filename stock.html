@@ -236,7 +236,7 @@
     .modal-backdrop.show{display:flex}
 
     .modal-card{
-      width:min(860px,100%);
+      width:min(1080px,100%);
       background:#fff;
       border:1px solid var(--border);
       border-radius:20px;
@@ -296,6 +296,116 @@
       margin-top:12px;
     }
 
+    .picker-box{
+      border:1px solid var(--border);
+      border-radius:14px;
+      background:#fff;
+      padding:14px;
+      margin-top:12px;
+    }
+    .picker-title{
+      font-size:15px;
+      font-weight:900;
+      color:var(--navy);
+      margin:0 0 10px 0;
+    }
+    .picker-toolbar{
+      display:grid;
+      grid-template-columns:1fr auto;
+      gap:10px;
+      align-items:end;
+      margin-bottom:12px;
+    }
+    .picker-results{
+      max-height:240px;
+      overflow:auto;
+      border:1px solid var(--border);
+      border-radius:12px;
+      background:#fafbfc;
+    }
+    .picker-row{
+      display:grid;
+      grid-template-columns:auto 120px 1fr 130px;
+      gap:10px;
+      align-items:center;
+      padding:10px 12px;
+      border-bottom:1px solid var(--border);
+      font-size:14px;
+    }
+    .picker-row:last-child{border-bottom:none}
+    .picker-row b{color:var(--navy)}
+    .picker-empty{
+      padding:14px;
+      color:var(--muted);
+      font-size:14px;
+    }
+
+    .manual-form{
+      display:grid;
+      grid-template-columns:1fr 120px 120px 120px auto;
+      gap:10px;
+      align-items:end;
+    }
+
+    .summary-wrap{
+      border:1px solid var(--border);
+      border-radius:14px;
+      background:#fff;
+      overflow:hidden;
+      margin-top:12px;
+    }
+    .summary-head{
+      padding:12px 14px;
+      background:#f8fafc;
+      border-bottom:1px solid var(--border);
+      font-weight:900;
+      color:var(--navy);
+    }
+    .summary-table-wrap{
+      max-height:260px;
+      overflow:auto;
+    }
+    .summary-table{
+      width:100%;
+      border-collapse:collapse;
+    }
+    .summary-table th,
+    .summary-table td{
+      border-bottom:1px solid var(--border);
+      padding:10px 12px;
+      text-align:left;
+      font-size:14px;
+      vertical-align:top;
+    }
+    .summary-table th{
+      background:#fff;
+      position:sticky;
+      top:0;
+      z-index:1;
+    }
+    .summary-type{
+      display:inline-flex;
+      align-items:center;
+      padding:4px 8px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:800;
+      border:1px solid var(--border);
+      background:#fff;
+      color:var(--navy);
+      white-space:nowrap;
+    }
+    .summary-type.manual{
+      background:rgba(196,154,108,.12);
+      border-color:rgba(196,154,108,.35);
+      color:#6e4f36;
+    }
+    .summary-actions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
     .hidden{display:none !important}
 
     @media(max-width:1100px){
@@ -303,6 +413,9 @@
       .stock-group-head{
         grid-template-columns:190px minmax(180px,1fr) 100px 36px;
         gap:10px;
+      }
+      .manual-form{
+        grid-template-columns:1fr 1fr;
       }
     }
 
@@ -319,11 +432,18 @@
       .sg-total{grid-area:total}
       .sg-arrow{grid-area:arrow;justify-self:end}
       .xml-grid{grid-template-columns:1fr}
+      .picker-row{
+        grid-template-columns:auto 1fr;
+      }
     }
 
     @media(max-width:760px){
       .desktop-detail-table{display:none}
       .mobile-cards{display:flex}
+      .picker-toolbar,
+      .manual-form{
+        grid-template-columns:1fr;
+      }
     }
 
     @media(max-width:700px){
@@ -380,6 +500,9 @@
       Overzicht per <b>SKU</b> met totaal aantal op voorraad. Klik op een regel om alle geregistreerde items van die SKU te tonen.
       Artikelen kunnen per regel of in bulk worden <b>uitgeboekt</b>, <b>toegewezen aan order</b> of als <b>retour Huizen</b> worden afgeboekt.
       Bij <b>retour Huizen</b> kun je direct adresgegevens invullen en wordt automatisch een <b>XML-bestand</b> gedownload.
+      <br><br>
+      Extra uitbreiding:
+      bij <b>retour Huizen + XML</b> kun je nu ook <b>extra artikelen uit voorraad toevoegen</b> en <b>handmatige artikelregels</b> opnemen in dezelfde XML.
       <br><br>
       <b>Eventuele foutmeldingen worden direct weergegeven.</b>
     </div>
@@ -540,8 +663,82 @@
           </div>
         </div>
 
+        <div class="picker-box">
+          <div class="picker-title">Meerdere artikelen uit de voorraad selecteren</div>
+
+          <div class="picker-toolbar">
+            <div>
+              <label for="xmlStockSearch">Zoek in voorraad</label>
+              <input id="xmlStockSearch" placeholder="Zoek op SKU / omschrijving / unieke SKU / locatie"/>
+            </div>
+            <button class="btn" id="btnXmlSearchStock" type="button">Zoeken</button>
+          </div>
+
+          <div class="picker-results" id="xmlStockResults">
+            <div class="picker-empty">Nog niet gezocht.</div>
+          </div>
+
+          <div class="modal-hint">
+            De aangevinkte artikelen uit de voorraad worden ook echt afgeboekt zodra je opslaat.
+          </div>
+        </div>
+
+        <div class="picker-box">
+          <div class="picker-title">Handmatig artikel toevoegen</div>
+
+          <div class="manual-form">
+            <div>
+              <label for="manualOmschrijving">Artikelomschrijving</label>
+              <input id="manualOmschrijving" placeholder="Bijv. Eetkamerstoel Nonna frame SAND"/>
+            </div>
+            <div>
+              <label for="manualAantal">Aantal</label>
+              <input id="manualAantal" type="number" min="1" step="1" value="1"/>
+            </div>
+            <div>
+              <label for="manualColli">Colli</label>
+              <input id="manualColli" type="number" min="1" step="1" value="1"/>
+            </div>
+            <div>
+              <label for="manualGewicht">Gewicht</label>
+              <input id="manualGewicht" type="number" min="0" step="0.001" value="1"/>
+            </div>
+            <div>
+              <button class="btn" id="btnAddManualLine" type="button" style="width:100%">Toevoegen</button>
+            </div>
+          </div>
+
+          <div class="modal-hint">
+            Handmatige regels komen alleen in de XML en worden niet uit de voorraad afgeboekt.
+          </div>
+        </div>
+
+        <div class="summary-wrap">
+          <div class="summary-head">Overzicht partijregels voor XML</div>
+          <div class="summary-table-wrap">
+            <table class="summary-table">
+              <thead>
+                <tr>
+                  <th>Type</th>
+                  <th>Omschrijving</th>
+                  <th>Aantal</th>
+                  <th>Colli</th>
+                  <th>Gewicht</th>
+                  <th>Herkomst</th>
+                  <th>Actie</th>
+                </tr>
+              </thead>
+              <tbody id="xmlSummaryBody">
+                <tr>
+                  <td colspan="7" class="picker-empty">Nog geen regels toegevoegd.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
         <div class="modal-hint">
-          Er wordt automatisch één XML bestand gemaakt. Per SKU wordt een aparte partijregel opgenomen.
+          Er wordt automatisch één XML bestand gemaakt. Voorraadregels en handmatige regels worden samen als aparte partijregels opgenomen.
         </div>
       </div>
 
@@ -557,13 +754,22 @@
 if(typeof setActiveNav === 'function') setActiveNav();
 
 const client = sb();
+
 let currentGroups = [];
 let currentActionContext = null;
 const selectedItemIds = new Set();
 
+let modalExtraStockItemIds = new Set();
+let modalManualLines = [];
+
 function byIdLocal(id){ return document.getElementById(id); }
 
 function safeText(v){ return String(v ?? '').trim(); }
+
+function safeNumber(v, fallback=0){
+  const n = Number(v);
+  return Number.isFinite(n) ? n : fallback;
+}
 
 function esc(value){
   return String(value ?? '')
@@ -602,6 +808,10 @@ function formatNlDateTime(v){
   if(!v) return '';
   const d = new Date(v);
   return isNaN(d) ? String(v) : d.toLocaleString('nl-NL');
+}
+
+function formatQtyThree(value){
+  return Number(value || 0).toFixed(3);
 }
 
 function groupItems(items){
@@ -867,7 +1077,17 @@ function bindSelectionControls(){
 function bindActionButtons(){
   document.querySelectorAll('[data-action-row]').forEach(btn => {
     btn.addEventListener('click', () => {
-      openActionModal(btn.getAttribute('data-action-row'), [btn.getAttribute('data-item-id')]);
+      const clickedId = btn.getAttribute('data-item-id');
+      const actionType = btn.getAttribute('data-action-row');
+
+      let ids = [];
+      if(selectedItemIds.size > 0 && selectedItemIds.has(clickedId)){
+        ids = [...selectedItemIds];
+      }else{
+        ids = [clickedId];
+      }
+
+      openActionModal(actionType, ids);
     });
   });
 
@@ -880,6 +1100,18 @@ function bindActionButtons(){
   });
 }
 
+function resetReturnXmlHelpers(){
+  modalExtraStockItemIds = new Set();
+  modalManualLines = [];
+  byIdLocal('xmlStockSearch').value = '';
+  byIdLocal('xmlStockResults').innerHTML = `<div class="picker-empty">Nog niet gezocht.</div>`;
+  byIdLocal('manualOmschrijving').value = '';
+  byIdLocal('manualAantal').value = '1';
+  byIdLocal('manualColli').value = '1';
+  byIdLocal('manualGewicht').value = '1';
+  renderXmlSummary();
+}
+
 function openActionModal(actionType, itemIds){
   if(!itemIds || !itemIds.length){
     showToast('Geen artikelen geselecteerd.', 'err');
@@ -887,8 +1119,9 @@ function openActionModal(actionType, itemIds){
   }
 
   currentActionContext = { actionType, itemIds: [...itemIds] };
+
   const items = itemIds.map(findItemById).filter(Boolean);
-  const skuBases = [...new Set(items.map(it => it.sku_base))];
+  const skuBases = [...new Set(items.map(it => it.sku_base).filter(Boolean))];
 
   const titles = {
     OUT: 'Artikelen uitboeken',
@@ -899,7 +1132,7 @@ function openActionModal(actionType, itemIds){
   const subs = {
     OUT: 'Vul het ordernummer in. De geselecteerde artikelen worden direct uit de huidige voorraad gehaald en toegevoegd aan de uitscans.',
     ALLOCATE_ORDER: 'Vul het ordernummer in. De geselecteerde artikelen worden direct afgeboekt en aan dit ordernummer gekoppeld in de uitscans.',
-    RETURN_TO_HUIZEN: 'Vul de retour- en adresgegevens in. De geselecteerde artikelen worden direct afgeboekt en daarna wordt automatisch een XML-bestand gedownload.'
+    RETURN_TO_HUIZEN: 'Vul de retour- en adresgegevens in. De geselecteerde artikelen worden direct afgeboekt en daarna wordt automatisch een XML-bestand gedownload. Je kunt daarnaast extra voorraadartikelen en handmatige artikelregels toevoegen.'
   };
 
   const hints = {
@@ -913,8 +1146,8 @@ function openActionModal(actionType, itemIds){
   byIdLocal('modalHint').textContent = hints[actionType] || '';
 
   byIdLocal('actionModalInfo').innerHTML = `
-    <div><b>Aantal artikelen:</b> ${itemIds.length}</div>
-    <div><b>SKU's:</b> ${esc(skuBases.join(', '))}</div>
+    <div><b>Aantal geselecteerde voorraadartikelen:</b> ${itemIds.length}</div>
+    <div><b>SKU's:</b> ${esc(skuBases.join(', ') || '-')}</div>
   `;
 
   byIdLocal('modalOrderNo').value = '';
@@ -924,6 +1157,19 @@ function openActionModal(actionType, itemIds){
   byIdLocal('actionOrderWrap').classList.toggle('hidden', actionType === 'RETURN_TO_HUIZEN');
   byIdLocal('actionDestinationWrap').classList.toggle('hidden', actionType !== 'RETURN_TO_HUIZEN');
   byIdLocal('returnXmlWrap').classList.toggle('hidden', actionType !== 'RETURN_TO_HUIZEN');
+
+  byIdLocal('xmlRef').value = '';
+  byIdLocal('xmlDebiteur').value = '20009';
+  byIdLocal('xmlLosnaam').value = '';
+  byIdLocal('xmlLosadres').value = '';
+  byIdLocal('xmlLospostcode').value = '';
+  byIdLocal('xmlLoswoonplaats').value = '';
+  byIdLocal('xmlLostelefoon').value = '';
+  byIdLocal('xmlCommissie').value = '';
+  byIdLocal('xmlVerzendinstructie').value = '';
+  byIdLocal('xmlBijzonderheden').value = '';
+
+  resetReturnXmlHelpers();
 
   byIdLocal('actionModal').classList.add('show');
 
@@ -952,6 +1198,8 @@ function closeActionModal(){
   byIdLocal('xmlCommissie').value = '';
   byIdLocal('xmlVerzendinstructie').value = '';
   byIdLocal('xmlBijzonderheden').value = '';
+
+  resetReturnXmlHelpers();
 }
 
 async function countOrderUsesLocal(orderNo){
@@ -964,8 +1212,202 @@ async function countOrderUsesLocal(orderNo){
   return count || 0;
 }
 
-function formatQtyThree(value){
-  return Number(value || 0).toFixed(3);
+function getBaseSelectedStockItems(){
+  if(!currentActionContext?.itemIds?.length) return [];
+  return currentActionContext.itemIds.map(findItemById).filter(Boolean);
+}
+
+function getExtraSelectedStockItems(){
+  return [...modalExtraStockItemIds].map(findItemById).filter(Boolean);
+}
+
+function getAllStockItemsForXml(){
+  const seen = new Set();
+  const rows = [];
+
+  [...getBaseSelectedStockItems(), ...getExtraSelectedStockItems()].forEach(it => {
+    if(!it) return;
+    const id = String(it.id);
+    if(seen.has(id)) return;
+    seen.add(id);
+    rows.push(it);
+  });
+
+  return rows;
+}
+
+function renderXmlSummary(){
+  const tbody = byIdLocal('xmlSummaryBody');
+  if(!tbody) return;
+
+  const baseItems = getBaseSelectedStockItems();
+  const extraItems = getExtraSelectedStockItems();
+
+  const htmlRows = [];
+
+  baseItems.forEach(it => {
+    htmlRows.push(`
+      <tr>
+        <td><span class="summary-type">Voorraad</span></td>
+        <td><b>${esc(it.name || it.sku_base || it.sku_unique || 'Artikel')}</b><br><small>${esc(it.sku_unique || '')}</small></td>
+        <td>1</td>
+        <td>1</td>
+        <td>1.000</td>
+        <td>Reeds geselecteerd</td>
+        <td>-</td>
+      </tr>
+    `);
+  });
+
+  extraItems.forEach(it => {
+    htmlRows.push(`
+      <tr>
+        <td><span class="summary-type">Voorraad</span></td>
+        <td><b>${esc(it.name || it.sku_base || it.sku_unique || 'Artikel')}</b><br><small>${esc(it.sku_unique || '')}</small></td>
+        <td>1</td>
+        <td>1</td>
+        <td>1.000</td>
+        <td>Extra toegevoegd</td>
+        <td>
+          <div class="summary-actions">
+            <button class="btn small-btn" type="button" data-remove-extra-stock="${esc(it.id)}">Verwijderen</button>
+          </div>
+        </td>
+      </tr>
+    `);
+  });
+
+  modalManualLines.forEach(line => {
+    htmlRows.push(`
+      <tr>
+        <td><span class="summary-type manual">Handmatig</span></td>
+        <td><b>${esc(line.modelnaam)}</b></td>
+        <td>${esc(line.aantal)}</td>
+        <td>${esc(line.colli)}</td>
+        <td>${formatQtyThree(line.gewicht)}</td>
+        <td>Handmatige invoer</td>
+        <td>
+          <div class="summary-actions">
+            <button class="btn small-btn" type="button" data-remove-manual="${esc(line.id)}">Verwijderen</button>
+          </div>
+        </td>
+      </tr>
+    `);
+  });
+
+  if(!htmlRows.length){
+    tbody.innerHTML = `<tr><td colspan="7" class="picker-empty">Nog geen regels toegevoegd.</td></tr>`;
+  }else{
+    tbody.innerHTML = htmlRows.join('');
+  }
+
+  tbody.querySelectorAll('[data-remove-extra-stock]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      modalExtraStockItemIds.delete(btn.getAttribute('data-remove-extra-stock'));
+      renderXmlSummary();
+      renderStockSearchResults();
+    });
+  });
+
+  tbody.querySelectorAll('[data-remove-manual]').forEach(btn => {
+    const id = btn.getAttribute('data-remove-manual');
+    modalManualLines = modalManualLines.filter(x => String(x.id) !== String(id));
+    renderXmlSummary();
+  });
+}
+
+function renderStockSearchResults(rows = null){
+  const box = byIdLocal('xmlStockResults');
+  if(!box) return;
+
+  if(rows === null){
+    return;
+  }
+
+  if(!rows.length){
+    box.innerHTML = `<div class="picker-empty">Geen voorraadartikelen gevonden.</div>`;
+    return;
+  }
+
+  box.innerHTML = rows.map(it => {
+    const checked = modalExtraStockItemIds.has(String(it.id)) ? 'checked' : '';
+    const alreadyBase = !!(currentActionContext?.itemIds || []).find(id => String(id) === String(it.id));
+    return `
+      <label class="picker-row">
+        <div>
+          <input type="checkbox" data-extra-stock-id="${esc(it.id)}" ${checked} ${alreadyBase ? 'disabled' : ''}/>
+        </div>
+        <div>
+          <b>${esc(it.sku_base || '')}</b>
+        </div>
+        <div>
+          ${esc(it.name || '')}<br>
+          <small>${esc(it.sku_unique || '')}</small>
+        </div>
+        <div>
+          ${alreadyBase ? '<small>Al geselecteerd</small>' : esc(it.location || '')}
+        </div>
+      </label>
+    `;
+  }).join('');
+
+  box.querySelectorAll('[data-extra-stock-id]').forEach(cb => {
+    cb.addEventListener('change', () => {
+      const id = cb.getAttribute('data-extra-stock-id');
+      if(cb.checked) modalExtraStockItemIds.add(id);
+      else modalExtraStockItemIds.delete(id);
+      renderXmlSummary();
+    });
+  });
+}
+
+function searchStockForXml(){
+  const q = safeText(byIdLocal('xmlStockSearch').value).toLowerCase();
+  const all = getCurrentVisibleItems();
+
+  const rows = all.filter(it => {
+    const id = String(it.id);
+    const txt = [
+      it.sku_base,
+      it.name,
+      it.description,
+      it.sku_unique,
+      it.location
+    ].join(' ').toLowerCase();
+
+    return !q || txt.includes(q) || id.includes(q);
+  }).slice(0, 200);
+
+  renderStockSearchResults(rows);
+}
+
+function addManualLine(){
+  const modelnaam = safeText(byIdLocal('manualOmschrijving').value);
+  const aantal = Math.max(1, parseInt(byIdLocal('manualAantal').value || '1', 10));
+  const colli = Math.max(1, parseInt(byIdLocal('manualColli').value || '1', 10));
+  const gewicht = Math.max(0, safeNumber(byIdLocal('manualGewicht').value, 1));
+
+  if(!modelnaam){
+    showToast('Vul een artikelomschrijving in voor de handmatige regel.', 'err');
+    byIdLocal('manualOmschrijving').focus();
+    return;
+  }
+
+  modalManualLines.push({
+    id: `manual_${Date.now()}_${Math.random().toString(36).slice(2,9)}`,
+    modelnaam,
+    aantal,
+    colli,
+    gewicht
+  });
+
+  byIdLocal('manualOmschrijving').value = '';
+  byIdLocal('manualAantal').value = '1';
+  byIdLocal('manualColli').value = '1';
+  byIdLocal('manualGewicht').value = '1';
+
+  renderXmlSummary();
+  byIdLocal('manualOmschrijving').focus();
 }
 
 function groupItemsForXml(items){
@@ -975,27 +1417,46 @@ function groupItemsForXml(items){
     const key = `${it.sku_base || ''}||${it.name || ''}`;
     if(!map.has(key)){
       map.set(key, {
-        sku_base: safeText(it.sku_base),
-        modelnaam: safeText(it.name),
-        qty: 0
+        modelnaam: safeText(it.name || it.sku_base || it.sku_unique || 'Artikel'),
+        aantal: 1,
+        colli: 1,
+        gewicht: 1
       });
+    }else{
+      const row = map.get(key);
+      row.aantal += 1;
+      row.colli += 1;
+      row.gewicht += 1;
     }
-    map.get(key).qty += 1;
   });
 
   return Array.from(map.values());
 }
 
-function buildReturnXml(items, fields){
-  const grouped = groupItemsForXml(items);
+function buildReturnXml(stockItems, manualLines, fields){
+  const groupedStock = groupItemsForXml(stockItems);
+  const allPartijen = [
+    ...groupedStock.map(row => ({
+      aantal: row.aantal,
+      modelnaam: row.modelnaam,
+      colli: row.colli,
+      gewicht: row.gewicht
+    })),
+    ...manualLines.map(line => ({
+      aantal: line.aantal,
+      modelnaam: line.modelnaam,
+      colli: line.colli,
+      gewicht: line.gewicht
+    }))
+  ];
 
-  const partijenXml = grouped.map((row, idx) => `
+  const partijenXml = allPartijen.map((row, idx) => `
             <Partij Referentie="${idx}">
-              <Aantal>${formatQtyThree(row.qty)}</Aantal>
+              <Aantal>${formatQtyThree(row.aantal)}</Aantal>
               <Modelnaam>${xmlEsc(row.modelnaam)}</Modelnaam>
               <Kleur></Kleur>
-              <Colli>${row.qty}</Colli>
-              <Gewicht>${formatQtyThree(row.qty)}</Gewicht>
+              <Colli>${row.colli}</Colli>
+              <Gewicht>${formatQtyThree(row.gewicht)}</Gewicht>
               <Statistiekcode></Statistiekcode>
               <Stof></Stof>
               <Volume>0.000</Volume>
@@ -1067,7 +1528,7 @@ function validateReturnXmlFields(){
 }
 
 async function performStockAction(actionType, itemIds, options = {}){
-  if(!itemIds?.length){
+  if(!itemIds?.length && actionType !== 'RETURN_TO_HUIZEN'){
     showToast('Geen artikelen geselecteerd.', 'err');
     return;
   }
@@ -1087,8 +1548,19 @@ async function performStockAction(actionType, itemIds, options = {}){
   }
 
   let xmlFields = null;
+  let stockItemsForXml = [];
+  let manualLinesForXml = [];
+
   if(actionType === 'RETURN_TO_HUIZEN'){
     xmlFields = validateReturnXmlFields();
+    stockItemsForXml = getAllStockItemsForXml();
+    manualLinesForXml = [...modalManualLines];
+
+    if(!stockItemsForXml.length && !manualLinesForXml.length){
+      throw new Error('Er zijn geen partijregels voor de XML. Selecteer voorraadartikelen of voeg handmatige regels toe.');
+    }
+
+    itemIds = stockItemsForXml.map(it => it.id);
   }
 
   try{
@@ -1100,58 +1572,63 @@ async function performStockAction(actionType, itemIds, options = {}){
       }
     }
 
-    const visibleItems = getCurrentVisibleItems().filter(x => itemIds.includes(x.id));
+    let items = [];
+    if(itemIds.length){
+      const { data: dbItems, error: itemsErr } = await client
+        .from('items')
+        .select('id, product_id, sku_unique, status, location')
+        .in('id', itemIds);
 
-    const { data: items, error: itemsErr } = await client
-      .from('items')
-      .select('id, product_id, sku_unique, status, location')
-      .in('id', itemIds);
+      if(itemsErr) throw itemsErr;
+      items = dbItems || [];
 
-    if(itemsErr) throw itemsErr;
-    if(!items?.length) throw new Error('Geen items gevonden.');
+      const invalid = items.filter(it => String(it.status || '').toUpperCase() !== 'IN_STOCK');
+      if(invalid.length){
+        throw new Error(`Er zijn ${invalid.length} items die niet meer op voorraad staan.`);
+      }
 
-    const invalid = items.filter(it => String(it.status || '').toUpperCase() !== 'IN_STOCK');
-    if(invalid.length){
-      throw new Error(`Er zijn ${invalid.length} items die niet meer op voorraad staan.`);
+      const nowIso = new Date().toISOString();
+
+      const { error:updateErr } = await client
+        .from('items')
+        .update({
+          status: 'OUT',
+          out_at: nowIso
+        })
+        .in('id', itemIds);
+
+      if(updateErr) throw updateErr;
+
+      const movements = items.map(it => ({
+        type: 'OUT',
+        action_type: actionType,
+        product_id: it.product_id,
+        sku_unique: it.sku_unique,
+        location: it.location || null,
+        order_no: (actionType === 'OUT' || actionType === 'ALLOCATE_ORDER') ? orderNo : (xmlFields?.ref || null),
+        destination: actionType === 'RETURN_TO_HUIZEN' ? destination : null,
+        note: note || null
+      }));
+
+      const { error:moveErr } = await client
+        .from('movements')
+        .insert(movements);
+
+      if(moveErr) throw moveErr;
     }
 
-    const nowIso = new Date().toISOString();
-
-    const { error:updateErr } = await client
-      .from('items')
-      .update({
-        status: 'OUT',
-        out_at: nowIso
-      })
-      .in('id', itemIds);
-
-    if(updateErr) throw updateErr;
-
-    const movements = items.map(it => ({
-      type: 'OUT',
-      action_type: actionType,
-      product_id: it.product_id,
-      sku_unique: it.sku_unique,
-      location: it.location || null,
-      order_no: (actionType === 'OUT' || actionType === 'ALLOCATE_ORDER') ? orderNo : (xmlFields?.ref || null),
-      destination: actionType === 'RETURN_TO_HUIZEN' ? destination : null,
-      note: note || null
-    }));
-
-    const { error:moveErr } = await client
-      .from('movements')
-      .insert(movements);
-
-    if(moveErr) throw moveErr;
-
     if(actionType === 'RETURN_TO_HUIZEN'){
-      const xml = buildReturnXml(visibleItems, xmlFields);
+      const xml = buildReturnXml(stockItemsForXml, manualLinesForXml, xmlFields);
       const filenameBase = safeText(xmlFields.ref).replace(/[^\w\-]+/g, '_') || 'retour_huizen';
       downloadXmlFile(`${filenameBase}.xml`, xml);
     }
 
     clearSelection();
     closeActionModal();
+
+    const processedCount = actionType === 'RETURN_TO_HUIZEN'
+      ? (stockItemsForXml.length + manualLinesForXml.length)
+      : items.length;
 
     const labels = {
       OUT: `uitgeboekt op order ${orderNo}`,
@@ -1160,7 +1637,7 @@ async function performStockAction(actionType, itemIds, options = {}){
     };
 
     const extra = actionType === 'RETURN_TO_HUIZEN' ? ' XML gedownload.' : '';
-    showToast(`${items.length} artikel(en) ${labels[actionType] || 'verwerkt'}.${extra}`, 'ok');
+    showToast(`${processedCount} regel(s) ${labels[actionType] || 'verwerkt'}.${extra}`, 'ok');
 
     await load();
   }catch(e){
@@ -1313,6 +1790,23 @@ byIdLocal('modalOrderNo').addEventListener('keydown', e => {
   if(e.key === 'Enter' && !byIdLocal('actionOrderWrap').classList.contains('hidden')){
     e.preventDefault();
     byIdLocal('btnConfirmAction').click();
+  }
+});
+
+byIdLocal('btnXmlSearchStock').addEventListener('click', searchStockForXml);
+byIdLocal('xmlStockSearch').addEventListener('keydown', e => {
+  if(e.key === 'Enter'){
+    e.preventDefault();
+    searchStockForXml();
+  }
+});
+
+byIdLocal('btnAddManualLine').addEventListener('click', addManualLine);
+
+byIdLocal('manualGewicht').addEventListener('keydown', e => {
+  if(e.key === 'Enter'){
+    e.preventDefault();
+    addManualLine();
   }
 });
 
