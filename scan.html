@@ -8,11 +8,6 @@
   <link rel="stylesheet" href="/css/theme.css"/>
 
   <style>
-    .compact-topbar .nav,
-    .compact-topbar .rightbar{
-      display:none;
-    }
-
     .scan-page{
       display:grid;
       gap:16px;
@@ -27,7 +22,7 @@
     }
 
     .scan-title{
-      font-size:20px;
+      font-size:22px;
       font-weight:900;
       color:var(--navy);
       margin:0 0 6px 0;
@@ -35,7 +30,7 @@
 
     .scan-sub{
       color:var(--muted);
-      line-height:1.45;
+      line-height:1.5;
       margin:0;
     }
 
@@ -90,19 +85,6 @@
       color:#1d4ed8;
     }
 
-    .action-grid{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:12px;
-    }
-
-    .big-btn{
-      min-height:74px;
-      font-size:22px;
-      font-weight:900;
-      border-radius:18px;
-    }
-
     .mode-switch{
       display:grid;
       grid-template-columns:1fr 1fr;
@@ -111,13 +93,13 @@
 
     .mode-btn{
       border:2px solid var(--border);
-      border-radius:18px;
-      padding:18px 14px;
+      border-radius:16px;
+      padding:14px 12px;
       background:#fff;
       color:var(--navy);
-      font-size:22px;
+      font-size:18px;
       font-weight:900;
-      min-height:74px;
+      min-height:58px;
       cursor:pointer;
     }
 
@@ -127,41 +109,63 @@
       border-color:var(--navy);
     }
 
-    .focus-line{
+    .action-grid{
+      display:grid;
+      grid-template-columns:auto auto 1fr;
+      gap:10px;
+      align-items:end;
+    }
+
+    .compact-btn{
+      min-height:46px;
       font-size:15px;
-      color:var(--muted);
-      line-height:1.5;
+      font-weight:900;
+      border-radius:12px;
+      padding:10px 14px;
     }
 
     .scan-fields{
       display:grid;
+      grid-template-columns:1.1fr .9fr .8fr;
       gap:12px;
+      align-items:end;
     }
 
-    .scan-fields input{
-      min-height:62px;
-      font-size:20px;
+    .scan-fields.single-side{
+      grid-template-columns:1.2fr .8fr;
+    }
+
+    .scan-fields input,
+    .scan-fields textarea{
+      min-height:48px;
+      font-size:17px;
       font-weight:700;
-      border-radius:16px;
+      border-radius:14px;
+    }
+
+    .scan-fields textarea{
+      min-height:90px;
     }
 
     .process-grid{
       display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:12px;
+      grid-template-columns:auto auto auto 1fr;
+      gap:10px;
+      align-items:end;
       margin-top:14px;
     }
 
     .process-btn{
-      min-height:74px;
-      font-size:22px;
+      min-height:46px;
+      font-size:15px;
       font-weight:900;
-      border-radius:18px;
+      border-radius:12px;
+      padding:10px 14px;
     }
 
     .kpi-grid{
       display:grid;
-      grid-template-columns:repeat(3,1fr);
+      grid-template-columns:repeat(4,1fr);
       gap:12px;
     }
 
@@ -187,6 +191,7 @@
       color:var(--navy);
       line-height:1.1;
       word-break:break-word;
+      white-space:pre-line;
     }
 
     #qr_reader{
@@ -195,7 +200,7 @@
       border-radius:16px;
       overflow:hidden;
       background:#fff;
-      min-height:300px;
+      min-height:280px;
     }
 
     .hidden{
@@ -217,9 +222,9 @@
 
     .batch-row{
       display:grid;
-      grid-template-columns:52px 1fr;
+      grid-template-columns:48px 1fr auto;
       gap:10px;
-      padding:14px;
+      padding:12px 14px;
       border-bottom:1px solid #edf2f7;
       align-items:center;
     }
@@ -231,36 +236,134 @@
     .batch-index{
       font-weight:900;
       color:var(--muted);
-      font-size:16px;
+      font-size:15px;
     }
 
-    .batch-sku{
+    .batch-scan{
       font-weight:900;
       color:var(--navy);
-      font-size:18px;
+      font-size:16px;
       word-break:break-word;
+      line-height:1.2;
     }
 
     .batch-meta{
       color:var(--muted);
       font-size:12px;
       margin-top:4px;
+      line-height:1.35;
     }
 
-    .mini-note{
+    .batch-remove{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-width:34px;
+      min-height:34px;
+      border-radius:10px;
+      border:1px solid #fecaca;
+      background:#fff5f5;
+      color:#b42318;
+      font-weight:900;
+      cursor:pointer;
+    }
+
+    .summary-box{
+      border:1px solid var(--border);
+      border-radius:14px;
+      background:#f8fafc;
+      padding:14px;
+      line-height:1.5;
+    }
+
+    .summary-box b{
+      color:var(--navy);
+    }
+
+    .result-list{
+      display:grid;
+      gap:10px;
+      margin-top:12px;
+    }
+
+    .result-row{
+      border:1px solid var(--border);
+      border-radius:12px;
+      background:#fff;
+      padding:12px;
+    }
+
+    .result-row.ok{
+      border-color:#abefc6;
+      background:#ecfdf3;
+    }
+
+    .result-row.err{
+      border-color:#fecdca;
+      background:#fef3f2;
+    }
+
+    .result-head{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+
+    .result-main{
+      font-weight:900;
+      color:var(--navy);
+      word-break:break-word;
+    }
+
+    .result-status{
+      font-size:12px;
+      font-weight:900;
+      padding:4px 10px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background:#fff;
+      white-space:nowrap;
+    }
+
+    .result-sub{
+      margin-top:6px;
       font-size:13px;
       color:var(--muted);
-      line-height:1.45;
-      margin-top:10px;
+      line-height:1.4;
+      word-break:break-word;
     }
 
-    @media(max-width:900px){
+    .desktop-nav{
+      display:block;
+    }
+
+    @media(max-width:1020px){
+      .scan-fields,
+      .scan-fields.single-side{
+        grid-template-columns:1fr 1fr;
+      }
+
+      .scan-fields > div:last-child{
+        grid-column:1 / -1;
+      }
+
       .kpi-grid{
-        grid-template-columns:1fr;
+        grid-template-columns:1fr 1fr;
+      }
+
+      .action-grid,
+      .process-grid{
+        grid-template-columns:1fr 1fr;
       }
     }
 
     @media(max-width:760px){
+      .desktop-nav{
+        display:none;
+      }
+
       .topbar .inner{
         padding:12px;
       }
@@ -273,16 +376,47 @@
         padding:16px;
       }
 
-      .action-grid,
       .mode-switch,
-      .process-grid{
+      .action-grid,
+      .scan-fields,
+      .scan-fields.single-side,
+      .process-grid,
+      .kpi-grid{
         grid-template-columns:1fr;
       }
 
-      .big-btn,
-      .mode-btn,
+      .mode-btn{
+        min-height:74px;
+        font-size:22px;
+        border-radius:18px;
+      }
+
+      .compact-btn,
       .process-btn{
-        min-height:76px;
+        min-height:68px;
+        font-size:20px;
+        border-radius:18px;
+      }
+
+      .scan-fields input,
+      .scan-fields textarea{
+        min-height:62px;
+        font-size:20px;
+        border-radius:16px;
+      }
+
+      #qr_reader{
+        min-height:320px;
+      }
+
+      .batch-row{
+        grid-template-columns:42px 1fr;
+      }
+
+      .batch-remove{
+        grid-column:2;
+        justify-self:start;
+        margin-top:8px;
       }
     }
   </style>
@@ -294,17 +428,17 @@
 </head>
 <body data-page="scan">
 
-<div class="topbar no-print compact-topbar">
+<div class="topbar no-print">
   <div class="inner">
     <div class="brand">
       <div class="logo">o</div>
       <div class="title">
         Oegema Logistics
-        <small>Dyyk · Mobiel scannen</small>
+        <small>Dyyk · Mobiel / desktop scannen</small>
       </div>
     </div>
 
-    <nav class="nav">
+    <nav class="nav desktop-nav">
       <a href="/">Dashboard</a>
       <a href="/products">Artikelen + Stickers</a>
       <a class="active" href="/scan">In-/Uitscan</a>
@@ -313,8 +447,10 @@
       <a href="/inventory">Inventarisatie</a>
     </nav>
 
-    <div class="rightbar">
-      <a class="site-link" href="https://www.voorraaddyyk.nl" target="_blank" rel="noopener">www.voorraaddyyk.nl</a>
+    <div class="rightbar desktop-nav">
+      <a class="site-link" href="https://www.voorraaddyyk.nl" target="_blank" rel="noopener">
+        www.voorraaddyyk.nl
+      </a>
     </div>
   </div>
 </div>
@@ -327,28 +463,14 @@
     <div class="scan-card">
       <h1 class="scan-title">Scan Inslag / Uitslag</h1>
       <p class="scan-sub">
-        Mobiele scanpagina met zo min mogelijk handelingen. Ondersteunt oude stickers zoals <b>FLZWNO-0001</b>
-        en nieuwe stickers zoals <b>FLZWNO77</b>.
+        Scan voortaan vooral op <b>basis-SKU</b>, bijvoorbeeld <b>FLIZWAKL</b>. Oude stickers met volgnummer blijven ook werken.
+        Bij uitslag boekt het systeem automatisch het <b>oudst ingeslagen beschikbare colli</b> af.
       </p>
 
       <p class="page-url">
         Actieve omgeving:
         <strong>www.voorraaddyyk.nl</strong>
       </p>
-    </div>
-
-    <div class="scan-card">
-      <div class="action-grid">
-        <button class="btn primary big-btn" id="btnQr" type="button">QR scannen</button>
-        <button class="btn big-btn" id="btnAddScan" type="button">Handmatig toevoegen</button>
-      </div>
-
-      <div id="qr_reader" class="hidden"></div>
-
-      <div class="mini-note">
-        Bij <b>uitslag</b> stopt de QR-scanner direct na één scan, zodat je meteen het ordernummer kunt invullen.
-        Bij <b>inslag</b> blijft de nadruk juist op het batchmatig scannen liggen.
-      </div>
     </div>
 
     <div class="scan-card">
@@ -359,39 +481,61 @@
         <button class="mode-btn" id="tabOut" type="button">Uitslag</button>
       </div>
 
-      <div class="focus-line" id="focusLine" style="margin-top:14px">
+      <div class="summary-box" id="modeInfo" style="margin-top:14px">
+        <b>Inslag actief.</b><br>
         Scan eerst alle colli van de batch. Vul daarna één keer de locatie in en verwerk de batch.
       </div>
     </div>
 
     <div class="scan-card">
-      <div class="scan-fields">
+      <div class="action-grid">
+        <button class="btn primary compact-btn" id="btnQr" type="button">QR scannen</button>
+        <button class="btn compact-btn" id="btnAddScan" type="button">Toevoegen</button>
+        <div class="small muted" style="align-self:center">
+          Dezelfde SKU mag meerdere keren in één batch voorkomen.
+        </div>
+      </div>
+
+      <div id="qr_reader" class="hidden"></div>
+    </div>
+
+    <div class="scan-card">
+      <div class="scan-fields single-side" id="fieldGrid">
         <div>
-          <label for="skuInput">Sticker / unieke SKU</label>
-          <input id="skuInput" placeholder="Scan of vul sticker in"/>
+          <label for="scanInput">Scan / SKU</label>
+          <input id="scanInput" placeholder="Bijv. FLIZWAKL of FLIZWAKL-00001"/>
         </div>
 
-        <div>
-          <label for="locInput">Locatie</label>
-          <input id="locInput" placeholder="Eén locatie voor hele batch"/>
+        <div id="locationWrap">
+          <label for="locationInput">Locatie</label>
+          <input id="locationInput" placeholder="Eén locatie voor hele batch"/>
         </div>
 
-        <div id="outBlock" class="hidden">
+        <div id="orderWrap" class="hidden">
           <label for="orderInput">Ordernummer</label>
-          <input id="orderInput" placeholder="Na scan direct ordernummer invullen"/>
+          <input id="orderInput" placeholder="Eén ordernummer voor hele batch"/>
+        </div>
+
+        <div id="noteWrap" class="hidden">
+          <label for="noteInput">Opmerking</label>
+          <textarea id="noteInput" placeholder="Optioneel"></textarea>
         </div>
       </div>
 
       <div class="process-grid">
-        <button class="btn primary process-btn" id="btnProcess" type="button">Batch inboeken</button>
-        <button class="btn process-btn" id="btnClear" type="button">Batch leegmaken</button>
+        <button class="btn primary process-btn" id="btnProcess" type="button">Batch verwerken</button>
+        <button class="btn process-btn" id="btnUndoLast" type="button">Laatste weg</button>
+        <button class="btn danger process-btn" id="btnClearBatch" type="button">Batch leegmaken</button>
+        <div class="small muted" style="align-self:center">
+          Oude genummerde colli worden bij uitslag FIFO eerst afgeboekt.
+        </div>
       </div>
     </div>
 
     <div class="scan-card">
       <div class="kpi-grid">
         <div class="kpi-card">
-          <div class="kpi-label">Gescande colli</div>
+          <div class="kpi-label">Batchregels</div>
           <div class="kpi-value" id="batchCount">0</div>
         </div>
 
@@ -404,6 +548,11 @@
           <div class="kpi-label">Laatste scan</div>
           <div class="kpi-value" id="lastScanKpi" style="font-size:18px">-</div>
         </div>
+
+        <div class="kpi-card">
+          <div class="kpi-label">Laatste verwerking</div>
+          <div class="kpi-value" id="lastProcessKpi" style="font-size:16px">-</div>
+        </div>
       </div>
     </div>
 
@@ -411,16 +560,24 @@
       <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-start">
         <div>
           <h2 class="scan-title" style="font-size:18px;margin-bottom:4px">Batchlijst</h2>
-          <div class="scan-sub">Alles wat hier staat wordt verwerkt.</div>
-        </div>
-
-        <div class="btnRow">
-          <button class="btn ghost" id="btnUndoLast" type="button">Laatste weg</button>
-          <button class="btn danger" id="btnClearBatch" type="button">Batch leegmaken</button>
+          <div class="scan-sub">Alle regels hieronder worden verwerkt in volgorde van scannen.</div>
         </div>
       </div>
 
       <div id="batchList" class="batch-list"></div>
+    </div>
+
+    <div class="scan-card">
+      <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-start">
+        <div>
+          <h2 class="scan-title" style="font-size:18px;margin-bottom:4px">Resultaat laatste verwerking</h2>
+          <div class="scan-sub">Hier zie je per regel wat gelukt of mislukt is.</div>
+        </div>
+      </div>
+
+      <div id="resultList" class="result-list">
+        <div class="summary-box">Nog geen batch verwerkt.</div>
+      </div>
     </div>
 
   </div>
@@ -431,33 +588,44 @@ setActiveNav();
 
 const client = sb();
 
+const state = {
+  mode: 'IN',
+  qr: null,
+  qrRunning: false,
+  batch: [],
+  results: []
+};
+
 const tabIn = byId('tabIn');
 const tabOut = byId('tabOut');
-const outBlock = byId('outBlock');
 
-const btnProcess = byId('btnProcess');
-const btnClear = byId('btnClear');
 const btnQr = byId('btnQr');
 const btnAddScan = byId('btnAddScan');
+const btnProcess = byId('btnProcess');
 const btnUndoLast = byId('btnUndoLast');
 const btnClearBatch = byId('btnClearBatch');
 
-const skuInput = byId('skuInput');
-const locInput = byId('locInput');
+const scanInput = byId('scanInput');
+const locationInput = byId('locationInput');
 const orderInput = byId('orderInput');
-const qrReader = byId('qr_reader');
+const noteInput = byId('noteInput');
 
+const locationWrap = byId('locationWrap');
+const orderWrap = byId('orderWrap');
+const noteWrap = byId('noteWrap');
+const fieldGrid = byId('fieldGrid');
+
+const qrReader = byId('qr_reader');
 const statusBox = byId('statusBox');
+const modeInfo = byId('modeInfo');
+
 const batchCount = byId('batchCount');
-const batchList = byId('batchList');
 const modeKpi = byId('modeKpi');
 const lastScanKpi = byId('lastScanKpi');
-const focusLine = byId('focusLine');
+const lastProcessKpi = byId('lastProcessKpi');
 
-let mode = 'IN';
-let qr = null;
-let qrRunning = false;
-let batch = [];
+const batchList = byId('batchList');
+const resultList = byId('resultList');
 
 function safeText(v){
   return String(v ?? '').trim();
@@ -468,258 +636,131 @@ function setStatus(message, type='info'){
   statusBox.textContent = message;
 }
 
-function updateModeUi(){
-  tabIn.classList.toggle('active', mode === 'IN');
-  tabOut.classList.toggle('active', mode === 'OUT');
-  outBlock.classList.toggle('hidden', mode !== 'OUT');
-
-  modeKpi.textContent = mode === 'IN' ? 'Inslag' : 'Uitslag';
-  btnProcess.textContent = mode === 'IN' ? 'Batch inboeken' : 'Uitslag verwerken';
-
-  if(mode === 'IN'){
-    focusLine.textContent = 'Scan eerst alle colli van de batch. Vul daarna één keer de locatie in en verwerk de batch.';
-    setStatus('Inslag actief. Focus blijft op de batch.', 'info');
-  }else{
-    focusLine.textContent = 'Bij uitslag wordt de QR-scanner na één scan direct gestopt. Daarna kun je meteen het ordernummer invullen en verwerken.';
-    setStatus('Uitslag actief. Scan 1 artikel en vul daarna direct ordernummer in.', 'info');
-  }
-}
-
 function setMode(nextMode){
-  mode = nextMode;
-  updateModeUi();
-  clearForm(false);
-}
+  state.mode = nextMode;
 
-function focusAfterScan(){
-  if(mode === 'OUT'){
-    setTimeout(() => {
-      orderInput.focus();
-      orderInput.select();
-    }, 120);
+  tabIn.classList.toggle('active', state.mode === 'IN');
+  tabOut.classList.toggle('active', state.mode === 'OUT');
+
+  const inMode = state.mode === 'IN';
+
+  locationWrap.classList.toggle('hidden', !inMode);
+  orderWrap.classList.toggle('hidden', inMode);
+  noteWrap.classList.toggle('hidden', inMode);
+
+  fieldGrid.classList.toggle('single-side', inMode);
+
+  modeKpi.textContent = inMode ? 'Inslag' : 'Uitslag';
+  btnProcess.textContent = inMode ? 'Batch inboeken' : 'Batch uitslaan';
+
+  if(inMode){
+    modeInfo.innerHTML = `<b>Inslag actief.</b><br>Scan eerst alle colli van de batch. Vul daarna één keer de locatie in en verwerk de batch.`;
+    setStatus('Inslag actief. Batch scannen en daarna één locatie invullen.', 'info');
+    setTimeout(() => scanInput.focus(), 50);
   }else{
-    skuInput.focus();
+    modeInfo.innerHTML = `<b>Uitslag actief.</b><br>Scan eerst alle colli of SKU’s van de batch. Vul daarna één ordernummer in. Het systeem boekt per scanregel FIFO het oudste beschikbare colli af.`;
+    setStatus('Uitslag actief. Batch scannen en daarna één ordernummer invullen.', 'info');
+    setTimeout(() => scanInput.focus(), 50);
   }
 }
 
-function clearForm(clearBatchToo = true){
-  skuInput.value = '';
-  locInput.value = '';
-  orderInput.value = '';
+function addScan(rawValue){
+  const value = normalizeScan(rawValue);
+  if(!value) return;
 
-  if(clearBatchToo){
-    batch = [];
-    renderBatch();
+  state.batch.push(value);
+  renderBatch();
+
+  scanInput.value = '';
+  lastScanKpi.textContent = value;
+
+  if(state.mode === 'IN'){
+    setStatus(`${state.batch.length} scanregel(s) klaar voor inslag.`, 'ok');
+  }else{
+    setStatus(`${state.batch.length} scanregel(s) klaar voor uitslag.`, 'ok');
   }
 
+  scanInput.focus();
+}
+
+function removeBatchIndex(index){
+  state.batch.splice(index, 1);
+  renderBatch();
+  lastScanKpi.textContent = state.batch.length ? state.batch[state.batch.length - 1] : '-';
+  setStatus('Batchregel verwijderd.', 'info');
+  scanInput.focus();
+}
+
+function clearBatch(){
+  state.batch = [];
+  renderBatch();
   lastScanKpi.textContent = '-';
-  skuInput.focus();
+  setStatus('Batch leeggemaakt.', 'info');
+  scanInput.focus();
 }
 
 function renderBatch(){
-  batchCount.textContent = String(batch.length);
+  batchCount.textContent = String(state.batch.length);
 
-  if(!batch.length){
-    batchList.innerHTML = `<div class="batch-empty">Nog geen colli gescand.</div>`;
+  if(!state.batch.length){
+    batchList.innerHTML = `<div class="batch-empty">Nog geen scanregels toegevoegd.</div>`;
     return;
   }
 
-  batchList.innerHTML = batch.map((sku, i) => `
+  batchList.innerHTML = state.batch.map((code, index) => `
     <div class="batch-row">
-      <div class="batch-index">#${i + 1}</div>
+      <div class="batch-index">#${index + 1}</div>
+
       <div>
-        <div class="batch-sku">${escapeHtml(sku)}</div>
-        <div class="batch-meta">${mode === 'IN' ? 'Klaar voor inslag' : 'Klaar voor uitslag'}</div>
+        <div class="batch-scan">${escapeHtml(code)}</div>
+        <div class="batch-meta">
+          ${state.mode === 'IN'
+            ? 'Wordt ingeboekt op de opgegeven locatie'
+            : 'Wordt FIFO afgeboekt op het opgegeven ordernummer'}
+        </div>
+      </div>
+
+      <button class="batch-remove" type="button" data-remove-index="${index}">✕</button>
+    </div>
+  `).join('');
+
+  document.querySelectorAll('[data-remove-index]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const index = Number(btn.getAttribute('data-remove-index'));
+      removeBatchIndex(index);
+    });
+  });
+}
+
+function renderResults(){
+  if(!state.results.length){
+    resultList.innerHTML = `<div class="summary-box">Nog geen batch verwerkt.</div>`;
+    return;
+  }
+
+  resultList.innerHTML = state.results.map(row => `
+    <div class="result-row ${row.ok ? 'ok' : 'err'}">
+      <div class="result-head">
+        <div class="result-main">${escapeHtml(row.scanned_code || '')}</div>
+        <div class="result-status">${row.ok ? 'GELUKT' : 'MISLUKT'}</div>
+      </div>
+      <div class="result-sub">
+        ${escapeHtml(row.message || '')}
       </div>
     </div>
   `).join('');
 }
 
-function normalizeScannedValue(value){
-  return normalizeScan(value);
-}
-
-function addScanToBatch(rawValue){
-  const sku = normalizeScannedValue(rawValue);
-
-  if(!sku) return;
-
-  if(batch.includes(sku)){
-    toast(`Sticker ${sku} is al gescand in deze batch.`, 'err');
-    setStatus(`Dubbele scan: ${sku}`, 'err');
-    skuInput.value = '';
-    focusAfterScan();
-    return;
-  }
-
-  batch = [sku, ...batch.filter(Boolean)];
-  renderBatch();
-
-  skuInput.value = '';
-  lastScanKpi.textContent = sku;
-
-  if(mode === 'IN'){
-    setStatus(`${batch.length} colli gescand voor inslag.`, 'ok');
-  }else{
-    setStatus(`Sticker gescand: ${sku}. Vul nu direct ordernummer in.`, 'ok');
-  }
-
-  focusAfterScan();
-}
-
-async function doInSingle(skuUnique, location){
-  const { data:item, error } = await client
-    .from('items')
-    .select('id, product_id, sku_unique, status')
-    .eq('sku_unique', skuUnique)
-    .maybeSingle();
-
-  if(error) throw error;
-  if(!item) throw new Error(`Sticker niet gevonden: ${skuUnique}`);
-  if(item.status === 'IN_STOCK') throw new Error(`Item staat al op voorraad: ${skuUnique}`);
-
-  const { error:updateErr } = await client
-    .from('items')
-    .update({
-      status: 'IN_STOCK',
-      location,
-      in_at: new Date().toISOString(),
-      out_at: null
-    })
-    .eq('id', item.id);
-
-  if(updateErr) throw updateErr;
-
-  const { error:moveErr } = await client
-    .from('movements')
-    .insert([{
-      type: 'IN',
-      product_id: item.product_id,
-      sku_unique: skuUnique,
-      location,
-      order_no: null
-    }]);
-
-  if(moveErr) throw moveErr;
-}
-
-async function doOutSingle(skuUnique, orderNo){
-  const { data:item, error } = await client
-    .from('items')
-    .select('id, product_id, sku_unique, status, location')
-    .eq('sku_unique', skuUnique)
-    .maybeSingle();
-
-  if(error) throw error;
-  if(!item) throw new Error(`Sticker niet gevonden: ${skuUnique}`);
-  if(item.status !== 'IN_STOCK') throw new Error(`Uitslag niet mogelijk: ${skuUnique} staat niet op voorraad.`);
-
-  const { error:updateErr } = await client
-    .from('items')
-    .update({
-      status: 'OUT',
-      out_at: new Date().toISOString()
-    })
-    .eq('id', item.id);
-
-  if(updateErr) throw updateErr;
-
-  const { error:moveErr } = await client
-    .from('movements')
-    .insert([{
-      type: 'OUT',
-      product_id: item.product_id,
-      sku_unique: skuUnique,
-      location: item.location || null,
-      order_no: orderNo
-    }]);
-
-  if(moveErr) throw moveErr;
-}
-
-async function processInBatch(){
-  if(!batch.length){
-    toast('Scan eerst één of meerdere colli.', 'err');
-    setStatus('Geen batch om in te boeken.', 'err');
-    return;
-  }
-
-  const location = safeText(locInput.value);
-  if(!location){
-    toast('Locatie is verplicht bij inslag.', 'err');
-    setStatus('Locatie ontbreekt voor inslag.', 'err');
-    locInput.focus();
-    return;
-  }
-
-  setStatus('Batch wordt ingeboekt…', 'info');
-
-  for(const sku of batch){
-    await doInSingle(sku, location);
-  }
-
-  toast(`${batch.length} colli ingeboekt op locatie ${location}.`, 'ok');
-  setStatus(`${batch.length} colli succesvol ingeboekt.`, 'ok');
-
-  batch = [];
-  renderBatch();
-  skuInput.value = '';
-  lastScanKpi.textContent = 'Batch verwerkt';
-  skuInput.focus();
-}
-
-async function processOutSingleFlow(){
-  if(!batch.length){
-    toast('Scan eerst een artikel.', 'err');
-    setStatus('Nog geen artikel gescand voor uitslag.', 'err');
-    return;
-  }
-
-  const orderNo = safeText(orderInput.value);
-  if(!orderNo){
-    toast('Ordernummer is verplicht bij uitslag.', 'err');
-    setStatus('Ordernummer ontbreekt voor uitslag.', 'err');
-    orderInput.focus();
-    return;
-  }
-
-  const sku = batch[0];
-  const used = await countOrderUses(client, orderNo).catch(() => 0);
-
-  if(used > 0){
-    const ok = confirm(`Ordernummer ${orderNo} is al ${used}x gebruikt. Doorgaan?`);
-    if(!ok){
-      setStatus('Uitslag geannuleerd.', 'info');
-      return;
-    }
-  }
-
-  setStatus(`Artikel ${sku} wordt uitgeboekt…`, 'info');
-
-  await doOutSingle(sku, orderNo);
-
-  toast(`Artikel ${sku} uitgeboekt op order ${orderNo}.`, 'ok');
-  setStatus(`Artikel ${sku} succesvol uitgeboekt.`, 'ok');
-
-  batch = [];
-  renderBatch();
-  skuInput.value = '';
-  orderInput.value = '';
-  lastScanKpi.textContent = 'Verwerkt';
-  skuInput.focus();
-}
-
-async function processBatch(){
+async function stopQrScanner(){
   try{
-    if(mode === 'IN'){
-      await processInBatch();
-    }else{
-      await processOutSingleFlow();
+    if(state.qr && state.qrRunning){
+      await state.qr.stop();
     }
-  }catch(e){
-    toast(e.message || String(e), 'err');
-    setStatus(e.message || String(e), 'err');
-  }
+  }catch(_){}
+
+  state.qrRunning = false;
+  qrReader.classList.add('hidden');
+  btnQr.textContent = 'QR scannen';
 }
 
 async function toggleQrScanner(){
@@ -729,41 +770,37 @@ async function toggleQrScanner(){
     return;
   }
 
-  if(!qr){
-    qr = new Html5Qrcode('qr_reader');
+  if(!state.qr){
+    state.qr = new Html5Qrcode('qr_reader');
   }
 
-  if(!qrRunning){
+  if(!state.qrRunning){
     qrReader.classList.remove('hidden');
-    qrReader.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    qrReader.scrollIntoView({ behavior:'smooth', block:'center' });
     btnQr.textContent = 'Stop QR';
     setStatus('Camera wordt geopend…', 'info');
 
     try{
       const cams = await Html5Qrcode.getCameras();
       if(!cams || !cams.length){
-        throw new Error('Geen camera gevonden');
+        throw new Error('Geen camera gevonden.');
       }
 
       const preferred = cams.find(c => /back|rear|environment/i.test(c.label)) || cams[0];
 
-      qrRunning = true;
+      state.qrRunning = true;
 
-      await qr.start(
+      await state.qr.start(
         preferred.id,
         { fps: 10, qrbox: { width: 260, height: 260 } },
-        (decodedText) => {
-          addScanToBatch(decodedText);
-
-          if(mode === 'OUT'){
-            stopQrScanner().catch(() => {});
-          }
+        decodedText => {
+          addScan(decodedText);
         }
       );
 
       setStatus('QR scanner actief.', 'ok');
     }catch(e){
-      qrRunning = false;
+      state.qrRunning = false;
       qrReader.classList.add('hidden');
       btnQr.textContent = 'QR scannen';
       toast('Camera start niet. Gebruik https en sta camera toe.', 'err');
@@ -771,40 +808,167 @@ async function toggleQrScanner(){
     }
   }else{
     await stopQrScanner();
+    setStatus('QR scanner gestopt.', 'info');
   }
 }
 
-async function stopQrScanner(){
-  try{
-    if(qr && qrRunning){
-      await qr.stop();
+async function processInBatch(){
+  const location = safeText(locationInput.value);
+
+  if(!state.batch.length){
+    toast('Voeg eerst scanregels toe.', 'err');
+    setStatus('Geen batch om te verwerken.', 'err');
+    return;
+  }
+
+  if(!location){
+    toast('Locatie is verplicht bij inslag.', 'err');
+    setStatus('Locatie ontbreekt.', 'err');
+    locationInput.focus();
+    return;
+  }
+
+  state.results = [];
+  renderResults();
+  setStatus('Batch wordt ingeboekt…', 'info');
+
+  let success = 0;
+  let failed = 0;
+
+  for(const scannedCode of state.batch){
+    try{
+      const { data, error } = await client.rpc('process_scan_in', {
+        p_scanned_code: scannedCode,
+        p_location: location
+      });
+
+      if(error) throw error;
+
+      success++;
+      state.results.push({
+        ok: true,
+        scanned_code: scannedCode,
+        message: `Ingeboekt. Interne voorraadregel: ${safeText(data?.sku_unique || '')} · locatie ${location}`
+      });
+    }catch(e){
+      failed++;
+      state.results.push({
+        ok: false,
+        scanned_code: scannedCode,
+        message: e.message || String(e)
+      });
     }
-  }catch(_){}
+  }
 
-  qrRunning = false;
-  qrReader.classList.add('hidden');
-  btnQr.textContent = 'QR scannen';
+  renderResults();
 
-  if(mode === 'OUT' && batch.length){
-    setStatus('Sticker gescand. Vul nu direct ordernummer in.', 'ok');
-    orderInput.focus();
-    orderInput.select();
+  lastProcessKpi.textContent = `${success} goed\n${failed} fout`;
+
+  if(failed === 0){
+    toast(`${success} scanregel(s) succesvol ingeboekt.`, 'ok');
+    setStatus(`${success} scanregel(s) succesvol ingeboekt.`, 'ok');
+    state.batch = [];
+    renderBatch();
+    scanInput.value = '';
+    scanInput.focus();
   }else{
-    setStatus(mode === 'IN' ? 'Inslag actief. Focus blijft op de batch.' : 'Uitslag actief. Scan 1 artikel en vul daarna direct ordernummer in.', 'info');
+    toast(`${success} gelukt, ${failed} mislukt.`, failed > 0 ? 'err' : 'ok');
+    setStatus(`${success} gelukt, ${failed} mislukt. Controleer het resultaat hieronder.`, 'err');
   }
 }
 
-btnProcess.addEventListener('click', () => {
-  processBatch().catch(e => {
+async function processOutBatch(){
+  const orderNo = safeText(orderInput.value);
+  const note = safeText(noteInput.value);
+
+  if(!state.batch.length){
+    toast('Voeg eerst scanregels toe.', 'err');
+    setStatus('Geen batch om te verwerken.', 'err');
+    return;
+  }
+
+  if(!orderNo){
+    toast('Ordernummer is verplicht bij uitslag.', 'err');
+    setStatus('Ordernummer ontbreekt.', 'err');
+    orderInput.focus();
+    return;
+  }
+
+  const used = await countOrderUses(client, orderNo).catch(() => 0);
+  if(used > 0){
+    const ok = confirm(`Ordernummer ${orderNo} is al ${used}x gebruikt. Doorgaan?`);
+    if(!ok){
+      setStatus('Uitslag geannuleerd.', 'info');
+      return;
+    }
+  }
+
+  state.results = [];
+  renderResults();
+  setStatus('Batch wordt uitgeboekt…', 'info');
+
+  let success = 0;
+  let failed = 0;
+
+  for(const scannedCode of state.batch){
+    try{
+      const { data, error } = await client.rpc('process_scan_out', {
+        p_scanned_code: scannedCode,
+        p_order_no: orderNo,
+        p_action_type: 'OUT',
+        p_note: note || null,
+        p_destination: null
+      });
+
+      if(error) throw error;
+
+      success++;
+      state.results.push({
+        ok: true,
+        scanned_code: scannedCode,
+        message: `Uitgeboekt op order ${orderNo}. Werkelijk afgeboekt colli: ${safeText(data?.sku_unique || '')}`
+      });
+    }catch(e){
+      failed++;
+      state.results.push({
+        ok: false,
+        scanned_code: scannedCode,
+        message: e.message || String(e)
+      });
+    }
+  }
+
+  renderResults();
+
+  lastProcessKpi.textContent = `${success} goed\n${failed} fout`;
+
+  if(failed === 0){
+    toast(`${success} scanregel(s) succesvol uitgeboekt.`, 'ok');
+    setStatus(`${success} scanregel(s) succesvol uitgeboekt.`, 'ok');
+    state.batch = [];
+    renderBatch();
+    scanInput.value = '';
+    orderInput.value = '';
+    noteInput.value = '';
+    scanInput.focus();
+  }else{
+    toast(`${success} gelukt, ${failed} mislukt.`, 'err');
+    setStatus(`${success} gelukt, ${failed} mislukt. Controleer het resultaat hieronder.`, 'err');
+  }
+}
+
+async function processBatch(){
+  try{
+    if(state.mode === 'IN'){
+      await processInBatch();
+    }else{
+      await processOutBatch();
+    }
+  }catch(e){
     toast(e.message || String(e), 'err');
     setStatus(e.message || String(e), 'err');
-  });
-});
-
-btnClear.addEventListener('click', () => {
-  clearForm(true);
-  setStatus('Batch gewist.', 'info');
-});
+  }
+}
 
 btnQr.addEventListener('click', () => {
   toggleQrScanner().catch(e => {
@@ -814,62 +978,43 @@ btnQr.addEventListener('click', () => {
 });
 
 btnAddScan.addEventListener('click', () => {
-  addScanToBatch(skuInput.value);
+  addScan(scanInput.value);
+});
 
-  if(mode === 'OUT'){
-    setTimeout(() => {
-      orderInput.focus();
-      orderInput.select();
-    }, 120);
-  }
+btnProcess.addEventListener('click', () => {
+  processBatch().catch(e => {
+    toast(e.message || String(e), 'err');
+    setStatus(e.message || String(e), 'err');
+  });
 });
 
 btnUndoLast.addEventListener('click', () => {
-  if(!batch.length) return;
-  const removed = batch[0];
-  batch.shift();
+  if(!state.batch.length) return;
+  state.batch.pop();
   renderBatch();
-  lastScanKpi.textContent = batch.length ? batch[0] : '-';
-  setStatus(`Laatste scan verwijderd: ${removed}`, 'info');
-  skuInput.focus();
+  lastScanKpi.textContent = state.batch.length ? state.batch[state.batch.length - 1] : '-';
+  setStatus('Laatste scanregel verwijderd.', 'info');
+  scanInput.focus();
 });
 
-btnClearBatch.addEventListener('click', () => {
-  batch = [];
-  renderBatch();
-  lastScanKpi.textContent = '-';
-  setStatus('Batch leeggemaakt.', 'info');
-  skuInput.focus();
+btnClearBatch.addEventListener('click', clearBatch);
+
+tabIn.addEventListener('click', () => setMode('IN'));
+tabOut.addEventListener('click', () => setMode('OUT'));
+
+scanInput.addEventListener('input', () => {
+  scanInput.value = normalizeScan(scanInput.value);
 });
 
-tabIn.addEventListener('click', () => {
-  setMode('IN');
-});
-
-tabOut.addEventListener('click', () => {
-  setMode('OUT');
-});
-
-skuInput.addEventListener('input', () => {
-  skuInput.value = normalizeScannedValue(skuInput.value);
-});
-
-skuInput.addEventListener('keydown', e => {
+scanInput.addEventListener('keydown', e => {
   if(e.key === 'Enter'){
     e.preventDefault();
-    addScanToBatch(skuInput.value);
-
-    if(mode === 'OUT'){
-      setTimeout(() => {
-        orderInput.focus();
-        orderInput.select();
-      }, 120);
-    }
+    addScan(scanInput.value);
   }
 });
 
-locInput.addEventListener('keydown', e => {
-  if(e.key === 'Enter' && mode === 'IN'){
+locationInput.addEventListener('keydown', e => {
+  if(e.key === 'Enter' && state.mode === 'IN'){
     e.preventDefault();
     processBatch().catch(err => {
       toast(err.message || String(err), 'err');
@@ -879,7 +1024,7 @@ locInput.addEventListener('keydown', e => {
 });
 
 orderInput.addEventListener('keydown', e => {
-  if(e.key === 'Enter' && mode === 'OUT'){
+  if(e.key === 'Enter' && state.mode === 'OUT'){
     e.preventDefault();
     processBatch().catch(err => {
       toast(err.message || String(err), 'err');
@@ -888,9 +1033,22 @@ orderInput.addEventListener('keydown', e => {
   }
 });
 
+document.addEventListener('visibilitychange', () => {
+  if(document.hidden && state.qrRunning){
+    stopQrScanner().catch(() => {});
+  }
+});
+
+window.addEventListener('beforeunload', () => {
+  if(state.qrRunning){
+    stopQrScanner().catch(() => {});
+  }
+});
+
 setMode('IN');
 renderBatch();
-clearForm(false);
+renderResults();
+lastProcessKpi.textContent = '-';
 </script>
 
 </body>
