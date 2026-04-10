@@ -18,6 +18,7 @@
       flex-wrap:wrap;
       gap:8px;
     }
+
     .page-url strong{
       display:inline-flex;
       align-items:center;
@@ -45,6 +46,7 @@
       background:#f8fafc;
       padding:14px;
     }
+
     .bulk-panel-top{
       display:flex;
       justify-content:space-between;
@@ -53,10 +55,12 @@
       align-items:center;
       margin-bottom:10px;
     }
+
     .bulk-summary{
       font-weight:800;
       color:var(--navy);
     }
+
     .bulk-note{
       font-size:12px;
       color:var(--muted);
@@ -83,7 +87,7 @@
       cursor:pointer;
       padding:16px;
       display:grid;
-      grid-template-columns:180px minmax(260px,1fr) 130px 130px 42px;
+      grid-template-columns:180px minmax(260px,1fr) 140px 140px 42px;
       gap:14px;
       align-items:center;
       text-align:left;
@@ -94,7 +98,7 @@
     }
 
     .stock-group-head.single-metric{
-      grid-template-columns:180px minmax(260px,1fr) 130px 42px;
+      grid-template-columns:180px minmax(260px,1fr) 140px 42px;
     }
 
     .sg-sku{
@@ -143,6 +147,12 @@
       background:rgba(196,154,108,.12);
       border-color:rgba(196,154,108,.32);
       color:#6e4f36;
+    }
+
+    .pill.scanmode{
+      background:#eff6ff;
+      border-color:#bfdbfe;
+      color:#1d4ed8;
     }
 
     .sg-stat{
@@ -197,7 +207,7 @@
 
     .body-top{
       display:grid;
-      grid-template-columns:repeat(3,minmax(0,1fr));
+      grid-template-columns:repeat(4,minmax(0,1fr));
       gap:12px;
       margin-bottom:14px;
     }
@@ -219,10 +229,12 @@
     }
 
     .mini-kpi .value{
-      font-size:26px;
-      line-height:1;
+      font-size:24px;
+      line-height:1.1;
       font-weight:900;
       color:var(--navy);
+      word-break:break-word;
+      white-space:pre-line;
     }
 
     .group-action-bar{
@@ -255,7 +267,7 @@
     table.stock-detail{
       width:100%;
       border-collapse:collapse;
-      min-width:980px;
+      min-width:1180px;
     }
 
     table.stock-detail th,
@@ -274,6 +286,21 @@
       position:sticky;
       top:0;
       z-index:1;
+    }
+
+    .detail-main{
+      font-weight:900;
+      color:var(--navy);
+      word-break:break-word;
+      line-height:1.2;
+    }
+
+    .detail-sub{
+      margin-top:4px;
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.35;
+      word-break:break-word;
     }
 
     .detail-actions{
@@ -319,7 +346,7 @@
       font-weight:800;
       text-transform:uppercase;
       letter-spacing:.04em;
-      min-width:110px;
+      min-width:118px;
     }
 
     .mobile-v{
@@ -340,6 +367,7 @@
       z-index:1000;
       overflow:auto;
     }
+
     .modal-backdrop.show{
       display:flex;
     }
@@ -390,17 +418,20 @@
       padding:14px;
       margin-top:10px;
     }
+
     .xml-title{
       font-size:15px;
       font-weight:900;
       color:var(--navy);
       margin-bottom:10px;
     }
+
     .xml-grid{
       display:grid;
       grid-template-columns:1fr 1fr;
       gap:12px;
     }
+
     .xml-grid-1{
       display:grid;
       grid-template-columns:1fr;
@@ -415,6 +446,7 @@
       overflow:hidden;
       margin-top:12px;
     }
+
     .summary-head{
       padding:12px 14px;
       background:#f8fafc;
@@ -422,14 +454,17 @@
       font-weight:900;
       color:var(--navy);
     }
+
     .summary-table-wrap{
       max-height:260px;
       overflow:auto;
     }
+
     .summary-table{
       width:100%;
       border-collapse:collapse;
     }
+
     .summary-table th,
     .summary-table td{
       border-bottom:1px solid var(--border);
@@ -438,12 +473,14 @@
       font-size:14px;
       vertical-align:top;
     }
+
     .summary-table th{
       background:#fff;
       position:sticky;
       top:0;
       z-index:1;
     }
+
     .summary-type{
       display:inline-flex;
       align-items:center;
@@ -456,6 +493,7 @@
       color:var(--navy);
       white-space:nowrap;
     }
+
     .summary-type.manual{
       background:rgba(196,154,108,.12);
       border-color:rgba(196,154,108,.32);
@@ -478,7 +516,9 @@
       color:var(--muted);
     }
 
-    .hidden{display:none !important;}
+    .hidden{
+      display:none !important;
+    }
 
     @media(max-width:1180px){
       .stock-group-head{
@@ -506,6 +546,12 @@
       }
     }
 
+    @media(max-width:980px){
+      .body-top{
+        grid-template-columns:1fr 1fr;
+      }
+    }
+
     @media(max-width:860px){
       .body-top{
         grid-template-columns:1fr;
@@ -517,8 +563,13 @@
     }
 
     @media(max-width:760px){
-      .table-wrap{display:none;}
-      .mobile-cards{display:flex;}
+      .table-wrap{
+        display:none;
+      }
+
+      .mobile-cards{
+        display:flex;
+      }
 
       .stock-group-head{
         grid-template-columns:1fr auto;
@@ -586,8 +637,8 @@
   <div class="card">
     <h2>Huidige voorraad</h2>
     <div class="muted">
-      Duidelijk voorraadoverzicht per artikel. Bij artikelen met <b>1 eenheid per colli</b> wordt alleen het aantal <b>colli</b> getoond.
-      Alleen bij artikelen met meerdere eenheden per colli wordt ook het totaal aantal <b>eenheden</b> getoond.
+      Duidelijk voorraadoverzicht per artikel. Nieuwe stickers worden gescand op <b>basis-SKU</b>, maar intern blijven unieke voorraadregels bestaan.
+      Daardoor kan het systeem bij uitslag automatisch FIFO het <b>oudst ingeslagen colli</b> kiezen.
       <br><br>
       Vanuit deze pagina kun je:
       <b>uitboeken</b>, <b>toewijzen aan order</b>, <b>retour Huizen + XML</b>, <b>handmatige XML aanmaken</b>
@@ -602,7 +653,7 @@
     <div class="stock-toolbar">
       <div>
         <label for="q">Zoeken</label>
-        <input id="q" placeholder="Zoek op SKU, naam, extra info, unieke SKU of locatie"/>
+        <input id="q" placeholder="Zoek op scanbare SKU, naam, extra info, interne unieke code of locatie"/>
       </div>
 
       <div>
@@ -642,7 +693,7 @@
       </div>
     </div>
 
-    <div class="row-3" style="margin-top:16px">
+    <div class="row-4" style="margin-top:16px">
       <div class="card" style="padding:16px">
         <div class="kpi">
           <div class="label">Aantal SKU's</div>
@@ -661,6 +712,13 @@
         <div class="kpi">
           <div class="label">Totaal eenheden</div>
           <div class="value" id="kpiUnitCount">0</div>
+        </div>
+      </div>
+
+      <div class="card" style="padding:16px">
+        <div class="kpi">
+          <div class="label">Scanmethode</div>
+          <div class="value" id="kpiScanMode" style="font-size:16px">Basis-SKU scan\nFIFO afboeking</div>
         </div>
       </div>
     </div>
@@ -945,6 +1003,11 @@ function xmlEsc(value){
 }
 
 function showToast(msg, type='ok'){
+  if(typeof toast === 'function'){
+    toast(msg, type);
+    return;
+  }
+
   const toastEl = byIdLocal('toast');
   if(toastEl){
     toastEl.textContent = msg;
@@ -956,8 +1019,8 @@ function showToast(msg, type='ok'){
     }, 8000);
     return;
   }
-  if(typeof toast === 'function') toast(msg, type);
-  else alert(msg);
+
+  alert(msg);
 }
 
 function formatNlDateTime(v){
@@ -1012,11 +1075,14 @@ function enrichRow(row){
   const split1x = isSplit1xProduct(product);
   const basePackUnits = parseBasePackUnits(product);
   const baseSku = parseBaseSku(product);
+  const scanCode = safeText(row.scan_code || baseSku);
+  const printWithoutSequence = product.print_without_sequence !== false;
 
   return {
     id: row.id,
     product_id: product.id || row.product_id,
     sku_unique: row.sku_unique || '',
+    scan_code: scanCode,
     status: row.status || 'IN_STOCK',
     location: row.location || '',
     in_at: row.in_at || row.created_at || '',
@@ -1029,6 +1095,7 @@ function enrichRow(row){
     base_pack_units: basePackUnits,
     base_sku: baseSku,
     split_1x: split1x,
+    print_without_sequence: printWithoutSequence,
     unit_value: split1x ? 1 : unitsPerColli
   };
 }
@@ -1042,11 +1109,14 @@ function groupItems(rows){
       map.set(key, {
         product_id: row.product_id,
         sku_base: row.sku_base,
+        scan_code: row.scan_code,
         name: row.name,
+        raw_name: row.raw_name,
         description: row.description,
         units_per_colli: row.units_per_colli,
         base_pack_units: row.base_pack_units,
         split_1x: row.split_1x,
+        print_without_sequence: row.print_without_sequence,
         items: []
       });
     }
@@ -1072,7 +1142,11 @@ function sortGroups(groups, sort){
   if(sort === 'units_per_colli_desc') rows.sort((a,b) => b.units_per_colli - a.units_per_colli || cmp(a.name, b.name));
 
   rows.forEach(group => {
-    group.items.sort((a,b) => new Date(b.in_at || 0) - new Date(a.in_at || 0));
+    group.items.sort((a,b) => {
+      const ta = new Date(a.in_at || a.created_at || 0).getTime();
+      const tb = new Date(b.in_at || b.created_at || 0).getTime();
+      return ta - tb || String(a.sku_unique).localeCompare(String(b.sku_unique), 'nl');
+    });
   });
 
   return rows;
@@ -1140,7 +1214,9 @@ function makeGroupHtml(group, index){
           <b>${esc(group.raw_name || group.name)}</b>
           <div class="sub">${esc(group.description || 'Geen overige vermelding')}</div>
           <div class="sg-meta">
+            <span class="pill scanmode">Scan: ${esc(group.scan_code)}</span>
             <span class="pill">${esc(unitsPerColliLabel(group.units_per_colli))}</span>
+            ${group.print_without_sequence ? '<span class="pill scanmode">Sticker zonder volgnummer</span>' : '<span class="pill">Sticker met volgnummer</span>'}
             ${group.split_1x ? `<span class="pill split">Gesplitste 1x-voorraad</span>` : ''}
           </div>
         </div>
@@ -1165,6 +1241,11 @@ function makeGroupHtml(group, index){
           <div class="mini-kpi">
             <div class="label">${group.split_1x ? 'Losse items op voorraad' : 'Colli op voorraad'}</div>
             <div class="value">${group.colli_count}</div>
+          </div>
+
+          <div class="mini-kpi">
+            <div class="label">Scanbare SKU</div>
+            <div class="value">${esc(group.scan_code)}</div>
           </div>
 
           <div class="mini-kpi">
@@ -1200,7 +1281,8 @@ function makeGroupHtml(group, index){
             <thead>
               <tr>
                 <th>Selectie</th>
-                <th>Unieke SKU</th>
+                <th>Scanbare SKU</th>
+                <th>Interne unieke code</th>
                 <th>Locatie</th>
                 <th>Inslag tijd</th>
                 <th>Waarde</th>
@@ -1211,10 +1293,21 @@ function makeGroupHtml(group, index){
               ${group.items.map(it => `
                 <tr>
                   <td><input class="row-check" type="checkbox" data-select-item-id="${esc(it.id)}"/></td>
-                  <td><b>${esc(it.sku_unique)}</b></td>
+
+                  <td>
+                    <div class="detail-main">${esc(it.scan_code)}</div>
+                    <div class="detail-sub">Werkvloer scan / sticker</div>
+                  </td>
+
+                  <td>
+                    <div class="detail-main">${esc(it.sku_unique)}</div>
+                    <div class="detail-sub">Interne voorraadregel</div>
+                  </td>
+
                   <td>${esc(it.location || '')}</td>
                   <td>${esc(formatNlDateTime(it.in_at))}</td>
                   <td>${it.unit_value} ${esc(unitWord(it.unit_value))}</td>
+
                   <td>
                     <div class="detail-actions">
                       <button class="btn small-btn" type="button" data-action-row="OUT" data-item-id="${esc(it.id)}">Uitboeken</button>
@@ -1239,8 +1332,12 @@ function makeGroupHtml(group, index){
                 <div class="mobile-v"><input class="row-check" type="checkbox" data-select-item-id="${esc(it.id)}"/></div>
               </div>
               <div class="mobile-line">
-                <div class="mobile-k">Unieke SKU</div>
-                <div class="mobile-v"><b>${esc(it.sku_unique)}</b></div>
+                <div class="mobile-k">Scanbare SKU</div>
+                <div class="mobile-v"><b>${esc(it.scan_code)}</b></div>
+              </div>
+              <div class="mobile-line">
+                <div class="mobile-k">Interne code</div>
+                <div class="mobile-v">${esc(it.sku_unique)}</div>
               </div>
               <div class="mobile-line">
                 <div class="mobile-k">Locatie</div>
@@ -1359,6 +1456,7 @@ function openActionModal(actionType, itemIds){
 
   const items = itemIds.map(findItemById).filter(Boolean);
   const skuBases = [...new Set(items.map(it => it.sku_base).filter(Boolean))];
+  const scanCodes = [...new Set(items.map(it => it.scan_code).filter(Boolean))];
 
   const titles = {
     OUT: 'Artikelen uitboeken',
@@ -1385,6 +1483,8 @@ function openActionModal(actionType, itemIds){
   byIdLocal('actionModalInfo').innerHTML = `
     <div><b>Aantal geselecteerde regels:</b> ${itemIds.length}</div>
     <div><b>SKU's:</b> ${esc(skuBases.join(', ') || '-')}</div>
+    <div><b>Scanbare codes:</b> ${esc(scanCodes.join(', ') || '-')}</div>
+    <div><b>Interne voorraadregels:</b> blijven intern zichtbaar in de historie</div>
   `;
 
   byIdLocal('modalOrderNo').value = '';
@@ -1576,44 +1676,24 @@ async function performStockAction(actionType, itemIds, options = {}){
       }
     }
 
-    const { data: items, error: itemsErr } = await client
-      .from('items')
-      .select('id, product_id, sku_unique, status, location')
-      .in('id', itemIds);
-
-    if(itemsErr) throw itemsErr;
-    if(!items?.length) throw new Error('Geen items gevonden.');
-
-    const invalid = items.filter(it => String(it.status || '').toUpperCase() !== 'IN_STOCK');
-    if(invalid.length){
-      throw new Error(`Er zijn ${invalid.length} items die niet meer op voorraad staan.`);
+    const selectedItems = itemIds.map(findItemById).filter(Boolean);
+    if(!selectedItems.length){
+      throw new Error('Geen geldige items geselecteerd.');
     }
 
-    const nowIso = new Date().toISOString();
+    const uniqueScannedCodes = [...new Set(selectedItems.map(it => it.scan_code).filter(Boolean))];
+    const scannedCodeForLog = uniqueScannedCodes.length === 1 ? uniqueScannedCodes[0] : null;
 
-    const { error:updateErr } = await client
-      .from('items')
-      .update({ status: 'OUT', out_at: nowIso })
-      .in('id', itemIds);
+    const { data, error } = await client.rpc('perform_stock_action', {
+      p_item_ids: itemIds,
+      p_action_type: actionType,
+      p_order_no: (actionType === 'OUT' || actionType === 'ALLOCATE_ORDER') ? orderNo : (xmlFields?.ref || null),
+      p_destination: actionType === 'RETURN_TO_HUIZEN' ? destination : null,
+      p_note: note || null,
+      p_scanned_code: scannedCodeForLog
+    });
 
-    if(updateErr) throw updateErr;
-
-    const movements = items.map(it => ({
-      type: 'OUT',
-      action_type: actionType,
-      product_id: it.product_id,
-      sku_unique: it.sku_unique,
-      location: it.location || null,
-      order_no: (actionType === 'OUT' || actionType === 'ALLOCATE_ORDER') ? orderNo : (xmlFields?.ref || null),
-      destination: actionType === 'RETURN_TO_HUIZEN' ? destination : null,
-      note: note || null
-    }));
-
-    const { error:moveErr } = await client
-      .from('movements')
-      .insert(movements);
-
-    if(moveErr) throw moveErr;
+    if(error) throw error;
 
     if(actionType === 'RETURN_TO_HUIZEN'){
       const xml = buildReturnXml(itemIds, xmlFields);
@@ -1631,7 +1711,7 @@ async function performStockAction(actionType, itemIds, options = {}){
     };
 
     const extra = actionType === 'RETURN_TO_HUIZEN' ? ' XML gedownload.' : '';
-    showToast(`${items.length} regel(s) ${labels[actionType] || 'verwerkt'}.${extra}`, 'ok');
+    showToast(`${Number(data || itemIds.length)} regel(s) ${labels[actionType] || 'verwerkt'}.${extra}`, 'ok');
 
     await loadStock();
   }catch(e){
@@ -1798,7 +1878,8 @@ function downloadManualXml(){
 function openSplitModal(item){
   state.currentSplitItem = item;
   byIdLocal('splitModalInfo').innerHTML = `
-    <div><b>SKU:</b> ${esc(item.sku_unique)}</div>
+    <div><b>Scanbare SKU:</b> ${esc(item.scan_code)}</div>
+    <div><b>Interne voorraadregel:</b> ${esc(item.sku_unique)}</div>
     <div><b>Artikel:</b> ${esc(item.raw_name)}</div>
     <div><b>Locatie:</b> ${esc(item.location || '-')}</div>
     <div><b>Huidige colli-inhoud:</b> ${item.units_per_colli} ${esc(unitWord(item.units_per_colli))}</div>
@@ -1815,38 +1896,6 @@ function closeSplitModal(){
   byIdLocal('splitModal').classList.remove('show');
 }
 
-async function ensureSplit1xProduct(item){
-  const splitSkuBase = `${item.base_sku}_1X`;
-  const splitName = `${stripPackSuffix(item.name)} (1x)`;
-  const baseDesc = cleanDescription(item.description || '');
-  const markerDesc = `${baseDesc}${baseDesc ? ' ' : ''}[SPLIT1X][BASESKU:${item.base_sku}][BASEPACK:${item.base_pack_units}]`.trim();
-
-  const { data: existing, error: findErr } = await client
-    .from('products')
-    .select('id, sku_base, name, description, units_per_colli')
-    .eq('sku_base', splitSkuBase)
-    .limit(1);
-
-  if(findErr) throw findErr;
-  if(existing && existing.length){
-    return existing[0];
-  }
-
-  const { data: created, error: createErr } = await client
-    .from('products')
-    .insert([{
-      sku_base: splitSkuBase,
-      name: splitName,
-      description: markerDesc,
-      units_per_colli: 1
-    }])
-    .select()
-    .single();
-
-  if(createErr) throw createErr;
-  return created;
-}
-
 async function splitItemTo1x(){
   const item = state.currentSplitItem;
   if(!item){
@@ -1855,71 +1904,15 @@ async function splitItemTo1x(){
   }
 
   try{
-    const { data: dbItem, error: dbErr } = await client
-      .from('items')
-      .select('id, product_id, sku_unique, status, location')
-      .eq('id', item.id)
-      .single();
+    const { data, error } = await client.rpc('split_item_to_1x', {
+      p_item_id: item.id
+    });
 
-    if(dbErr) throw dbErr;
-    if(String(dbItem.status || '').toUpperCase() !== 'IN_STOCK'){
-      throw new Error('Deze colli staat niet meer op voorraad.');
-    }
-
-    const splitProduct = await ensureSplit1xProduct(item);
-    const nowIso = new Date().toISOString();
-
-    const { error: outErr } = await client
-      .from('items')
-      .update({ status: 'OUT', out_at: nowIso })
-      .eq('id', item.id);
-
-    if(outErr) throw outErr;
-
-    const { error: moveOutErr } = await client
-      .from('movements')
-      .insert([{
-        type: 'OUT',
-        action_type: 'SPLIT_OUT',
-        product_id: dbItem.product_id,
-        sku_unique: dbItem.sku_unique,
-        location: dbItem.location || null,
-        note: `Colli gesplitst naar ${item.units_per_colli}x 1x-items`
-      }]);
-
-    if(moveOutErr) throw moveOutErr;
-
-    const newItems = Array.from({ length: item.units_per_colli }).map((_, idx) => ({
-      product_id: splitProduct.id,
-      sku_unique: `${dbItem.sku_unique}-${idx + 1}`,
-      status: 'IN_STOCK',
-      location: dbItem.location || null,
-      in_at: nowIso
-    }));
-
-    const { data: insertedItems, error: insertErr } = await client
-      .from('items')
-      .insert(newItems)
-      .select('id, product_id, sku_unique, location');
-
-    if(insertErr) throw insertErr;
-
-    const { error: moveInErr } = await client
-      .from('movements')
-      .insert((insertedItems || []).map(it => ({
-        type: 'IN',
-        action_type: 'SPLIT_IN',
-        product_id: it.product_id,
-        sku_unique: it.sku_unique,
-        location: it.location || null,
-        note: `Aangemaakt uit split van ${dbItem.sku_unique}`
-      })));
-
-    if(moveInErr) throw moveInErr;
+    if(error) throw error;
 
     closeSplitModal();
     clearSelection();
-    showToast(`${item.units_per_colli} losse 1x-items aangemaakt uit ${dbItem.sku_unique}.`, 'ok');
+    showToast(`${Number(data?.created_count || item.units_per_colli)} losse 1x-items aangemaakt uit ${item.sku_unique}.`, 'ok');
     await loadStock();
   }catch(e){
     console.error('splitItemTo1x fout:', e);
@@ -1934,13 +1927,14 @@ function exportGroupedToExcel(groups){
   groups.forEach(group => {
     rows.push({
       SKU: group.sku_base,
+      'Scanbare SKU': group.scan_code,
       Omschrijving: group.raw_name || group.name,
       'Overige vermelding': group.description || '',
       'Eenheden per colli': group.units_per_colli,
       'Totaal colli/items': group.colli_count,
       'Totaal eenheden': group.unit_count,
-      'Unieke SKU': '',
-      'Locatie': '',
+      'Interne unieke code': '',
+      Locatie: '',
       'Inslag tijd': '',
       'Waarde per regel': ''
     });
@@ -1948,13 +1942,14 @@ function exportGroupedToExcel(groups){
     group.items.forEach(it => {
       rows.push({
         SKU: '',
+        'Scanbare SKU': it.scan_code,
         Omschrijving: '',
         'Overige vermelding': '',
         'Eenheden per colli': '',
         'Totaal colli/items': '',
         'Totaal eenheden': '',
-        'Unieke SKU': it.sku_unique,
-        'Locatie': it.location || '',
+        'Interne unieke code': it.sku_unique,
+        Locatie: it.location || '',
         'Inslag tijd': formatNlDateTime(it.in_at),
         'Waarde per regel': it.unit_value
       });
@@ -1965,8 +1960,8 @@ function exportGroupedToExcel(groups){
   const ws = XLSX.utils.json_to_sheet(rows);
 
   ws["!cols"] = [
-    { wch: 16 }, { wch: 34 }, { wch: 28 }, { wch: 16 }, { wch: 16 },
-    { wch: 16 }, { wch: 24 }, { wch: 18 }, { wch: 22 }, { wch: 14 }
+    { wch: 16 }, { wch: 18 }, { wch: 34 }, { wch: 28 }, { wch: 16 },
+    { wch: 16 }, { wch: 16 }, { wch: 26 }, { wch: 18 }, { wch: 22 }, { wch: 14 }
   ];
 
   XLSX.utils.book_append_sheet(wb, ws, 'Voorraad');
@@ -1990,6 +1985,7 @@ async function loadStock(){
     .select(`
       id,
       sku_unique,
+      scan_code,
       status,
       location,
       in_at,
@@ -2000,7 +1996,8 @@ async function loadStock(){
         sku_base,
         name,
         description,
-        units_per_colli
+        units_per_colli,
+        print_without_sequence
       )
     `)
     .eq('status', 'IN_STOCK')
@@ -2014,6 +2011,7 @@ async function loadStock(){
     rows = rows.filter(row => {
       const haystack = [
         row.sku_base,
+        row.scan_code,
         row.raw_name,
         row.description,
         row.sku_unique,
