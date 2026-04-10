@@ -236,7 +236,7 @@
     .modal-backdrop.show{display:flex}
 
     .modal-card{
-      width:min(1080px,100%);
+      width:min(980px,100%);
       background:#fff;
       border:1px solid var(--border);
       border-radius:20px;
@@ -271,6 +271,7 @@
       line-height:1.4;
       margin-top:4px;
     }
+
     .xml-box{
       border:1px solid var(--border);
       border-radius:14px;
@@ -296,53 +297,22 @@
       margin-top:12px;
     }
 
-    .picker-box{
+    .manual-line-box{
       border:1px solid var(--border);
       border-radius:14px;
       background:#fff;
       padding:14px;
       margin-top:12px;
     }
-    .picker-title{
+    .manual-line-head{
       font-size:15px;
       font-weight:900;
       color:var(--navy);
-      margin:0 0 10px 0;
+      margin-bottom:10px;
     }
-    .picker-toolbar{
+    .manual-line-form{
       display:grid;
       grid-template-columns:1fr auto;
-      gap:10px;
-      align-items:end;
-      margin-bottom:12px;
-    }
-    .picker-results{
-      max-height:240px;
-      overflow:auto;
-      border:1px solid var(--border);
-      border-radius:12px;
-      background:#fafbfc;
-    }
-    .picker-row{
-      display:grid;
-      grid-template-columns:auto 120px 1fr 130px;
-      gap:10px;
-      align-items:center;
-      padding:10px 12px;
-      border-bottom:1px solid var(--border);
-      font-size:14px;
-    }
-    .picker-row:last-child{border-bottom:none}
-    .picker-row b{color:var(--navy)}
-    .picker-empty{
-      padding:14px;
-      color:var(--muted);
-      font-size:14px;
-    }
-
-    .manual-form{
-      display:grid;
-      grid-template-columns:1fr 120px 120px 120px auto;
       gap:10px;
       align-items:end;
     }
@@ -362,7 +332,7 @@
       color:var(--navy);
     }
     .summary-table-wrap{
-      max-height:260px;
+      max-height:300px;
       overflow:auto;
     }
     .summary-table{
@@ -400,11 +370,6 @@
       border-color:rgba(196,154,108,.35);
       color:#6e4f36;
     }
-    .summary-actions{
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-    }
 
     .hidden{display:none !important}
 
@@ -413,9 +378,6 @@
       .stock-group-head{
         grid-template-columns:190px minmax(180px,1fr) 100px 36px;
         gap:10px;
-      }
-      .manual-form{
-        grid-template-columns:1fr 1fr;
       }
     }
 
@@ -432,16 +394,12 @@
       .sg-total{grid-area:total}
       .sg-arrow{grid-area:arrow;justify-self:end}
       .xml-grid{grid-template-columns:1fr}
-      .picker-row{
-        grid-template-columns:auto 1fr;
-      }
     }
 
     @media(max-width:760px){
       .desktop-detail-table{display:none}
       .mobile-cards{display:flex}
-      .picker-toolbar,
-      .manual-form{
+      .manual-line-form{
         grid-template-columns:1fr;
       }
     }
@@ -501,8 +459,8 @@
       Artikelen kunnen per regel of in bulk worden <b>uitgeboekt</b>, <b>toegewezen aan order</b> of als <b>retour Huizen</b> worden afgeboekt.
       Bij <b>retour Huizen</b> kun je direct adresgegevens invullen en wordt automatisch een <b>XML-bestand</b> gedownload.
       <br><br>
-      Extra uitbreiding:
-      bij <b>retour Huizen + XML</b> kun je nu ook <b>extra artikelen uit voorraad toevoegen</b> en <b>handmatige artikelregels</b> opnemen in dezelfde XML.
+      Daarnaast is er nu ook een aparte knop <b>Handmatige XML aanmaken</b>. Daarmee maak je een XML zonder voorraad af te boeken.
+      Iedere handmatige regel is altijd precies <b>1 artikel</b>. Dus 3 stoelen = 3 losse regels.
       <br><br>
       <b>Eventuele foutmeldingen worden direct weergegeven.</b>
     </div>
@@ -550,11 +508,12 @@
           <button class="btn" id="btnBulkOut" type="button">Bulk: uitboeken</button>
           <button class="btn primary" id="btnBulkAllocate" type="button">Bulk: toewijzen aan order</button>
           <button class="btn accent" id="btnBulkReturn" type="button">Bulk: retour Huizen + XML</button>
+          <button class="btn" id="btnManualXml" type="button">Handmatige XML aanmaken</button>
         </div>
       </div>
 
       <div class="bulk-note">
-        Alle acties boeken direct af vanuit de huidige voorraad en worden vastgelegd in de uitscans.
+        Bulk retour Huizen + XML boekt alleen geselecteerde voorraad af. Handmatige XML maakt alleen XML-regels aan en boekt niets af.
       </div>
     </div>
 
@@ -663,82 +622,27 @@
           </div>
         </div>
 
-        <div class="picker-box">
-          <div class="picker-title">Meerdere artikelen uit de voorraad selecteren</div>
-
-          <div class="picker-toolbar">
-            <div>
-              <label for="xmlStockSearch">Zoek in voorraad</label>
-              <input id="xmlStockSearch" placeholder="Zoek op SKU / omschrijving / unieke SKU / locatie"/>
-            </div>
-            <button class="btn" id="btnXmlSearchStock" type="button">Zoeken</button>
-          </div>
-
-          <div class="picker-results" id="xmlStockResults">
-            <div class="picker-empty">Nog niet gezocht.</div>
-          </div>
-
-          <div class="modal-hint">
-            De aangevinkte artikelen uit de voorraad worden ook echt afgeboekt zodra je opslaat.
-          </div>
-        </div>
-
-        <div class="picker-box">
-          <div class="picker-title">Handmatig artikel toevoegen</div>
-
-          <div class="manual-form">
-            <div>
-              <label for="manualOmschrijving">Artikelomschrijving</label>
-              <input id="manualOmschrijving" placeholder="Bijv. Eetkamerstoel Nonna frame SAND"/>
-            </div>
-            <div>
-              <label for="manualAantal">Aantal</label>
-              <input id="manualAantal" type="number" min="1" step="1" value="1"/>
-            </div>
-            <div>
-              <label for="manualColli">Colli</label>
-              <input id="manualColli" type="number" min="1" step="1" value="1"/>
-            </div>
-            <div>
-              <label for="manualGewicht">Gewicht</label>
-              <input id="manualGewicht" type="number" min="0" step="0.001" value="1"/>
-            </div>
-            <div>
-              <button class="btn" id="btnAddManualLine" type="button" style="width:100%">Toevoegen</button>
-            </div>
-          </div>
-
-          <div class="modal-hint">
-            Handmatige regels komen alleen in de XML en worden niet uit de voorraad afgeboekt.
-          </div>
-        </div>
-
         <div class="summary-wrap">
-          <div class="summary-head">Overzicht partijregels voor XML</div>
+          <div class="summary-head">Voorraadregels in deze XML</div>
           <div class="summary-table-wrap">
             <table class="summary-table">
               <thead>
                 <tr>
                   <th>Type</th>
                   <th>Omschrijving</th>
-                  <th>Aantal</th>
-                  <th>Colli</th>
-                  <th>Gewicht</th>
-                  <th>Herkomst</th>
-                  <th>Actie</th>
+                  <th>Unieke SKU</th>
+                  <th>Locatie</th>
                 </tr>
               </thead>
-              <tbody id="xmlSummaryBody">
-                <tr>
-                  <td colspan="7" class="picker-empty">Nog geen regels toegevoegd.</td>
-                </tr>
+              <tbody id="returnXmlSummaryBody">
+                <tr><td colspan="4">Nog geen regels.</td></tr>
               </tbody>
             </table>
           </div>
         </div>
 
         <div class="modal-hint">
-          Er wordt automatisch één XML bestand gemaakt. Voorraadregels en handmatige regels worden samen als aparte partijregels opgenomen.
+          Bij deze actie wordt per geselecteerd voorraadartikel één partijregel gemaakt en het artikel wordt afgeboekt.
         </div>
       </div>
 
@@ -750,26 +654,132 @@
   </div>
 </div>
 
+<div id="manualXmlModal" class="modal-backdrop">
+  <div class="modal-card">
+    <h3 class="modal-title">Handmatige XML aanmaken</h3>
+    <div class="modal-sub">
+      Maak een XML zonder voorraad af te boeken. Iedere handmatige regel is altijd exact 1 artikel.
+      Wil je 3 dezelfde eetkamerstoelen, voeg dan 3 losse regels toe.
+    </div>
+
+    <div class="modal-grid">
+      <div class="modal-info">
+        <div><b>Type:</b> Alleen handmatige XML</div>
+        <div><b>Voorraadmutatie:</b> Nee</div>
+      </div>
+
+      <div class="xml-box">
+        <div class="xml-title">XML gegevens</div>
+
+        <div class="xml-grid">
+          <div>
+            <label for="manualXmlRef">Referentie / opdrachtnummer</label>
+            <input id="manualXmlRef" placeholder="Bijv. 2601854"/>
+          </div>
+          <div>
+            <label for="manualXmlDebiteur">Debiteur</label>
+            <input id="manualXmlDebiteur" value="20009"/>
+          </div>
+
+          <div>
+            <label for="manualXmlLosnaam">Losnaam</label>
+            <input id="manualXmlLosnaam" placeholder="Bijv. Eijerkamp Logistics 2"/>
+          </div>
+          <div>
+            <label for="manualXmlLosadres">Losadres</label>
+            <input id="manualXmlLosadres" placeholder="Straat + huisnummer"/>
+          </div>
+
+          <div>
+            <label for="manualXmlLospostcode">Lospostcode</label>
+            <input id="manualXmlLospostcode" placeholder="Bijv. 7202 CM"/>
+          </div>
+          <div>
+            <label for="manualXmlLoswoonplaats">Loswoonplaats</label>
+            <input id="manualXmlLoswoonplaats" placeholder="Bijv. ZUTPHEN"/>
+          </div>
+
+          <div>
+            <label for="manualXmlLostelefoon">Lostelefoon</label>
+            <input id="manualXmlLostelefoon" placeholder="Telefoonnummer"/>
+          </div>
+          <div>
+            <label for="manualXmlCommissie">Commissie</label>
+            <input id="manualXmlCommissie" placeholder="Bijv. : 10 0 132937 002 Visscher"/>
+          </div>
+        </div>
+
+        <div class="xml-grid-1">
+          <div>
+            <label for="manualXmlVerzendinstructie">Verzendinstructie</label>
+            <input id="manualXmlVerzendinstructie" placeholder="Bijv. Leverweek: 16"/>
+          </div>
+          <div>
+            <label for="manualXmlBijzonderheden">Bijzonderheden</label>
+            <textarea id="manualXmlBijzonderheden" placeholder="Optioneel"></textarea>
+          </div>
+        </div>
+
+        <div class="manual-line-box">
+          <div class="manual-line-head">Handmatige artikelregel toevoegen</div>
+          <div class="manual-line-form">
+            <div>
+              <label for="manualXmlOmschrijving">Artikelomschrijving</label>
+              <input id="manualXmlOmschrijving" placeholder="Bijv. Eetkamerstoel Nonna"/>
+            </div>
+            <button class="btn" id="btnAddManualXmlLine" type="button">Regel toevoegen</button>
+          </div>
+          <div class="modal-hint">
+            Iedere keer dat je op toevoegen klikt, wordt exact 1 regel toegevoegd met Aantal 1, Colli 1 en Gewicht 1.000.
+          </div>
+        </div>
+
+        <div class="summary-wrap">
+          <div class="summary-head">Handmatige partijregels</div>
+          <div class="summary-table-wrap">
+            <table class="summary-table">
+              <thead>
+                <tr>
+                  <th>Type</th>
+                  <th>Omschrijving</th>
+                  <th>Aantal</th>
+                  <th>Colli</th>
+                  <th>Gewicht</th>
+                  <th>Actie</th>
+                </tr>
+              </thead>
+              <tbody id="manualXmlSummaryBody">
+                <tr><td colspan="6">Nog geen handmatige regels toegevoegd.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="modal-hint">
+          Deze handmatige XML bevat alleen de regels uit het overzicht hierboven.
+        </div>
+      </div>
+
+      <div class="btnRow" style="margin-top:4px">
+        <button class="btn primary" id="btnDownloadManualXml" type="button">XML downloaden</button>
+        <button class="btn" id="btnCancelManualXml" type="button">Annuleren</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 if(typeof setActiveNav === 'function') setActiveNav();
 
 const client = sb();
-
 let currentGroups = [];
 let currentActionContext = null;
 const selectedItemIds = new Set();
-
-let modalExtraStockItemIds = new Set();
-let modalManualLines = [];
+let manualXmlLines = [];
 
 function byIdLocal(id){ return document.getElementById(id); }
 
 function safeText(v){ return String(v ?? '').trim(); }
-
-function safeNumber(v, fallback=0){
-  const n = Number(v);
-  return Number.isFinite(n) ? n : fallback;
-}
 
 function esc(value){
   return String(value ?? '')
@@ -1083,7 +1093,7 @@ function bindActionButtons(){
       let ids = [];
       if(selectedItemIds.size > 0 && selectedItemIds.has(clickedId)){
         ids = [...selectedItemIds];
-      }else{
+      } else {
         ids = [clickedId];
       }
 
@@ -1100,18 +1110,6 @@ function bindActionButtons(){
   });
 }
 
-function resetReturnXmlHelpers(){
-  modalExtraStockItemIds = new Set();
-  modalManualLines = [];
-  byIdLocal('xmlStockSearch').value = '';
-  byIdLocal('xmlStockResults').innerHTML = `<div class="picker-empty">Nog niet gezocht.</div>`;
-  byIdLocal('manualOmschrijving').value = '';
-  byIdLocal('manualAantal').value = '1';
-  byIdLocal('manualColli').value = '1';
-  byIdLocal('manualGewicht').value = '1';
-  renderXmlSummary();
-}
-
 function openActionModal(actionType, itemIds){
   if(!itemIds || !itemIds.length){
     showToast('Geen artikelen geselecteerd.', 'err');
@@ -1119,9 +1117,8 @@ function openActionModal(actionType, itemIds){
   }
 
   currentActionContext = { actionType, itemIds: [...itemIds] };
-
   const items = itemIds.map(findItemById).filter(Boolean);
-  const skuBases = [...new Set(items.map(it => it.sku_base).filter(Boolean))];
+  const skuBases = [...new Set(items.map(it => it.sku_base))];
 
   const titles = {
     OUT: 'Artikelen uitboeken',
@@ -1132,7 +1129,7 @@ function openActionModal(actionType, itemIds){
   const subs = {
     OUT: 'Vul het ordernummer in. De geselecteerde artikelen worden direct uit de huidige voorraad gehaald en toegevoegd aan de uitscans.',
     ALLOCATE_ORDER: 'Vul het ordernummer in. De geselecteerde artikelen worden direct afgeboekt en aan dit ordernummer gekoppeld in de uitscans.',
-    RETURN_TO_HUIZEN: 'Vul de retour- en adresgegevens in. De geselecteerde artikelen worden direct afgeboekt en daarna wordt automatisch een XML-bestand gedownload. Je kunt daarnaast extra voorraadartikelen en handmatige artikelregels toevoegen.'
+    RETURN_TO_HUIZEN: 'Vul de retour- en adresgegevens in. De geselecteerde artikelen worden direct afgeboekt en daarna wordt automatisch een XML-bestand gedownload.'
   };
 
   const hints = {
@@ -1146,8 +1143,8 @@ function openActionModal(actionType, itemIds){
   byIdLocal('modalHint').textContent = hints[actionType] || '';
 
   byIdLocal('actionModalInfo').innerHTML = `
-    <div><b>Aantal geselecteerde voorraadartikelen:</b> ${itemIds.length}</div>
-    <div><b>SKU's:</b> ${esc(skuBases.join(', ') || '-')}</div>
+    <div><b>Aantal artikelen:</b> ${itemIds.length}</div>
+    <div><b>SKU's:</b> ${esc(skuBases.join(', '))}</div>
   `;
 
   byIdLocal('modalOrderNo').value = '';
@@ -1169,8 +1166,7 @@ function openActionModal(actionType, itemIds){
   byIdLocal('xmlVerzendinstructie').value = '';
   byIdLocal('xmlBijzonderheden').value = '';
 
-  resetReturnXmlHelpers();
-
+  renderReturnXmlSummary(items);
   byIdLocal('actionModal').classList.add('show');
 
   if(actionType === 'RETURN_TO_HUIZEN'){
@@ -1198,8 +1194,105 @@ function closeActionModal(){
   byIdLocal('xmlCommissie').value = '';
   byIdLocal('xmlVerzendinstructie').value = '';
   byIdLocal('xmlBijzonderheden').value = '';
+}
 
-  resetReturnXmlHelpers();
+function renderReturnXmlSummary(items){
+  const tbody = byIdLocal('returnXmlSummaryBody');
+  if(!tbody) return;
+
+  if(!items || !items.length){
+    tbody.innerHTML = `<tr><td colspan="4">Nog geen regels.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = items.map(it => `
+    <tr>
+      <td><span class="summary-type">Voorraad</span></td>
+      <td>${esc(it.name || it.sku_base || '')}</td>
+      <td>${esc(it.sku_unique || '')}</td>
+      <td>${esc(it.location || '')}</td>
+    </tr>
+  `).join('');
+}
+
+function resetManualXmlModal(){
+  manualXmlLines = [];
+  byIdLocal('manualXmlRef').value = '';
+  byIdLocal('manualXmlDebiteur').value = '20009';
+  byIdLocal('manualXmlLosnaam').value = '';
+  byIdLocal('manualXmlLosadres').value = '';
+  byIdLocal('manualXmlLospostcode').value = '';
+  byIdLocal('manualXmlLoswoonplaats').value = '';
+  byIdLocal('manualXmlLostelefoon').value = '';
+  byIdLocal('manualXmlCommissie').value = '';
+  byIdLocal('manualXmlVerzendinstructie').value = '';
+  byIdLocal('manualXmlBijzonderheden').value = '';
+  byIdLocal('manualXmlOmschrijving').value = '';
+  renderManualXmlSummary();
+}
+
+function openManualXmlModal(){
+  resetManualXmlModal();
+  byIdLocal('manualXmlModal').classList.add('show');
+  byIdLocal('manualXmlRef').focus();
+}
+
+function closeManualXmlModal(){
+  byIdLocal('manualXmlModal').classList.remove('show');
+  resetManualXmlModal();
+}
+
+function addManualXmlLine(){
+  const omschrijving = safeText(byIdLocal('manualXmlOmschrijving').value);
+  if(!omschrijving){
+    showToast('Vul een artikelomschrijving in.', 'err');
+    byIdLocal('manualXmlOmschrijving').focus();
+    return;
+  }
+
+  manualXmlLines.push({
+    id: `manual_${Date.now()}_${Math.random().toString(36).slice(2,8)}`,
+    modelnaam: omschrijving,
+    aantal: 1,
+    colli: 1,
+    gewicht: 1
+  });
+
+  byIdLocal('manualXmlOmschrijving').value = '';
+  renderManualXmlSummary();
+  byIdLocal('manualXmlOmschrijving').focus();
+}
+
+function removeManualXmlLine(lineId){
+  manualXmlLines = manualXmlLines.filter(x => String(x.id) !== String(lineId));
+  renderManualXmlSummary();
+}
+
+function renderManualXmlSummary(){
+  const tbody = byIdLocal('manualXmlSummaryBody');
+  if(!tbody) return;
+
+  if(!manualXmlLines.length){
+    tbody.innerHTML = `<tr><td colspan="6">Nog geen handmatige regels toegevoegd.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = manualXmlLines.map(line => `
+    <tr>
+      <td><span class="summary-type manual">Handmatig</span></td>
+      <td>${esc(line.modelnaam)}</td>
+      <td>1</td>
+      <td>1</td>
+      <td>1.000</td>
+      <td><button class="btn small-btn" type="button" data-remove-manual-line="${esc(line.id)}">Verwijderen</button></td>
+    </tr>
+  `).join('');
+
+  tbody.querySelectorAll('[data-remove-manual-line]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      removeManualXmlLine(btn.getAttribute('data-remove-manual-line'));
+    });
+  });
 }
 
 async function countOrderUsesLocal(orderNo){
@@ -1212,257 +1305,37 @@ async function countOrderUsesLocal(orderNo){
   return count || 0;
 }
 
-function getBaseSelectedStockItems(){
-  if(!currentActionContext?.itemIds?.length) return [];
-  return currentActionContext.itemIds.map(findItemById).filter(Boolean);
-}
-
-function getExtraSelectedStockItems(){
-  return [...modalExtraStockItemIds].map(findItemById).filter(Boolean);
-}
-
-function getAllStockItemsForXml(){
-  const seen = new Set();
-  const rows = [];
-
-  [...getBaseSelectedStockItems(), ...getExtraSelectedStockItems()].forEach(it => {
-    if(!it) return;
-    const id = String(it.id);
-    if(seen.has(id)) return;
-    seen.add(id);
-    rows.push(it);
-  });
-
-  return rows;
-}
-
-function renderXmlSummary(){
-  const tbody = byIdLocal('xmlSummaryBody');
-  if(!tbody) return;
-
-  const baseItems = getBaseSelectedStockItems();
-  const extraItems = getExtraSelectedStockItems();
-
-  const htmlRows = [];
-
-  baseItems.forEach(it => {
-    htmlRows.push(`
-      <tr>
-        <td><span class="summary-type">Voorraad</span></td>
-        <td><b>${esc(it.name || it.sku_base || it.sku_unique || 'Artikel')}</b><br><small>${esc(it.sku_unique || '')}</small></td>
-        <td>1</td>
-        <td>1</td>
-        <td>1.000</td>
-        <td>Reeds geselecteerd</td>
-        <td>-</td>
-      </tr>
-    `);
-  });
-
-  extraItems.forEach(it => {
-    htmlRows.push(`
-      <tr>
-        <td><span class="summary-type">Voorraad</span></td>
-        <td><b>${esc(it.name || it.sku_base || it.sku_unique || 'Artikel')}</b><br><small>${esc(it.sku_unique || '')}</small></td>
-        <td>1</td>
-        <td>1</td>
-        <td>1.000</td>
-        <td>Extra toegevoegd</td>
-        <td>
-          <div class="summary-actions">
-            <button class="btn small-btn" type="button" data-remove-extra-stock="${esc(it.id)}">Verwijderen</button>
-          </div>
-        </td>
-      </tr>
-    `);
-  });
-
-  modalManualLines.forEach(line => {
-    htmlRows.push(`
-      <tr>
-        <td><span class="summary-type manual">Handmatig</span></td>
-        <td><b>${esc(line.modelnaam)}</b></td>
-        <td>${esc(line.aantal)}</td>
-        <td>${esc(line.colli)}</td>
-        <td>${formatQtyThree(line.gewicht)}</td>
-        <td>Handmatige invoer</td>
-        <td>
-          <div class="summary-actions">
-            <button class="btn small-btn" type="button" data-remove-manual="${esc(line.id)}">Verwijderen</button>
-          </div>
-        </td>
-      </tr>
-    `);
-  });
-
-  if(!htmlRows.length){
-    tbody.innerHTML = `<tr><td colspan="7" class="picker-empty">Nog geen regels toegevoegd.</td></tr>`;
-  }else{
-    tbody.innerHTML = htmlRows.join('');
-  }
-
-  tbody.querySelectorAll('[data-remove-extra-stock]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      modalExtraStockItemIds.delete(btn.getAttribute('data-remove-extra-stock'));
-      renderXmlSummary();
-      renderStockSearchResults();
-    });
-  });
-
-  tbody.querySelectorAll('[data-remove-manual]').forEach(btn => {
-    const id = btn.getAttribute('data-remove-manual');
-    modalManualLines = modalManualLines.filter(x => String(x.id) !== String(id));
-    renderXmlSummary();
-  });
-}
-
-function renderStockSearchResults(rows = null){
-  const box = byIdLocal('xmlStockResults');
-  if(!box) return;
-
-  if(rows === null){
-    return;
-  }
-
-  if(!rows.length){
-    box.innerHTML = `<div class="picker-empty">Geen voorraadartikelen gevonden.</div>`;
-    return;
-  }
-
-  box.innerHTML = rows.map(it => {
-    const checked = modalExtraStockItemIds.has(String(it.id)) ? 'checked' : '';
-    const alreadyBase = !!(currentActionContext?.itemIds || []).find(id => String(id) === String(it.id));
-    return `
-      <label class="picker-row">
-        <div>
-          <input type="checkbox" data-extra-stock-id="${esc(it.id)}" ${checked} ${alreadyBase ? 'disabled' : ''}/>
-        </div>
-        <div>
-          <b>${esc(it.sku_base || '')}</b>
-        </div>
-        <div>
-          ${esc(it.name || '')}<br>
-          <small>${esc(it.sku_unique || '')}</small>
-        </div>
-        <div>
-          ${alreadyBase ? '<small>Al geselecteerd</small>' : esc(it.location || '')}
-        </div>
-      </label>
-    `;
-  }).join('');
-
-  box.querySelectorAll('[data-extra-stock-id]').forEach(cb => {
-    cb.addEventListener('change', () => {
-      const id = cb.getAttribute('data-extra-stock-id');
-      if(cb.checked) modalExtraStockItemIds.add(id);
-      else modalExtraStockItemIds.delete(id);
-      renderXmlSummary();
-    });
-  });
-}
-
-function searchStockForXml(){
-  const q = safeText(byIdLocal('xmlStockSearch').value).toLowerCase();
-  const all = getCurrentVisibleItems();
-
-  const rows = all.filter(it => {
-    const id = String(it.id);
-    const txt = [
-      it.sku_base,
-      it.name,
-      it.description,
-      it.sku_unique,
-      it.location
-    ].join(' ').toLowerCase();
-
-    return !q || txt.includes(q) || id.includes(q);
-  }).slice(0, 200);
-
-  renderStockSearchResults(rows);
-}
-
-function addManualLine(){
-  const modelnaam = safeText(byIdLocal('manualOmschrijving').value);
-  const aantal = Math.max(1, parseInt(byIdLocal('manualAantal').value || '1', 10));
-  const colli = Math.max(1, parseInt(byIdLocal('manualColli').value || '1', 10));
-  const gewicht = Math.max(0, safeNumber(byIdLocal('manualGewicht').value, 1));
-
-  if(!modelnaam){
-    showToast('Vul een artikelomschrijving in voor de handmatige regel.', 'err');
-    byIdLocal('manualOmschrijving').focus();
-    return;
-  }
-
-  modalManualLines.push({
-    id: `manual_${Date.now()}_${Math.random().toString(36).slice(2,9)}`,
-    modelnaam,
-    aantal,
-    colli,
-    gewicht
-  });
-
-  byIdLocal('manualOmschrijving').value = '';
-  byIdLocal('manualAantal').value = '1';
-  byIdLocal('manualColli').value = '1';
-  byIdLocal('manualGewicht').value = '1';
-
-  renderXmlSummary();
-  byIdLocal('manualOmschrijving').focus();
-}
-
-function groupItemsForXml(items){
-  const map = new Map();
-
-  items.forEach(it => {
-    const key = `${it.sku_base || ''}||${it.name || ''}`;
-    if(!map.has(key)){
-      map.set(key, {
-        modelnaam: safeText(it.name || it.sku_base || it.sku_unique || 'Artikel'),
-        aantal: 1,
-        colli: 1,
-        gewicht: 1
-      });
-    }else{
-      const row = map.get(key);
-      row.aantal += 1;
-      row.colli += 1;
-      row.gewicht += 1;
-    }
-  });
-
-  return Array.from(map.values());
-}
-
-function buildReturnXml(stockItems, manualLines, fields){
-  const groupedStock = groupItemsForXml(stockItems);
-  const allPartijen = [
-    ...groupedStock.map(row => ({
-      aantal: row.aantal,
-      modelnaam: row.modelnaam,
-      colli: row.colli,
-      gewicht: row.gewicht
-    })),
-    ...manualLines.map(line => ({
-      aantal: line.aantal,
-      modelnaam: line.modelnaam,
-      colli: line.colli,
-      gewicht: line.gewicht
-    }))
-  ];
-
-  const partijenXml = allPartijen.map((row, idx) => `
+function buildPartijenXmlFromStockItems(items){
+  return items.map((it, idx) => `
             <Partij Referentie="${idx}">
-              <Aantal>${formatQtyThree(row.aantal)}</Aantal>
-              <Modelnaam>${xmlEsc(row.modelnaam)}</Modelnaam>
+              <Aantal>1.000</Aantal>
+              <Modelnaam>${xmlEsc(it.name || it.sku_base || it.sku_unique || 'Artikel')}</Modelnaam>
               <Kleur></Kleur>
-              <Colli>${row.colli}</Colli>
-              <Gewicht>${formatQtyThree(row.gewicht)}</Gewicht>
+              <Colli>1</Colli>
+              <Gewicht>1.000</Gewicht>
               <Statistiekcode></Statistiekcode>
               <Stof></Stof>
               <Volume>0.000</Volume>
               <AantalZe>1</AantalZe>
             </Partij>`).join('\n');
+}
 
+function buildPartijenXmlFromManualLines(lines){
+  return lines.map((line, idx) => `
+            <Partij Referentie="${idx}">
+              <Aantal>1.000</Aantal>
+              <Modelnaam>${xmlEsc(line.modelnaam)}</Modelnaam>
+              <Kleur></Kleur>
+              <Colli>1</Colli>
+              <Gewicht>1.000</Gewicht>
+              <Statistiekcode></Statistiekcode>
+              <Stof></Stof>
+              <Volume>0.000</Volume>
+              <AantalZe>1</AantalZe>
+            </Partij>`).join('\n');
+}
+
+function buildXml(fields, partijenXml){
   return `<?xml version="1.0" encoding="utf-8"?>
 <Bericht>
   <Opdrachten>
@@ -1527,8 +1400,32 @@ function validateReturnXmlFields(){
   return fields;
 }
 
+function validateManualXmlFields(){
+  const fields = {
+    ref: safeText(byIdLocal('manualXmlRef').value),
+    debiteur: safeText(byIdLocal('manualXmlDebiteur').value),
+    losnaam: safeText(byIdLocal('manualXmlLosnaam').value),
+    losadres: safeText(byIdLocal('manualXmlLosadres').value),
+    lospostcode: safeText(byIdLocal('manualXmlLospostcode').value),
+    loswoonplaats: safeText(byIdLocal('manualXmlLoswoonplaats').value),
+    lostelefoon: safeText(byIdLocal('manualXmlLostelefoon').value),
+    commissie: safeText(byIdLocal('manualXmlCommissie').value),
+    verzendinstructie: safeText(byIdLocal('manualXmlVerzendinstructie').value),
+    bijzonderheden: safeText(byIdLocal('manualXmlBijzonderheden').value)
+  };
+
+  if(!fields.ref) throw new Error('Referentie / opdrachtnummer ontbreekt.');
+  if(!fields.debiteur) throw new Error('Debiteur ontbreekt.');
+  if(!fields.losnaam) throw new Error('Losnaam ontbreekt.');
+  if(!fields.losadres) throw new Error('Losadres ontbreekt.');
+  if(!fields.lospostcode) throw new Error('Lospostcode ontbreekt.');
+  if(!fields.loswoonplaats) throw new Error('Loswoonplaats ontbreekt.');
+
+  return fields;
+}
+
 async function performStockAction(actionType, itemIds, options = {}){
-  if(!itemIds?.length && actionType !== 'RETURN_TO_HUIZEN'){
+  if(!itemIds?.length){
     showToast('Geen artikelen geselecteerd.', 'err');
     return;
   }
@@ -1548,19 +1445,8 @@ async function performStockAction(actionType, itemIds, options = {}){
   }
 
   let xmlFields = null;
-  let stockItemsForXml = [];
-  let manualLinesForXml = [];
-
   if(actionType === 'RETURN_TO_HUIZEN'){
     xmlFields = validateReturnXmlFields();
-    stockItemsForXml = getAllStockItemsForXml();
-    manualLinesForXml = [...modalManualLines];
-
-    if(!stockItemsForXml.length && !manualLinesForXml.length){
-      throw new Error('Er zijn geen partijregels voor de XML. Selecteer voorraadartikelen of voeg handmatige regels toe.');
-    }
-
-    itemIds = stockItemsForXml.map(it => it.id);
   }
 
   try{
@@ -1572,63 +1458,59 @@ async function performStockAction(actionType, itemIds, options = {}){
       }
     }
 
-    let items = [];
-    if(itemIds.length){
-      const { data: dbItems, error: itemsErr } = await client
-        .from('items')
-        .select('id, product_id, sku_unique, status, location')
-        .in('id', itemIds);
+    const visibleItems = getCurrentVisibleItems().filter(x => itemIds.includes(x.id));
 
-      if(itemsErr) throw itemsErr;
-      items = dbItems || [];
+    const { data: items, error: itemsErr } = await client
+      .from('items')
+      .select('id, product_id, sku_unique, status, location')
+      .in('id', itemIds);
 
-      const invalid = items.filter(it => String(it.status || '').toUpperCase() !== 'IN_STOCK');
-      if(invalid.length){
-        throw new Error(`Er zijn ${invalid.length} items die niet meer op voorraad staan.`);
-      }
+    if(itemsErr) throw itemsErr;
+    if(!items?.length) throw new Error('Geen items gevonden.');
 
-      const nowIso = new Date().toISOString();
-
-      const { error:updateErr } = await client
-        .from('items')
-        .update({
-          status: 'OUT',
-          out_at: nowIso
-        })
-        .in('id', itemIds);
-
-      if(updateErr) throw updateErr;
-
-      const movements = items.map(it => ({
-        type: 'OUT',
-        action_type: actionType,
-        product_id: it.product_id,
-        sku_unique: it.sku_unique,
-        location: it.location || null,
-        order_no: (actionType === 'OUT' || actionType === 'ALLOCATE_ORDER') ? orderNo : (xmlFields?.ref || null),
-        destination: actionType === 'RETURN_TO_HUIZEN' ? destination : null,
-        note: note || null
-      }));
-
-      const { error:moveErr } = await client
-        .from('movements')
-        .insert(movements);
-
-      if(moveErr) throw moveErr;
+    const invalid = items.filter(it => String(it.status || '').toUpperCase() !== 'IN_STOCK');
+    if(invalid.length){
+      throw new Error(`Er zijn ${invalid.length} items die niet meer op voorraad staan.`);
     }
 
+    const nowIso = new Date().toISOString();
+
+    const { error:updateErr } = await client
+      .from('items')
+      .update({
+        status: 'OUT',
+        out_at: nowIso
+      })
+      .in('id', itemIds);
+
+    if(updateErr) throw updateErr;
+
+    const movements = items.map(it => ({
+      type: 'OUT',
+      action_type: actionType,
+      product_id: it.product_id,
+      sku_unique: it.sku_unique,
+      location: it.location || null,
+      order_no: (actionType === 'OUT' || actionType === 'ALLOCATE_ORDER') ? orderNo : (xmlFields?.ref || null),
+      destination: actionType === 'RETURN_TO_HUIZEN' ? destination : null,
+      note: note || null
+    }));
+
+    const { error:moveErr } = await client
+      .from('movements')
+      .insert(movements);
+
+    if(moveErr) throw moveErr;
+
     if(actionType === 'RETURN_TO_HUIZEN'){
-      const xml = buildReturnXml(stockItemsForXml, manualLinesForXml, xmlFields);
+      const partijenXml = buildPartijenXmlFromStockItems(visibleItems);
+      const xml = buildXml(xmlFields, partijenXml);
       const filenameBase = safeText(xmlFields.ref).replace(/[^\w\-]+/g, '_') || 'retour_huizen';
       downloadXmlFile(`${filenameBase}.xml`, xml);
     }
 
     clearSelection();
     closeActionModal();
-
-    const processedCount = actionType === 'RETURN_TO_HUIZEN'
-      ? (stockItemsForXml.length + manualLinesForXml.length)
-      : items.length;
 
     const labels = {
       OUT: `uitgeboekt op order ${orderNo}`,
@@ -1637,13 +1519,34 @@ async function performStockAction(actionType, itemIds, options = {}){
     };
 
     const extra = actionType === 'RETURN_TO_HUIZEN' ? ' XML gedownload.' : '';
-    showToast(`${processedCount} regel(s) ${labels[actionType] || 'verwerkt'}.${extra}`, 'ok');
+    showToast(`${items.length} artikel(en) ${labels[actionType] || 'verwerkt'}.${extra}`, 'ok');
 
     await load();
   }catch(e){
     console.error('performStockAction fout:', e);
     showToast(e.message || String(e), 'err');
     throw e;
+  }
+}
+
+function downloadManualXml(){
+  try{
+    const fields = validateManualXmlFields();
+
+    if(!manualXmlLines.length){
+      throw new Error('Voeg eerst minimaal 1 handmatige artikelregel toe.');
+    }
+
+    const partijenXml = buildPartijenXmlFromManualLines(manualXmlLines);
+    const xml = buildXml(fields, partijenXml);
+    const filenameBase = safeText(fields.ref).replace(/[^\w\-]+/g, '_') || 'handmatige_xml';
+
+    downloadXmlFile(`${filenameBase}.xml`, xml);
+    showToast(`${manualXmlLines.length} handmatige regel(s) in XML geplaatst.`, 'ok');
+    closeManualXmlModal();
+  }catch(e){
+    console.error('downloadManualXml fout:', e);
+    showToast(e.message || String(e), 'err');
   }
 }
 
@@ -1756,6 +1659,7 @@ byIdLocal('btnSelectNone').addEventListener('click', clearSelection);
 byIdLocal('btnBulkOut').addEventListener('click', () => openActionModal('OUT', [...selectedItemIds]));
 byIdLocal('btnBulkAllocate').addEventListener('click', () => openActionModal('ALLOCATE_ORDER', [...selectedItemIds]));
 byIdLocal('btnBulkReturn').addEventListener('click', () => openActionModal('RETURN_TO_HUIZEN', [...selectedItemIds]));
+byIdLocal('btnManualXml').addEventListener('click', openManualXmlModal);
 
 byIdLocal('btnCancelAction').addEventListener('click', closeActionModal);
 
@@ -1786,6 +1690,17 @@ byIdLocal('btnConfirmAction').addEventListener('click', async () => {
   }
 });
 
+byIdLocal('btnCancelManualXml').addEventListener('click', closeManualXmlModal);
+byIdLocal('btnAddManualXmlLine').addEventListener('click', addManualXmlLine);
+byIdLocal('btnDownloadManualXml').addEventListener('click', downloadManualXml);
+
+byIdLocal('manualXmlOmschrijving').addEventListener('keydown', e => {
+  if(e.key === 'Enter'){
+    e.preventDefault();
+    addManualXmlLine();
+  }
+});
+
 byIdLocal('modalOrderNo').addEventListener('keydown', e => {
   if(e.key === 'Enter' && !byIdLocal('actionOrderWrap').classList.contains('hidden')){
     e.preventDefault();
@@ -1793,30 +1708,18 @@ byIdLocal('modalOrderNo').addEventListener('keydown', e => {
   }
 });
 
-byIdLocal('btnXmlSearchStock').addEventListener('click', searchStockForXml);
-byIdLocal('xmlStockSearch').addEventListener('keydown', e => {
-  if(e.key === 'Enter'){
-    e.preventDefault();
-    searchStockForXml();
-  }
-});
-
-byIdLocal('btnAddManualLine').addEventListener('click', addManualLine);
-
-byIdLocal('manualGewicht').addEventListener('keydown', e => {
-  if(e.key === 'Enter'){
-    e.preventDefault();
-    addManualLine();
-  }
-});
-
 byIdLocal('actionModal').addEventListener('click', e => {
   if(e.target === byIdLocal('actionModal')) closeActionModal();
 });
 
+byIdLocal('manualXmlModal').addEventListener('click', e => {
+  if(e.target === byIdLocal('manualXmlModal')) closeManualXmlModal();
+});
+
 document.addEventListener('keydown', e => {
-  if(e.key === 'Escape' && byIdLocal('actionModal').classList.contains('show')){
-    closeActionModal();
+  if(e.key === 'Escape'){
+    if(byIdLocal('actionModal').classList.contains('show')) closeActionModal();
+    if(byIdLocal('manualXmlModal').classList.contains('show')) closeManualXmlModal();
   }
 });
 
