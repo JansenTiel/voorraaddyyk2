@@ -54,7 +54,7 @@
       background:#fff;
       padding:14px;
       display:grid;
-      grid-template-columns:180px 1fr 140px 120px auto;
+      grid-template-columns:180px 1fr 150px 120px auto;
       gap:12px;
       align-items:center;
     }
@@ -98,6 +98,12 @@
       background:rgba(196,154,108,.12);
       border-color:rgba(196,154,108,.32);
       color:#6e4f36;
+    }
+
+    .meta-pill.scanmode{
+      background:#eff6ff;
+      border-color:#bfdbfe;
+      color:#1d4ed8;
     }
 
     .manage-units,
@@ -216,6 +222,31 @@
       background:#f8fafc;
       padding:12px 14px;
       line-height:1.5;
+    }
+
+    .info-box{
+      border:1px solid var(--border);
+      border-radius:14px;
+      background:#f8fafc;
+      padding:12px 14px;
+      line-height:1.5;
+      margin-top:12px;
+    }
+
+    .info-box b{
+      color:var(--navy);
+    }
+
+    .sticker-preview-note{
+      margin-top:10px;
+      padding:10px 12px;
+      border-radius:12px;
+      background:#eff6ff;
+      border:1px solid #bfdbfe;
+      color:#1d4ed8;
+      font-size:13px;
+      line-height:1.45;
+      font-weight:700;
     }
 
     .modal-backdrop{
@@ -343,11 +374,13 @@
   <div class="card">
     <h2>Artikelen + Stickers</h2>
     <div class="muted products-intro">
-      Artikelbeheer voor Dyyk. Maak artikelen aan, zoek bestaande artikelen snel terug,
+      Artikelbeheer voor Dyyk. Maak artikelen aan, zoek bestaande artikelen terug,
       genereer stickers en beheer foutieve of verouderde artikelen.
       <br><br>
+      Nieuwe stickers worden standaard geprint <b>zonder volgnummer</b>. Het systeem maakt intern nog wel unieke itemregels aan,
+      maar de barcode en QR bevatten voortaan de <b>basis-SKU</b>. Oude voorraad met volgnummer blijft gewoon ondersteund.
+      <br><br>
       Per artikel leg je ook vast hoeveel <b>eenheden per colli</b> in één verpakking zitten.
-      De sticker blijft altijd per <b>colli</b>, maar dit veld wordt gebruikt voor overzicht, XML en eventueel splitsen naar losse eenheden.
     </div>
 
     <p class="page-url">
@@ -363,18 +396,25 @@
         <h3>1) Artikel aanmaken</h3>
 
         <label for="sku_base">SKU basis</label>
-        <input id="sku_base" placeholder="FLSAN"/>
+        <input id="sku_base" placeholder="FLIZWAKL"/>
 
         <label for="name" style="margin-top:12px">Naam / omschrijving</label>
-        <input id="name" placeholder="Flint Sand Normaal"/>
+        <input id="name" placeholder="Flint Zwart Klein"/>
 
         <label for="description" style="margin-top:12px">Overige vermelding</label>
         <textarea id="description" placeholder="Bijvoorbeeld serie, uitvoering of extra info"></textarea>
 
         <label for="units_per_colli" style="margin-top:12px">Eenheden per colli</label>
         <input id="units_per_colli" type="number" min="1" step="1" value="1"/>
+
         <div class="small muted" style="margin-top:6px">
           Meestal is dit 1. Gebruik bijvoorbeeld 2 als er 2 stoelen in 1 doos zitten, of 4 als 1 colli uit 4 losse eenheden bestaat.
+        </div>
+
+        <div class="info-box">
+          <b>Printmethode nieuwe stickers</b><br>
+          Nieuwe artikelen worden standaard ingesteld op <b>printen zonder volgnummer</b>.
+          Intern blijven de itemregels wel uniek, zodat voorraad en historie intact blijven.
         </div>
 
         <div class="btnRow" style="margin-top:16px">
@@ -392,7 +432,7 @@
         <div class="row" style="margin-top:12px">
           <div>
             <label for="qty">Aantal stickers</label>
-            <input id="qty" type="number" min="1" max="500" value="10"/>
+            <input id="qty" type="number" min="1" max="5000" value="25"/>
           </div>
           <div>
             <label>&nbsp;</label>
@@ -406,6 +446,7 @@
             <span id="selectedProductSub"></span>
             <div class="selected-product-extra">
               <span class="meta-pill" id="selectedUnitsPill">1 per colli</span>
+              <span class="meta-pill scanmode" id="selectedScanModePill">Sticker zonder volgnummer</span>
               <span class="meta-pill split hidden" id="selectedSplitPill">Gesplitste 1x-variant</span>
             </div>
           </div>
@@ -426,6 +467,11 @@
             <button class="btn accent" id="btn_pdf" type="button" disabled>Download PDF</button>
           </div>
         </div>
+
+        <div class="sticker-preview-note">
+          Op de sticker wordt voortaan alleen de <b>scanbare basis-SKU</b> getoond.
+          Intern maakt het systeem nog wel unieke voorraadregels aan.
+        </div>
       </div>
     </div>
 
@@ -443,7 +489,7 @@
 
         <div>
           <label for="quick_qty">Aantal stickers</label>
-          <input id="quick_qty" type="number" min="1" max="500" value="10"/>
+          <input id="quick_qty" type="number" min="1" max="5000" value="25"/>
         </div>
 
         <div>
@@ -462,7 +508,9 @@
 
     <div class="card">
       <h3>Sticker preview</h3>
-      <div class="muted">Alleen aangevinkte stickers worden in de PDF gezet.</div>
+      <div class="muted">
+        Alleen aangevinkte stickers worden in de PDF gezet. Barcode en QR tonen de scanbare basis-SKU.
+      </div>
       <div id="stickers" class="previewWrap" style="margin-top:14px"></div>
     </div>
 
@@ -573,7 +621,8 @@ function formatProduct(product){
     ...product,
     units_per_colli: safeInt(product.units_per_colli, 1),
     clean_description: cleanDescription(product.description || ''),
-    split_1x: isSplit1xProduct(product)
+    split_1x: isSplit1xProduct(product),
+    print_without_sequence: product.print_without_sequence !== false
   };
 }
 
@@ -603,6 +652,7 @@ function updateSelectedProductBar(){
   const sub = byId('selectedProductSub');
   const unitsPill = byId('selectedUnitsPill');
   const splitPill = byId('selectedSplitPill');
+  const scanModePill = byId('selectedScanModePill');
   const select = byId('product_select');
 
   const product = state.products.find(p => String(p.id) === String(select.value));
@@ -613,6 +663,7 @@ function updateSelectedProductBar(){
     sub.textContent = '';
     unitsPill.textContent = '1 per colli';
     splitPill.classList.add('hidden');
+    scanModePill.textContent = 'Sticker zonder volgnummer';
     return;
   }
 
@@ -620,6 +671,9 @@ function updateSelectedProductBar(){
   title.textContent = `${product.sku_base} — ${product.name}`;
   sub.textContent = product.clean_description || 'Geen overige vermelding';
   unitsPill.textContent = unitsLabel(product.units_per_colli);
+  scanModePill.textContent = product.print_without_sequence
+    ? 'Sticker zonder volgnummer'
+    : 'Sticker met volgnummer';
   splitPill.classList.toggle('hidden', !product.split_1x);
 }
 
@@ -628,7 +682,7 @@ async function loadProducts(selectId = null){
 
   const { data, error } = await client
     .from('products')
-    .select('id, sku_base, name, description, units_per_colli, created_at')
+    .select('id, sku_base, name, description, units_per_colli, print_without_sequence, created_at')
     .order('created_at', { ascending: false });
 
   if(error) throw error;
@@ -695,7 +749,13 @@ async function createProduct(){
   try{
     const { data, error } = await client
       .from('products')
-      .insert([{ sku_base, name, description, units_per_colli }])
+      .insert([{
+        sku_base,
+        name,
+        description,
+        units_per_colli,
+        print_without_sequence: true
+      }])
       .select()
       .single();
 
@@ -738,16 +798,22 @@ function clearPreview(){
   updateButtons();
 }
 
+function getPrintableCode(product, item){
+  return safeText(item.scan_code || (product.print_without_sequence ? product.sku_base : item.sku_unique));
+}
+
 function renderSticker(product, item){
   const wrap = document.createElement('div');
   wrap.className = 'sticker-wrap';
   wrap.dataset.itemId = item.id;
 
+  const printableCode = getPrintableCode(product, item);
+
   wrap.innerHTML = `
     <div class="sticker-head">
       <label>
         <input class="sticker-check" type="checkbox" checked />
-        Print ${escapeHtml(item.sku_unique)}
+        Print ${escapeHtml(printableCode)}
       </label>
       <span class="badge">14 × 11 cm</span>
     </div>
@@ -758,7 +824,7 @@ function renderSticker(product, item){
           <div class="st-company">Oegema Logistics Betuwe</div>
           <div class="st-customer">Klant: ${escapeHtml(CUSTOMER_NAME)}</div>
           <div class="st-prod">${escapeHtml(product.name)}</div>
-          <div class="st-sku">${escapeHtml(item.sku_unique)}</div>
+          <div class="st-sku">${escapeHtml(printableCode)}</div>
           <div class="st-notes">${escapeHtml(product.clean_description || '')}</div>
           <div class="st-notes">${escapeHtml(unitsLabel(product.units_per_colli))}</div>
         </div>
@@ -780,7 +846,7 @@ function renderSticker(product, item){
 
   const barcodeSvg = wrap.querySelector(`#bc_${CSS.escape(String(item.id))}`);
   if(barcodeSvg){
-    JsBarcode(barcodeSvg, item.sku_unique, {
+    JsBarcode(barcodeSvg, printableCode, {
       format: 'CODE128',
       displayValue: true,
       fontSize: 14,
@@ -792,7 +858,7 @@ function renderSticker(product, item){
   const qrEl = wrap.querySelector(`#qr_${CSS.escape(String(item.id))}`);
   if(qrEl){
     new QRCode(qrEl, {
-      text: item.sku_unique,
+      text: printableCode,
       width: 120,
       height: 120,
       correctLevel: QRCode.CorrectLevel.M
@@ -816,7 +882,7 @@ async function generateStickers(productIdOverride = null, qtyOverride = null){
   const qty = Number(qtyOverride || byId('qty').value || 0);
 
   if(!product_id) return toast('Kies een artikel.', 'err');
-  if(!qty || qty < 1 || qty > 500) return toast('Aantal moet tussen 1 en 500 zijn.', 'err');
+  if(!qty || qty < 1 || qty > 5000) return toast('Aantal moet tussen 1 en 5000 zijn.', 'err');
   if(!client) return toast('Supabase client ontbreekt.', 'err');
 
   const btn = byId('btn_generate');
@@ -955,6 +1021,7 @@ async function loadManageList(){
         <div class="small">${escapeHtml(r.clean_description || 'Geen overige vermelding')}</div>
         <div class="product-meta">
           <span class="meta-pill">${escapeHtml(unitsLabel(r.units_per_colli))}</span>
+          <span class="meta-pill scanmode">${r.print_without_sequence ? 'Sticker zonder volgnummer' : 'Sticker met volgnummer'}</span>
           ${r.split_1x ? '<span class="meta-pill split">Gesplitste 1x-variant</span>' : ''}
         </div>
       </div>
@@ -1040,6 +1107,7 @@ async function loadQuickFindList(){
         <div class="small">${escapeHtml(r.clean_description || 'Geen overige vermelding')}</div>
         <div class="product-meta">
           <span class="meta-pill">${escapeHtml(unitsLabel(r.units_per_colli))}</span>
+          <span class="meta-pill scanmode">${r.print_without_sequence ? 'Sticker zonder volgnummer' : 'Sticker met volgnummer'}</span>
           ${r.split_1x ? '<span class="meta-pill split">Gesplitste 1x-variant</span>' : ''}
         </div>
       </div>
@@ -1068,10 +1136,10 @@ function bindQuickGenerateButtons(){
   document.querySelectorAll('[data-quick-generate-id]').forEach(btn => {
     btn.addEventListener('click', async () => {
       const productId = btn.getAttribute('data-quick-generate-id');
-      const qty = Number(prompt('Aantal stickers:', byId('qty').value || '10') || '');
+      const qty = Number(prompt('Aantal stickers:', byId('qty').value || '25') || '');
 
-      if(!qty || qty < 1 || qty > 500){
-        toast('Aantal moet tussen 1 en 500 zijn.', 'err');
+      if(!qty || qty < 1 || qty > 5000){
+        toast('Aantal moet tussen 1 en 5000 zijn.', 'err');
         return;
       }
 
@@ -1100,8 +1168,8 @@ function bindQuickFindButtons(){
       const productId = btn.getAttribute('data-quick-print-id');
       const qty = Number(byId('quick_qty').value || 0);
 
-      if(!qty || qty < 1 || qty > 500){
-        toast('Aantal moet tussen 1 en 500 zijn.', 'err');
+      if(!qty || qty < 1 || qty > 5000){
+        toast('Aantal moet tussen 1 en 5000 zijn.', 'err');
         return;
       }
 
@@ -1130,6 +1198,7 @@ function bindEditButtons(){
         <div><b>Huidige SKU basis:</b> ${escapeHtml(state.currentEditProduct.sku_base)}</div>
         <div><b>Gekoppelde items:</b> ${state.currentEditProduct.item_count}</div>
         <div><b>Eenheden per colli:</b> ${state.currentEditProduct.units_per_colli}</div>
+        <div><b>Stickerweergave:</b> zonder volgnummer</div>
       `;
 
       byId('edit_sku_base').value = state.currentEditProduct.sku_base || '';
@@ -1215,7 +1284,8 @@ async function saveProductEdit(){
         sku_base,
         name,
         description: finalDescription,
-        units_per_colli
+        units_per_colli,
+        print_without_sequence: true
       })
       .eq('id', state.currentEditProduct.id);
 
