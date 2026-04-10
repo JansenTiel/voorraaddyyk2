@@ -71,6 +71,10 @@
       background:#fafbfc;
     }
 
+    .stock-group-head.single-metric{
+      grid-template-columns:180px minmax(260px,1fr) 130px 40px;
+    }
+
     .sg-sku{
       font-size:18px;
       font-weight:900;
@@ -281,6 +285,13 @@
           "info info info info";
       }
 
+      .stock-group-head.single-metric{
+        grid-template-columns:1fr 120px 40px;
+        grid-template-areas:
+          "sku colli arrow"
+          "info info info";
+      }
+
       .sg-sku{grid-area:sku}
       .sg-info{grid-area:info}
       .sg-stat.colli{grid-area:colli}
@@ -314,6 +325,14 @@
           "info info"
           "colli units";
         align-items:start;
+      }
+
+      .stock-group-head.single-metric{
+        grid-template-columns:1fr auto;
+        grid-template-areas:
+          "sku arrow"
+          "info info"
+          "colli colli";
       }
 
       .sg-stat{
@@ -361,15 +380,9 @@
   <div class="card">
     <h2>Huidige voorraad</h2>
     <div class="muted">
-      Deze pagina toont de voorraad per artikel op een duidelijke manier:
-      <br>
-      <b>Colli op voorraad</b> = het aantal fysieke dozen / stickers / voorraadregels.
-      <br>
-      <b>Eenheden op voorraad</b> = colli × eenheden per colli.
-      <br><br>
-      Voorbeeld:
-      als een artikel 3 colli op voorraad heeft en 2 stoelen per colli bevat, dan zie je:
-      <b>3 colli</b> en <b>6 stoelen op voorraad</b>.
+      Deze pagina toont de voorraad per artikel op een duidelijke manier.
+      Bij artikelen met <b>1 eenheid per colli</b> zie je alleen het aantal <b>colli</b>.
+      Alleen bij artikelen met <b>meer dan 1 per colli</b> wordt ook het totaal aantal <b>eenheden</b> getoond.
     </div>
 
     <p class="page-url">
@@ -518,6 +531,7 @@ function groupItems(rows){
   return Array.from(map.values()).map(group => {
     group.colli_count = group.items.length;
     group.unit_count = group.colli_count * group.units_per_colli;
+    group.show_units = group.units_per_colli > 1;
     return group;
   });
 }
@@ -541,11 +555,11 @@ function sortGroups(groups, sort){
 
 function makeGroupHtml(group, index){
   const desc = group.description ? esc(group.description) : 'Geen overige vermelding';
-  const unitLabel = group.units_per_colli > 1 ? unitWord(group.unit_count) : unitWord(group.unit_count);
+  const headClass = group.show_units ? 'stock-group-head' : 'stock-group-head single-metric';
 
   return `
     <div class="stock-group" data-group-index="${index}">
-      <button class="stock-group-head" type="button" aria-expanded="false">
+      <button class="${headClass}" type="button" aria-expanded="false">
         <div class="sg-sku">${esc(group.sku_base)}</div>
 
         <div class="sg-info">
@@ -561,10 +575,12 @@ function makeGroupHtml(group, index){
           <div class="t">colli</div>
         </div>
 
-        <div class="sg-stat units">
-          <div class="n">${group.unit_count}</div>
-          <div class="t">${esc(unitLabel)}</div>
-        </div>
+        ${group.show_units ? `
+          <div class="sg-stat units">
+            <div class="n">${group.unit_count}</div>
+            <div class="t">${esc(unitWord(group.unit_count))}</div>
+          </div>
+        ` : ''}
 
         <div class="sg-arrow">⌄</div>
       </button>
@@ -581,10 +597,17 @@ function makeGroupHtml(group, index){
             <div class="value">${group.units_per_colli}</div>
           </div>
 
-          <div class="mini-kpi">
-            <div class="label">Totaal ${esc(unitWord(group.unit_count))}</div>
-            <div class="value">${group.unit_count}</div>
-          </div>
+          ${group.show_units ? `
+            <div class="mini-kpi">
+              <div class="label">Totaal ${esc(unitWord(group.unit_count))}</div>
+              <div class="value">${group.unit_count}</div>
+            </div>
+          ` : `
+            <div class="mini-kpi">
+              <div class="label">Voorraadtype</div>
+              <div class="value">1 = 1</div>
+            </div>
+          `}
         </div>
 
         <div class="table-wrap">
@@ -595,7 +618,7 @@ function makeGroupHtml(group, index){
                 <th>Locatie</th>
                 <th>Inslag tijd</th>
                 <th>Colli</th>
-                <th>Eenheden in deze colli</th>
+                ${group.show_units ? '<th>Eenheden in deze colli</th>' : ''}
               </tr>
             </thead>
             <tbody>
@@ -605,7 +628,7 @@ function makeGroupHtml(group, index){
                   <td>${esc(it.location || '')}</td>
                   <td>${esc(formatNlDateTime(it.in_at))}</td>
                   <td>1</td>
-                  <td>${group.units_per_colli}</td>
+                  ${group.show_units ? `<td>${group.units_per_colli}</td>` : ''}
                 </tr>
               `).join('')}
             </tbody>
@@ -631,10 +654,12 @@ function makeGroupHtml(group, index){
                 <div class="mobile-k">Colli</div>
                 <div class="mobile-v">1</div>
               </div>
-              <div class="mobile-line">
-                <div class="mobile-k">Eenheden</div>
-                <div class="mobile-v">${group.units_per_colli}</div>
-              </div>
+              ${group.show_units ? `
+                <div class="mobile-line">
+                  <div class="mobile-k">Eenheden</div>
+                  <div class="mobile-v">${group.units_per_colli}</div>
+                </div>
+              ` : ''}
             </div>
           `).join('')}
         </div>
