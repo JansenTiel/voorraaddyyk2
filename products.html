@@ -54,7 +54,7 @@
       background:#fff;
       padding:14px;
       display:grid;
-      grid-template-columns:180px 1fr 120px auto;
+      grid-template-columns:180px 1fr 140px 120px auto;
       gap:12px;
       align-items:center;
     }
@@ -72,6 +72,49 @@
       display:block;
       margin-bottom:4px;
       color:var(--navy);
+    }
+
+    .product-meta{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-top:6px;
+    }
+
+    .meta-pill{
+      display:inline-flex;
+      align-items:center;
+      padding:4px 10px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:800;
+      border:1px solid var(--border);
+      background:#f8fafc;
+      color:var(--navy);
+      white-space:nowrap;
+    }
+
+    .manage-units,
+    .quick-find-units{
+      text-align:center;
+    }
+
+    .manage-units .n,
+    .quick-find-units .n{
+      font-size:28px;
+      line-height:1;
+      font-weight:900;
+      color:var(--navy);
+    }
+
+    .manage-units .t,
+    .quick-find-units .t{
+      font-size:12px;
+      color:var(--muted);
+      font-weight:800;
+      text-transform:uppercase;
+      letter-spacing:.04em;
+      margin-top:4px;
     }
 
     .manage-count,
@@ -154,6 +197,13 @@
       display:block;
     }
 
+    .selected-product-extra{
+      margin-top:6px;
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
     .hint-box{
       border:1px solid var(--border);
       border-radius:14px;
@@ -219,14 +269,16 @@
       display:none !important;
     }
 
-    @media(max-width:1100px){
+    @media(max-width:1180px){
       .manage-row,
       .quick-find-row{
         grid-template-columns:1fr;
       }
 
       .manage-count,
-      .quick-find-count{
+      .quick-find-count,
+      .manage-units,
+      .quick-find-units{
         text-align:left;
       }
 
@@ -287,6 +339,9 @@
     <div class="muted products-intro">
       Artikelbeheer voor Dyyk. Maak artikelen aan, zoek bestaande artikelen snel terug,
       genereer stickers en beheer foutieve of verouderde artikelen.
+      <br><br>
+      Nieuw: per artikel leg je nu ook vast hoeveel <b>eenheden per colli</b> in één verpakking zitten.
+      De sticker blijft altijd per <b>colli</b>, maar dit veld vormt later de basis voor eventueel splitsen naar losse eenheden.
     </div>
 
     <p class="page-url">
@@ -309,6 +364,12 @@
 
         <label for="description" style="margin-top:12px">Overige vermelding</label>
         <textarea id="description" placeholder="Bijvoorbeeld serie, uitvoering of extra info"></textarea>
+
+        <label for="units_per_colli" style="margin-top:12px">Eenheden per colli</label>
+        <input id="units_per_colli" type="number" min="1" step="1" value="1"/>
+        <div class="small muted" style="margin-top:6px">
+          Meestal is dit 1. Gebruik bijvoorbeeld 2 als er 2 stoelen in 1 doos zitten, of 4 als 1 colli uit 4 losse eenheden bestaat.
+        </div>
 
         <div class="btnRow" style="margin-top:16px">
           <button class="btn primary" id="btn_create" type="button">Opslaan</button>
@@ -337,6 +398,9 @@
           <div class="selected-product-info">
             <b id="selectedProductTitle">Geen artikel gekozen</b>
             <span id="selectedProductSub"></span>
+            <div class="selected-product-extra">
+              <span class="meta-pill" id="selectedUnitsPill">1 per colli</span>
+            </div>
           </div>
 
           <div class="btnRow">
@@ -435,7 +499,7 @@
 <div id="editModal" class="modal-backdrop">
   <div class="modal-card">
     <h3 class="modal-title">Artikel bewerken</h3>
-    <div class="modal-sub">Pas hier SKU basis, omschrijving en extra info aan.</div>
+    <div class="modal-sub">Pas hier SKU basis, omschrijving, extra info en eenheden per colli aan.</div>
     <div class="modal-info" id="editModalInfo"></div>
 
     <label for="edit_sku_base">SKU basis</label>
@@ -446,6 +510,9 @@
 
     <label for="edit_description" style="margin-top:12px">Overige vermelding</label>
     <textarea id="edit_description" placeholder="Bijvoorbeeld serie of extra info"></textarea>
+
+    <label for="edit_units_per_colli" style="margin-top:12px">Eenheden per colli</label>
+    <input id="edit_units_per_colli" type="number" min="1" step="1" value="1"/>
 
     <div class="btnRow" style="margin-top:16px">
       <button class="btn primary" id="btnConfirmEdit" type="button">Opslaan wijzigingen</button>
@@ -477,6 +544,16 @@ function safeText(v){
   return String(v ?? '').trim();
 }
 
+function safeInt(v, fallback = 1){
+  const n = parseInt(v, 10);
+  return Number.isFinite(n) && n > 0 ? n : fallback;
+}
+
+function unitsLabel(units){
+  const n = safeInt(units, 1);
+  return `${n} ${n === 1 ? 'eenheid' : 'eenheden'} per colli`;
+}
+
 function setBusy(button, busy){
   if(!button) return;
 
@@ -496,6 +573,7 @@ function updateSelectedProductBar(){
   const bar = byId('selectedProductBar');
   const title = byId('selectedProductTitle');
   const sub = byId('selectedProductSub');
+  const unitsPill = byId('selectedUnitsPill');
   const select = byId('product_select');
 
   const product = state.products.find(p => String(p.id) === String(select.value));
@@ -504,12 +582,14 @@ function updateSelectedProductBar(){
     bar.classList.add('hidden');
     title.textContent = 'Geen artikel gekozen';
     sub.textContent = '';
+    unitsPill.textContent = '1 per colli';
     return;
   }
 
   bar.classList.remove('hidden');
   title.textContent = `${product.sku_base} — ${product.name}`;
   sub.textContent = product.description || 'Geen overige vermelding';
+  unitsPill.textContent = unitsLabel(product.units_per_colli);
 }
 
 async function loadProducts(selectId = null){
@@ -517,12 +597,15 @@ async function loadProducts(selectId = null){
 
   const { data, error } = await client
     .from('products')
-    .select('id, sku_base, name, description, created_at')
+    .select('id, sku_base, name, description, units_per_colli, created_at')
     .order('created_at', { ascending: false });
 
   if(error) throw error;
 
-  state.products = data || [];
+  state.products = (data || []).map(p => ({
+    ...p,
+    units_per_colli: safeInt(p.units_per_colli, 1)
+  }));
 
   const elSelect = byId('product_select');
   elSelect.innerHTML = '';
@@ -543,7 +626,7 @@ async function loadProducts(selectId = null){
     elSelect.appendChild(opt);
   });
 
-  if(selectId && state.products.some(p => p.id === selectId)){
+  if(selectId && state.products.some(p => String(p.id) === String(selectId))){
     elSelect.value = selectId;
   }
 
@@ -571,9 +654,11 @@ async function createProduct(){
   const sku_base = cleanSku(byId('sku_base').value);
   const name = safeText(byId('name').value);
   const description = safeText(byId('description').value);
+  const units_per_colli = safeInt(byId('units_per_colli').value, 1);
 
   if(!sku_base) return toast('Vul een SKU basis in.', 'err');
   if(!name) return toast('Vul een naam / omschrijving in.', 'err');
+  if(units_per_colli < 1) return toast('Eenheden per colli moet minimaal 1 zijn.', 'err');
   if(!client) return toast('Supabase client ontbreekt.', 'err');
 
   const btn = byId('btn_create');
@@ -582,7 +667,7 @@ async function createProduct(){
   try{
     const { data, error } = await client
       .from('products')
-      .insert([{ sku_base, name, description }])
+      .insert([{ sku_base, name, description, units_per_colli }])
       .select()
       .single();
 
@@ -591,6 +676,7 @@ async function createProduct(){
     byId('sku_base').value = '';
     byId('name').value = '';
     byId('description').value = '';
+    byId('units_per_colli').value = '1';
 
     await loadProducts(data.id);
     await loadManageList();
@@ -646,6 +732,7 @@ function renderSticker(product, item){
           <div class="st-prod">${escapeHtml(product.name)}</div>
           <div class="st-sku">${escapeHtml(item.sku_unique)}</div>
           <div class="st-notes">${escapeHtml(product.description || '')}</div>
+          <div class="st-notes">${escapeHtml(unitsLabel(product.units_per_colli))}</div>
         </div>
         <div class="st-badge">${escapeHtml(STICKER_PREFIX)}</div>
       </div>
@@ -715,6 +802,8 @@ async function generateStickers(productIdOverride = null, qtyOverride = null){
       .single();
 
     if(pErr) throw pErr;
+
+    product.units_per_colli = safeInt(product.units_per_colli, 1);
 
     const { data: items, error } = await client.rpc('create_items', {
       p_product_id: product_id,
@@ -832,14 +921,25 @@ async function loadManageList(){
   listEl.innerHTML = rows.map(r => `
     <div class="manage-row">
       <div class="manage-sku">${escapeHtml(r.sku_base)}</div>
+
       <div class="manage-info">
         <b>${escapeHtml(r.name)}</b>
         <div class="small">${escapeHtml(r.description || 'Geen overige vermelding')}</div>
+        <div class="product-meta">
+          <span class="meta-pill">${escapeHtml(unitsLabel(r.units_per_colli))}</span>
+        </div>
       </div>
+
+      <div class="manage-units">
+        <div class="n">${r.units_per_colli}</div>
+        <div class="t">per colli</div>
+      </div>
+
       <div class="manage-count">
         <div class="n">${r.item_count}</div>
         <div class="t">items</div>
       </div>
+
       <div class="manage-actions">
         <button class="btn" type="button" data-quick-generate-id="${escapeHtml(r.id)}">Print stickers</button>
         <button
@@ -849,6 +949,7 @@ async function loadManageList(){
           data-edit-sku="${escapeHtml(r.sku_base)}"
           data-edit-name="${escapeHtml(r.name)}"
           data-edit-description="${escapeHtml(r.description || '')}"
+          data-edit-units="${r.units_per_colli}"
           data-edit-count="${r.item_count}"
         >Bewerken</button>
         <button
@@ -858,6 +959,7 @@ async function loadManageList(){
           data-delete-sku="${escapeHtml(r.sku_base)}"
           data-delete-name="${escapeHtml(r.name)}"
           data-delete-description="${escapeHtml(r.description || '')}"
+          data-delete-units="${r.units_per_colli}"
           data-delete-count="${r.item_count}"
         >Verwijderen</button>
       </div>
@@ -903,14 +1005,25 @@ async function loadQuickFindList(){
   listEl.innerHTML = rows.map(r => `
     <div class="quick-find-row">
       <div class="quick-find-sku">${escapeHtml(r.sku_base)}</div>
+
       <div class="quick-find-info">
         <b>${escapeHtml(r.name)}</b>
         <div class="small">${escapeHtml(r.description || 'Geen overige vermelding')}</div>
+        <div class="product-meta">
+          <span class="meta-pill">${escapeHtml(unitsLabel(r.units_per_colli))}</span>
+        </div>
       </div>
+
+      <div class="quick-find-units">
+        <div class="n">${r.units_per_colli}</div>
+        <div class="t">per colli</div>
+      </div>
+
       <div class="quick-find-count">
         <div class="n">${r.item_count}</div>
         <div class="t">items</div>
       </div>
+
       <div class="quick-find-actions">
         <button class="btn primary" type="button" data-quick-pick-id="${escapeHtml(r.id)}">Kies artikel</button>
         <button class="btn accent" type="button" data-quick-print-id="${escapeHtml(r.id)}">Direct printen</button>
@@ -979,17 +1092,20 @@ function bindEditButtons(){
         sku_base: btn.getAttribute('data-edit-sku'),
         name: btn.getAttribute('data-edit-name'),
         description: btn.getAttribute('data-edit-description'),
+        units_per_colli: safeInt(btn.getAttribute('data-edit-units'), 1),
         item_count: Number(btn.getAttribute('data-edit-count') || 0)
       };
 
       byId('editModalInfo').innerHTML = `
         <div><b>Huidige SKU basis:</b> ${escapeHtml(state.currentEditProduct.sku_base)}</div>
         <div><b>Gekoppelde items:</b> ${state.currentEditProduct.item_count}</div>
+        <div><b>Eenheden per colli:</b> ${state.currentEditProduct.units_per_colli}</div>
       `;
 
       byId('edit_sku_base').value = state.currentEditProduct.sku_base || '';
       byId('edit_name').value = state.currentEditProduct.name || '';
       byId('edit_description').value = state.currentEditProduct.description || '';
+      byId('edit_units_per_colli').value = String(state.currentEditProduct.units_per_colli || 1);
       byId('editModal').classList.add('show');
     });
   });
@@ -1003,6 +1119,7 @@ function bindDeleteButtons(){
         sku_base: btn.getAttribute('data-delete-sku'),
         name: btn.getAttribute('data-delete-name'),
         description: btn.getAttribute('data-delete-description'),
+        units_per_colli: safeInt(btn.getAttribute('data-delete-units'), 1),
         item_count: Number(btn.getAttribute('data-delete-count') || 0)
       };
 
@@ -1010,6 +1127,7 @@ function bindDeleteButtons(){
         <div><b>SKU basis:</b> ${escapeHtml(state.currentDeleteProduct.sku_base)}</div>
         <div><b>Omschrijving:</b> ${escapeHtml(state.currentDeleteProduct.name)}</div>
         <div><b>Overige vermelding:</b> ${escapeHtml(state.currentDeleteProduct.description || '-')}</div>
+        <div><b>Eenheden per colli:</b> ${state.currentDeleteProduct.units_per_colli}</div>
         <div><b>Gekoppelde items:</b> ${state.currentDeleteProduct.item_count}</div>
       `;
 
@@ -1035,9 +1153,11 @@ async function saveProductEdit(){
   const sku_base = cleanSku(byId('edit_sku_base').value);
   const name = safeText(byId('edit_name').value);
   const description = safeText(byId('edit_description').value);
+  const units_per_colli = safeInt(byId('edit_units_per_colli').value, 1);
 
   if(!sku_base) return toast('Vul een SKU basis in.', 'err');
   if(!name) return toast('Vul een naam / omschrijving in.', 'err');
+  if(units_per_colli < 1) return toast('Eenheden per colli moet minimaal 1 zijn.', 'err');
 
   const btn = byId('btnConfirmEdit');
   setBusy(btn, true);
@@ -1045,7 +1165,7 @@ async function saveProductEdit(){
   try{
     const { error } = await client
       .from('products')
-      .update({ sku_base, name, description })
+      .update({ sku_base, name, description, units_per_colli })
       .eq('id', state.currentEditProduct.id);
 
     if(error) throw error;
