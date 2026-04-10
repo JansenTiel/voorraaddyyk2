@@ -94,6 +94,12 @@
       white-space:nowrap;
     }
 
+    .meta-pill.split{
+      background:rgba(196,154,108,.12);
+      border-color:rgba(196,154,108,.32);
+      color:#6e4f36;
+    }
+
     .manage-units,
     .quick-find-units{
       text-align:center;
@@ -340,8 +346,8 @@
       Artikelbeheer voor Dyyk. Maak artikelen aan, zoek bestaande artikelen snel terug,
       genereer stickers en beheer foutieve of verouderde artikelen.
       <br><br>
-      Nieuw: per artikel leg je nu ook vast hoeveel <b>eenheden per colli</b> in één verpakking zitten.
-      De sticker blijft altijd per <b>colli</b>, maar dit veld vormt later de basis voor eventueel splitsen naar losse eenheden.
+      Per artikel leg je ook vast hoeveel <b>eenheden per colli</b> in één verpakking zitten.
+      De sticker blijft altijd per <b>colli</b>, maar dit veld wordt gebruikt voor overzicht, XML en eventueel splitsen naar losse eenheden.
     </div>
 
     <p class="page-url">
@@ -400,6 +406,7 @@
             <span id="selectedProductSub"></span>
             <div class="selected-product-extra">
               <span class="meta-pill" id="selectedUnitsPill">1 per colli</span>
+              <span class="meta-pill split hidden" id="selectedSplitPill">Gesplitste 1x-variant</span>
             </div>
           </div>
 
@@ -549,6 +556,27 @@ function safeInt(v, fallback = 1){
   return Number.isFinite(n) && n > 0 ? n : fallback;
 }
 
+function cleanDescription(desc){
+  return safeText(desc)
+    .replace(/\[SPLIT1X\]/g, '')
+    .replace(/\[BASESKU:[^\]]+\]/gi, '')
+    .replace(/\[BASEPACK:\d+\]/gi, '')
+    .trim();
+}
+
+function isSplit1xProduct(product){
+  return /\[SPLIT1X\]/i.test(safeText(product.description));
+}
+
+function formatProduct(product){
+  return {
+    ...product,
+    units_per_colli: safeInt(product.units_per_colli, 1),
+    clean_description: cleanDescription(product.description || ''),
+    split_1x: isSplit1xProduct(product)
+  };
+}
+
 function unitsLabel(units){
   const n = safeInt(units, 1);
   return `${n} ${n === 1 ? 'eenheid' : 'eenheden'} per colli`;
@@ -574,6 +602,7 @@ function updateSelectedProductBar(){
   const title = byId('selectedProductTitle');
   const sub = byId('selectedProductSub');
   const unitsPill = byId('selectedUnitsPill');
+  const splitPill = byId('selectedSplitPill');
   const select = byId('product_select');
 
   const product = state.products.find(p => String(p.id) === String(select.value));
@@ -583,13 +612,15 @@ function updateSelectedProductBar(){
     title.textContent = 'Geen artikel gekozen';
     sub.textContent = '';
     unitsPill.textContent = '1 per colli';
+    splitPill.classList.add('hidden');
     return;
   }
 
   bar.classList.remove('hidden');
   title.textContent = `${product.sku_base} — ${product.name}`;
-  sub.textContent = product.description || 'Geen overige vermelding';
+  sub.textContent = product.clean_description || 'Geen overige vermelding';
   unitsPill.textContent = unitsLabel(product.units_per_colli);
+  splitPill.classList.toggle('hidden', !product.split_1x);
 }
 
 async function loadProducts(selectId = null){
@@ -602,10 +633,7 @@ async function loadProducts(selectId = null){
 
   if(error) throw error;
 
-  state.products = (data || []).map(p => ({
-    ...p,
-    units_per_colli: safeInt(p.units_per_colli, 1)
-  }));
+  state.products = (data || []).map(formatProduct);
 
   const elSelect = byId('product_select');
   elSelect.innerHTML = '';
@@ -731,7 +759,7 @@ function renderSticker(product, item){
           <div class="st-customer">Klant: ${escapeHtml(CUSTOMER_NAME)}</div>
           <div class="st-prod">${escapeHtml(product.name)}</div>
           <div class="st-sku">${escapeHtml(item.sku_unique)}</div>
-          <div class="st-notes">${escapeHtml(product.description || '')}</div>
+          <div class="st-notes">${escapeHtml(product.clean_description || '')}</div>
           <div class="st-notes">${escapeHtml(unitsLabel(product.units_per_colli))}</div>
         </div>
         <div class="st-badge">${escapeHtml(STICKER_PREFIX)}</div>
@@ -795,7 +823,7 @@ async function generateStickers(productIdOverride = null, qtyOverride = null){
   setBusy(btn, true);
 
   try{
-    const { data: product, error: pErr } = await client
+    const { data: productRaw, error: pErr } = await client
       .from('products')
       .select('*')
       .eq('id', product_id)
@@ -803,7 +831,7 @@ async function generateStickers(productIdOverride = null, qtyOverride = null){
 
     if(pErr) throw pErr;
 
-    product.units_per_colli = safeInt(product.units_per_colli, 1);
+    const product = formatProduct(productRaw);
 
     const { data: items, error } = await client.rpc('create_items', {
       p_product_id: product_id,
@@ -907,7 +935,7 @@ async function loadManageList(){
 
   if(q){
     rows = rows.filter(r =>
-      [r.sku_base, r.name, r.description]
+      [r.sku_base, r.name, r.clean_description]
         .map(v => String(v || '').toLowerCase())
         .some(v => v.includes(q))
     );
@@ -924,9 +952,10 @@ async function loadManageList(){
 
       <div class="manage-info">
         <b>${escapeHtml(r.name)}</b>
-        <div class="small">${escapeHtml(r.description || 'Geen overige vermelding')}</div>
+        <div class="small">${escapeHtml(r.clean_description || 'Geen overige vermelding')}</div>
         <div class="product-meta">
           <span class="meta-pill">${escapeHtml(unitsLabel(r.units_per_colli))}</span>
+          ${r.split_1x ? '<span class="meta-pill split">Gesplitste 1x-variant</span>' : ''}
         </div>
       </div>
 
@@ -948,7 +977,7 @@ async function loadManageList(){
           data-edit-id="${escapeHtml(r.id)}"
           data-edit-sku="${escapeHtml(r.sku_base)}"
           data-edit-name="${escapeHtml(r.name)}"
-          data-edit-description="${escapeHtml(r.description || '')}"
+          data-edit-description="${escapeHtml(r.clean_description || '')}"
           data-edit-units="${r.units_per_colli}"
           data-edit-count="${r.item_count}"
         >Bewerken</button>
@@ -958,7 +987,7 @@ async function loadManageList(){
           data-delete-id="${escapeHtml(r.id)}"
           data-delete-sku="${escapeHtml(r.sku_base)}"
           data-delete-name="${escapeHtml(r.name)}"
-          data-delete-description="${escapeHtml(r.description || '')}"
+          data-delete-description="${escapeHtml(r.clean_description || '')}"
           data-delete-units="${r.units_per_colli}"
           data-delete-count="${r.item_count}"
         >Verwijderen</button>
@@ -989,7 +1018,7 @@ async function loadQuickFindList(){
 
   if(q){
     rows = rows.filter(r =>
-      [r.sku_base, r.name, r.description]
+      [r.sku_base, r.name, r.clean_description]
         .map(v => String(v || '').toLowerCase())
         .some(v => v.includes(q))
     );
@@ -1008,9 +1037,10 @@ async function loadQuickFindList(){
 
       <div class="quick-find-info">
         <b>${escapeHtml(r.name)}</b>
-        <div class="small">${escapeHtml(r.description || 'Geen overige vermelding')}</div>
+        <div class="small">${escapeHtml(r.clean_description || 'Geen overige vermelding')}</div>
         <div class="product-meta">
           <span class="meta-pill">${escapeHtml(unitsLabel(r.units_per_colli))}</span>
+          ${r.split_1x ? '<span class="meta-pill split">Gesplitste 1x-variant</span>' : ''}
         </div>
       </div>
 
@@ -1163,9 +1193,30 @@ async function saveProductEdit(){
   setBusy(btn, true);
 
   try{
+    const { data: currentRaw, error: currentErr } = await client
+      .from('products')
+      .select('id, description')
+      .eq('id', state.currentEditProduct.id)
+      .single();
+
+    if(currentErr) throw currentErr;
+
+    const currentDesc = safeText(currentRaw.description);
+    const baseSkuMatch = currentDesc.match(/\[BASESKU:[^\]]+\]/gi) || [];
+    const basePackMatch = currentDesc.match(/\[BASEPACK:\d+\]/gi) || [];
+    const splitMarker = currentDesc.match(/\[SPLIT1X\]/gi) || [];
+
+    const markerString = [...splitMarker, ...baseSkuMatch, ...basePackMatch].join('');
+    const finalDescription = `${description}${description && markerString ? ' ' : ''}${markerString}`.trim();
+
     const { error } = await client
       .from('products')
-      .update({ sku_base, name, description, units_per_colli })
+      .update({
+        sku_base,
+        name,
+        description: finalDescription,
+        units_per_colli
+      })
       .eq('id', state.currentEditProduct.id);
 
     if(error) throw error;
