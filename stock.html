@@ -12,7 +12,2069 @@
       margin:12px 0 0;
       color:var(--navy);
       font-size:14px;
+      font-weight:700;<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Huidige voorraad</title>
+
+  <link rel="stylesheet" href="/css/theme.css"/>
+
+  <style>
+    .page-url{
+      margin:12px 0 0;
+      color:var(--navy);
+      font-size:14px;
       font-weight:700;
+      display:flex;
+      align-items:center;
+      flex-wrap:wrap;
+      gap:8px;
+    }
+
+    .page-url strong{
+      display:inline-flex;
+      align-items:center;
+      padding:5px 12px;
+      border-radius:999px;
+      background:rgba(196,154,108,.14);
+      border:1px solid rgba(196,154,108,.28);
+      color:#6e4f36;
+      font-weight:900;
+      letter-spacing:.01em;
+    }
+
+    .stock-toolbar{
+      display:grid;
+      grid-template-columns:1.2fr .8fr auto;
+      gap:14px;
+      align-items:end;
+      margin-top:14px;
+    }
+
+    .bulk-panel{
+      margin-top:16px;
+      border:1px solid var(--border);
+      border-radius:14px;
+      background:#f8fafc;
+      padding:14px;
+    }
+
+    .bulk-panel-top{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+      align-items:center;
+      margin-bottom:10px;
+    }
+
+    .bulk-summary{
+      font-weight:800;
+      color:var(--navy);
+    }
+
+    .bulk-note{
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.4;
+      margin-top:8px;
+    }
+
+    .group-list{
+      display:grid;
+      gap:12px;
+    }
+
+    .stock-group{
+      border:1px solid var(--border);
+      border-radius:16px;
+      background:#fff;
+      overflow:hidden;
+    }
+
+    .stock-group-head{
+      width:100%;
+      border:none;
+      background:#fff;
+      cursor:pointer;
+      padding:16px;
+      display:grid;
+      grid-template-columns:180px minmax(260px,1fr) 130px 130px 42px;
+      gap:14px;
+      align-items:center;
+      text-align:left;
+    }
+
+    .stock-group-head:hover{
+      background:#fafbfc;
+    }
+
+    .stock-group-head.single-metric{
+      grid-template-columns:180px minmax(260px,1fr) 130px 42px;
+    }
+
+    .sg-sku{
+      font-size:18px;
+      font-weight:900;
+      color:var(--navy);
+      word-break:break-word;
+      line-height:1.15;
+    }
+
+    .sg-info b{
+      display:block;
+      color:var(--navy);
+      font-size:18px;
+      margin-bottom:4px;
+      line-height:1.2;
+    }
+
+    .sg-info .sub{
+      font-size:13px;
+      color:var(--muted);
+      line-height:1.35;
+    }
+
+    .sg-meta{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-top:8px;
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      padding:4px 10px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background:#f8fafc;
+      font-size:12px;
+      font-weight:800;
+      color:var(--navy);
+      white-space:nowrap;
+    }
+
+    .pill.split{
+      background:rgba(196,154,108,.12);
+      border-color:rgba(196,154,108,.32);
+      color:#6e4f36;
+    }
+
+    .sg-stat{
+      text-align:right;
+    }
+
+    .sg-stat .n{
+      font-size:32px;
+      line-height:1;
+      font-weight:900;
+      color:var(--navy);
+    }
+
+    .sg-stat .t{
+      font-size:12px;
+      color:var(--muted);
+      font-weight:800;
+      text-transform:uppercase;
+      letter-spacing:.04em;
+      margin-top:4px;
+    }
+
+    .sg-arrow{
+      width:42px;
+      height:42px;
+      border:1px solid var(--border);
+      border-radius:999px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:var(--navy);
+      font-size:18px;
+      font-weight:900;
+      background:#fff;
+      transition:transform .18s ease;
+    }
+
+    .stock-group.open .sg-arrow{
+      transform:rotate(180deg);
+    }
+
+    .stock-group-body{
+      display:none;
+      border-top:1px solid var(--border);
+      background:#fcfcfd;
+      padding:16px;
+    }
+
+    .stock-group.open .stock-group-body{
+      display:block;
+    }
+
+    .body-top{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:12px;
+      margin-bottom:14px;
+    }
+
+    .mini-kpi{
+      border:1px solid var(--border);
+      border-radius:14px;
+      background:#fff;
+      padding:12px 14px;
+    }
+
+    .mini-kpi .label{
+      font-size:12px;
+      color:var(--muted);
+      font-weight:800;
+      text-transform:uppercase;
+      letter-spacing:.04em;
+      margin-bottom:6px;
+    }
+
+    .mini-kpi .value{
+      font-size:26px;
+      line-height:1;
+      font-weight:900;
+      color:var(--navy);
+      word-break:break-word;
+      white-space:pre-line;
+    }
+
+    .group-action-bar{
+      border:1px dashed var(--border);
+      border-radius:14px;
+      background:#fff;
+      padding:12px;
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:center;
+      flex-wrap:wrap;
+      margin-bottom:12px;
+    }
+
+    .group-action-left{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+
+    .table-wrap{
+      overflow:auto;
+      border:1px solid var(--border);
+      border-radius:14px;
+      background:#fff;
+    }
+
+    table.stock-detail{
+      width:100%;
+      border-collapse:collapse;
+      min-width:980px;
+    }
+
+    table.stock-detail th,
+    table.stock-detail td{
+      padding:10px 12px;
+      border-bottom:1px solid var(--border);
+      text-align:left;
+      font-size:14px;
+      vertical-align:top;
+    }
+
+    table.stock-detail th{
+      background:#f8fafc;
+      color:var(--navy);
+      font-weight:900;
+      position:sticky;
+      top:0;
+      z-index:1;
+    }
+
+    .detail-actions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    .row-check{
+      width:18px;
+      height:18px;
+      accent-color:var(--navy);
+    }
+
+    .mobile-cards{
+      display:none;
+      gap:10px;
+      margin-top:12px;
+      flex-direction:column;
+    }
+
+    .mobile-card{
+      border:1px solid var(--border);
+      border-radius:12px;
+      background:#fff;
+      padding:12px;
+    }
+
+    .mobile-line{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:6px;
+    }
+
+    .mobile-line:last-child{
+      margin-bottom:0;
+    }
+
+    .mobile-k{
+      font-size:12px;
+      color:var(--muted);
+      font-weight:800;
+      text-transform:uppercase;
+      letter-spacing:.04em;
+      min-width:110px;
+    }
+
+    .mobile-v{
+      text-align:right;
+      font-size:14px;
+      color:var(--text);
+      word-break:break-word;
+    }
+
+    .modal-backdrop{
+      position:fixed;
+      inset:0;
+      background:rgba(15,47,79,.35);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+      z-index:1000;
+      overflow:auto;
+    }
+
+    .modal-backdrop.show{
+      display:flex;
+    }
+
+    .modal-card{
+      width:min(980px,100%);
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius:20px;
+      box-shadow:0 20px 50px rgba(0,0,0,.18);
+      padding:22px;
+      margin:auto;
+      max-height:92vh;
+      overflow:auto;
+    }
+
+    .modal-title{
+      font-size:22px;
+      font-weight:900;
+      color:var(--navy);
+      margin:0 0 6px 0;
+    }
+
+    .modal-sub{
+      color:var(--muted);
+      margin-bottom:16px;
+      line-height:1.45;
+    }
+
+    .modal-info{
+      border:1px solid var(--border);
+      border-radius:12px;
+      background:#fafbfc;
+      padding:12px;
+      font-size:14px;
+      line-height:1.5;
+      margin-bottom:14px;
+    }
+
+    .modal-info b{
+      color:var(--navy);
+    }
+
+    .xml-box{
+      border:1px solid var(--border);
+      border-radius:14px;
+      background:#f8fafc;
+      padding:14px;
+      margin-top:10px;
+    }
+
+    .xml-title{
+      font-size:15px;
+      font-weight:900;
+      color:var(--navy);
+      margin-bottom:10px;
+    }
+
+    .xml-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+
+    .xml-grid-1{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:12px;
+      margin-top:12px;
+    }
+
+    .summary-wrap{
+      border:1px solid var(--border);
+      border-radius:14px;
+      background:#fff;
+      overflow:hidden;
+      margin-top:12px;
+    }
+
+    .summary-head{
+      padding:12px 14px;
+      background:#f8fafc;
+      border-bottom:1px solid var(--border);
+      font-weight:900;
+      color:var(--navy);
+    }
+
+    .summary-table-wrap{
+      max-height:260px;
+      overflow:auto;
+    }
+
+    .summary-table{
+      width:100%;
+      border-collapse:collapse;
+    }
+
+    .summary-table th,
+    .summary-table td{
+      border-bottom:1px solid var(--border);
+      padding:10px 12px;
+      text-align:left;
+      font-size:14px;
+      vertical-align:top;
+    }
+
+    .summary-table th{
+      background:#fff;
+      position:sticky;
+      top:0;
+      z-index:1;
+    }
+
+    .summary-type{
+      display:inline-flex;
+      align-items:center;
+      padding:4px 8px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:800;
+      border:1px solid var(--border);
+      background:#fff;
+      color:var(--navy);
+      white-space:nowrap;
+    }
+
+    .summary-type.manual{
+      background:rgba(196,154,108,.12);
+      border-color:rgba(196,154,108,.32);
+      color:#6e4f36;
+    }
+
+    .manual-form{
+      display:grid;
+      grid-template-columns:1fr auto;
+      gap:10px;
+      align-items:end;
+      margin-top:10px;
+    }
+
+    .empty-state{
+      border:1px solid var(--border);
+      border-radius:14px;
+      background:#fff;
+      padding:18px;
+      color:var(--muted);
+    }
+
+    .hidden{
+      display:none !important;
+    }
+
+    @media(max-width:1180px){
+      .stock-group-head{
+        grid-template-columns:1fr 120px 120px 42px;
+        grid-template-areas:
+          "sku colli units arrow"
+          "info info info info";
+      }
+
+      .stock-group-head.single-metric{
+        grid-template-columns:1fr 120px 42px;
+        grid-template-areas:
+          "sku colli arrow"
+          "info info info";
+      }
+
+      .sg-sku{grid-area:sku}
+      .sg-info{grid-area:info}
+      .sg-stat.colli{grid-area:colli}
+      .sg-stat.units{grid-area:units}
+      .sg-arrow{grid-area:arrow}
+
+      .stock-toolbar{
+        grid-template-columns:1fr;
+      }
+    }
+
+    @media(max-width:860px){
+      .body-top{
+        grid-template-columns:1fr;
+      }
+
+      .xml-grid{
+        grid-template-columns:1fr;
+      }
+    }
+
+    @media(max-width:760px){
+      .table-wrap{
+        display:none;
+      }
+
+      .mobile-cards{
+        display:flex;
+      }
+
+      .stock-group-head{
+        grid-template-columns:1fr auto;
+        grid-template-areas:
+          "sku arrow"
+          "info info"
+          "colli units";
+      }
+
+      .stock-group-head.single-metric{
+        grid-template-columns:1fr auto;
+        grid-template-areas:
+          "sku arrow"
+          "info info"
+          "colli colli";
+      }
+
+      .sg-stat{
+        text-align:left;
+      }
+
+      .manual-form{
+        grid-template-columns:1fr;
+      }
+    }
+  </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/js/supabase.js"></script>
+  <script src="/js/app.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+<body data-page="stock">
+
+<div class="topbar no-print">
+  <div class="inner">
+    <div class="brand">
+      <div class="logo">o</div>
+      <div class="title">
+        Oegema Logistics
+        <small>Dyyk · Voorraadbeheer</small>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <a href="/">Dashboard</a>
+      <a href="/products">Artikelen + Stickers</a>
+      <a href="/scan">In-/Uitscan</a>
+      <a class="active" href="/stock">Huidige voorraad</a>
+      <a href="/outscans">Uitscans</a>
+      <a href="/inventory">Inventarisatie</a>
+    </nav>
+
+    <div class="rightbar">
+      <a class="site-link" href="https://www.voorraaddyyk.nl" target="_blank" rel="noopener">
+        www.voorraaddyyk.nl
+      </a>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <div id="toast" class="notice"></div>
+
+  <div class="card">
+    <h2>Huidige voorraad</h2>
+    <div class="muted">
+      Duidelijk voorraadoverzicht per artikel. Nieuwe stickers worden gescand zonder zichtbaar volgnummer,
+      terwijl het systeem intern gewoon FIFO en voorraadhistorie blijft bijhouden.
+      <br><br>
+      Vanuit deze pagina kun je:
+      <b>uitboeken</b>, <b>toewijzen aan order</b>, <b>retour Huizen + XML</b>, <b>handmatige XML aanmaken</b>
+      en colli met meerdere eenheden <b>splitsen naar losse 1x-items</b>.
+    </div>
+
+    <p class="page-url">
+      Actieve omgeving:
+      <strong>www.voorraaddyyk.nl</strong>
+    </p>
+
+    <div class="stock-toolbar">
+      <div>
+        <label for="q">Zoeken</label>
+        <input id="q" placeholder="Zoek op SKU, naam, extra info of locatie"/>
+      </div>
+
+      <div>
+        <label for="sort">Sorteren op</label>
+        <select id="sort">
+          <option value="name_asc">Naam A-Z</option>
+          <option value="sku_asc">SKU A-Z</option>
+          <option value="colli_desc">Meeste colli eerst</option>
+          <option value="units_desc">Meeste eenheden eerst</option>
+          <option value="units_per_colli_desc">Meeste per colli eerst</option>
+        </select>
+      </div>
+
+      <div>
+        <label>&nbsp;</label>
+        <button class="btn primary" id="btn_refresh" type="button" style="width:100%">Verversen</button>
+      </div>
+    </div>
+
+    <div class="bulk-panel">
+      <div class="bulk-panel-top">
+        <div class="bulk-summary" id="bulkSummary">Geselecteerd: 0 artikelen</div>
+
+        <div class="btnRow">
+          <button class="btn" id="btnSelectAllVisible" type="button">Alles op pagina selecteren</button>
+          <button class="btn" id="btnSelectNone" type="button">Selectie wissen</button>
+          <button class="btn" id="btnBulkOut" type="button">Bulk: uitboeken</button>
+          <button class="btn primary" id="btnBulkAllocate" type="button">Bulk: toewijzen aan order</button>
+          <button class="btn accent" id="btnBulkReturn" type="button">Bulk: retour Huizen + XML</button>
+          <button class="btn" id="btnManualXml" type="button">Handmatige XML aanmaken</button>
+          <button class="btn" id="btnExportStock" type="button">Download Excel</button>
+        </div>
+      </div>
+
+      <div class="bulk-note">
+        Retour Huizen + XML gebruikt de geselecteerde voorraadregels. Bij split-items wordt in de XML het aantal colli automatisch berekend op basis van de oorspronkelijke verpakking.
+      </div>
+    </div>
+
+    <div class="row-3" style="margin-top:16px">
+      <div class="card" style="padding:16px">
+        <div class="kpi">
+          <div class="label">Aantal SKU's</div>
+          <div class="value" id="kpiSkuCount">0</div>
+        </div>
+      </div>
+
+      <div class="card" style="padding:16px">
+        <div class="kpi">
+          <div class="label">Totaal colli / items</div>
+          <div class="value" id="kpiColliCount">0</div>
+        </div>
+      </div>
+
+      <div class="card" style="padding:16px">
+        <div class="kpi">
+          <div class="label">Totaal eenheden</div>
+          <div class="value" id="kpiUnitCount">0</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <div id="groupList" class="group-list"></div>
+  </div>
+</div>
+
+<!-- ACTIEMODAL -->
+<div id="actionModal" class="modal-backdrop">
+  <div class="modal-card">
+    <h3 class="modal-title" id="actionModalTitle">Actie uitvoeren</h3>
+    <div class="modal-sub" id="actionModalSub">Voer de gegevens in voor deze actie.</div>
+
+    <div class="modal-info" id="actionModalInfo"></div>
+
+    <div id="actionOrderWrap">
+      <label for="modalOrderNo">Ordernummer</label>
+      <input id="modalOrderNo" placeholder="Bijv. ORD-12345"/>
+    </div>
+
+    <div id="actionDestinationWrap" class="hidden" style="margin-top:12px">
+      <label for="modalDestination">Bestemming</label>
+      <input id="modalDestination" value="Retour Huizen"/>
+    </div>
+
+    <div style="margin-top:12px">
+      <label for="modalNote">Opmerking</label>
+      <textarea id="modalNote" placeholder="Optioneel"></textarea>
+      <div class="small muted" id="modalHint" style="margin-top:6px">Deze actie boekt direct af.</div>
+    </div>
+
+    <div id="returnXmlWrap" class="xml-box hidden">
+      <div class="xml-title">XML gegevens retour Huizen</div>
+
+      <div class="xml-grid">
+        <div>
+          <label for="xmlRef">Referentie / opdrachtnummer</label>
+          <input id="xmlRef" placeholder="Bijv. 2514750"/>
+        </div>
+        <div>
+          <label for="xmlDebiteur">Debiteur</label>
+          <input id="xmlDebiteur" value="20009"/>
+        </div>
+
+        <div>
+          <label for="xmlLosnaam">Losnaam</label>
+          <input id="xmlLosnaam" placeholder="Bijv. Magazijn Novitaz"/>
+        </div>
+        <div>
+          <label for="xmlLosadres">Losadres</label>
+          <input id="xmlLosadres" placeholder="Straat + huisnummer"/>
+        </div>
+
+        <div>
+          <label for="xmlLospostcode">Lospostcode</label>
+          <input id="xmlLospostcode" placeholder="Bijv. 1671 NH"/>
+        </div>
+        <div>
+          <label for="xmlLoswoonplaats">Loswoonplaats</label>
+          <input id="xmlLoswoonplaats" placeholder="Bijv. MEDEMBLIK"/>
+        </div>
+
+        <div>
+          <label for="xmlLostelefoon">Lostelefoon</label>
+          <input id="xmlLostelefoon" placeholder="Telefoonnummer"/>
+        </div>
+        <div>
+          <label for="xmlCommissie">Commissie</label>
+          <input id="xmlCommissie" placeholder="Bijv. : V2500635 dhr Morris Vijn"/>
+        </div>
+      </div>
+
+      <div class="xml-grid-1">
+        <div>
+          <label for="xmlVerzendinstructie">Verzendinstructie</label>
+          <input id="xmlVerzendinstructie" placeholder="Bijv. Leverweek: 11"/>
+        </div>
+        <div>
+          <label for="xmlBijzonderheden">Bijzonderheden</label>
+          <textarea id="xmlBijzonderheden" placeholder="Optioneel"></textarea>
+        </div>
+      </div>
+
+      <div class="summary-wrap">
+        <div class="summary-head">XML-overzicht vanuit geselecteerde voorraad</div>
+        <div class="summary-table-wrap">
+          <table class="summary-table">
+            <thead>
+              <tr>
+                <th>Omschrijving</th>
+                <th>Aantal</th>
+                <th>Colli</th>
+                <th>Oorspr. per colli</th>
+              </tr>
+            </thead>
+            <tbody id="returnXmlSummaryBody">
+              <tr><td colspan="4">Nog geen regels.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="small muted" style="margin-top:8px">
+        Bij split-1x artikelen wordt het aantal colli automatisch berekend op basis van de oorspronkelijke verpakking.
+      </div>
+    </div>
+
+    <div class="btnRow" style="margin-top:16px">
+      <button class="btn primary" id="btnConfirmAction" type="button">Opslaan</button>
+      <button class="btn" id="btnCancelAction" type="button">Annuleren</button>
+    </div>
+  </div>
+</div>
+
+<!-- HANDMATIGE XML -->
+<div id="manualXmlModal" class="modal-backdrop">
+  <div class="modal-card">
+    <h3 class="modal-title">Handmatige XML aanmaken</h3>
+    <div class="modal-sub">
+      Maak een XML zonder voorraad af te boeken. Iedere handmatige regel is exact <b>1 artikel</b>.
+      Wil je 3 gelijke stoelen toevoegen, voeg je 3 losse regels toe.
+    </div>
+
+    <div class="modal-info">
+      <div><b>Voorraadmutatie:</b> nee</div>
+      <div><b>XML-type:</b> volledig handmatig</div>
+    </div>
+
+    <div class="xml-box">
+      <div class="xml-title">XML gegevens</div>
+
+      <div class="xml-grid">
+        <div>
+          <label for="manualXmlRef">Referentie / opdrachtnummer</label>
+          <input id="manualXmlRef" placeholder="Bijv. 2601854"/>
+        </div>
+        <div>
+          <label for="manualXmlDebiteur">Debiteur</label>
+          <input id="manualXmlDebiteur" value="20009"/>
+        </div>
+
+        <div>
+          <label for="manualXmlLosnaam">Losnaam</label>
+          <input id="manualXmlLosnaam" placeholder="Bijv. Eijerkamp Logistics 2"/>
+        </div>
+        <div>
+          <label for="manualXmlLosadres">Losadres</label>
+          <input id="manualXmlLosadres" placeholder="Straat + huisnummer"/>
+        </div>
+
+        <div>
+          <label for="manualXmlLospostcode">Lospostcode</label>
+          <input id="manualXmlLospostcode" placeholder="Bijv. 7202 CM"/>
+        </div>
+        <div>
+          <label for="manualXmlLoswoonplaats">Loswoonplaats</label>
+          <input id="manualXmlLoswoonplaats" placeholder="Bijv. ZUTPHEN"/>
+        </div>
+
+        <div>
+          <label for="manualXmlLostelefoon">Lostelefoon</label>
+          <input id="manualXmlLostelefoon" placeholder="Telefoonnummer"/>
+        </div>
+        <div>
+          <label for="manualXmlCommissie">Commissie</label>
+          <input id="manualXmlCommissie" placeholder="Bijv. : 10 0 132937 002 Visscher"/>
+        </div>
+      </div>
+
+      <div class="xml-grid-1">
+        <div>
+          <label for="manualXmlVerzendinstructie">Verzendinstructie</label>
+          <input id="manualXmlVerzendinstructie" placeholder="Bijv. Leverweek: 16"/>
+        </div>
+        <div>
+          <label for="manualXmlBijzonderheden">Bijzonderheden</label>
+          <textarea id="manualXmlBijzonderheden" placeholder="Optioneel"></textarea>
+        </div>
+      </div>
+
+      <div class="xml-title" style="margin-top:14px">Handmatige regel toevoegen</div>
+      <div class="manual-form">
+        <div>
+          <label for="manualXmlOmschrijving">Artikelomschrijving</label>
+          <input id="manualXmlOmschrijving" placeholder="Bijv. Eetkamerstoel Nonna"/>
+        </div>
+        <button class="btn" id="btnAddManualXmlLine" type="button">Regel toevoegen</button>
+      </div>
+
+      <div class="summary-wrap">
+        <div class="summary-head">Handmatige partijregels</div>
+        <div class="summary-table-wrap">
+          <table class="summary-table">
+            <thead>
+              <tr>
+                <th>Type</th>
+                <th>Omschrijving</th>
+                <th>Aantal</th>
+                <th>Colli</th>
+                <th>Actie</th>
+              </tr>
+            </thead>
+            <tbody id="manualXmlSummaryBody">
+              <tr><td colspan="5">Nog geen handmatige regels toegevoegd.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="btnRow" style="margin-top:16px">
+      <button class="btn primary" id="btnDownloadManualXml" type="button">XML downloaden</button>
+      <button class="btn" id="btnCancelManualXml" type="button">Annuleren</button>
+    </div>
+  </div>
+</div>
+
+<!-- SPLIT MODAL -->
+<div id="splitModal" class="modal-backdrop">
+  <div class="modal-card">
+    <h3 class="modal-title">Colli splitsen naar losse 1x-items</h3>
+    <div class="modal-sub">
+      De geselecteerde colli wordt uit voorraad gehaald en vervangen door losse 1x-items op dezelfde locatie.
+    </div>
+
+    <div class="modal-info" id="splitModalInfo"></div>
+
+    <div class="btnRow" style="margin-top:16px">
+      <button class="btn primary" id="btnConfirmSplit" type="button">Splitsen</button>
+      <button class="btn" id="btnCancelSplit" type="button">Annuleren</button>
+    </div>
+  </div>
+</div>
+
+<script>
+if(typeof setActiveNav === 'function') setActiveNav();
+
+const client = typeof sb === 'function' ? sb() : null;
+
+const state = {
+  groups: [],
+  visibleItems: [],
+  currentActionContext: null,
+  currentSplitItem: null,
+  manualXmlLines: []
+};
+
+const selectedItemIds = new Set();
+
+function byIdLocal(id){
+  return document.getElementById(id);
+}
+
+function safeText(v){
+  return String(v ?? '').trim();
+}
+
+function safeInt(v, fallback = 1){
+  const n = parseInt(v, 10);
+  return Number.isFinite(n) && n > 0 ? n : fallback;
+}
+
+function esc(value){
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function xmlEsc(value){
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+}
+
+function showToast(msg, type='ok'){
+  if(typeof toast === 'function'){
+    toast(msg, type);
+    return;
+  }
+
+  const toastEl = byIdLocal('toast');
+  if(toastEl){
+    toastEl.textContent = msg;
+    toastEl.className = `notice ${type}`;
+    toastEl.style.display = 'block';
+    clearTimeout(window._toastTimer);
+    window._toastTimer = setTimeout(() => {
+      toastEl.style.display = 'none';
+    }, 8000);
+    return;
+  }
+
+  alert(msg);
+}
+
+function formatNlDateTime(v){
+  if(typeof nlTime === 'function') return nlTime(v);
+  if(!v) return '';
+  const d = new Date(v);
+  return isNaN(d) ? String(v) : d.toLocaleString('nl-NL');
+}
+
+function unitWord(n){
+  return n === 1 ? 'eenheid' : 'eenheden';
+}
+
+function unitsPerColliLabel(n){
+  return `${n} ${n === 1 ? 'eenheid' : 'eenheden'} per colli`;
+}
+
+function cleanDescription(desc){
+  return safeText(desc)
+    .replace(/\[SPLIT1X\]/g, '')
+    .replace(/\[BASESKU:[^\]]+\]/g, '')
+    .replace(/\[BASEPACK:\d+\]/g, '')
+    .trim();
+}
+
+function stripPackSuffix(name){
+  return safeText(name)
+    .replace(/\s*\(\d+x\)\s*$/i, '')
+    .replace(/\s*\(1x\)\s*$/i, '')
+    .trim();
+}
+
+function parseBaseSku(product){
+  const desc = safeText(product.description);
+  const m = desc.match(/\[BASESKU:([^\]]+)\]/i);
+  return m ? m[1] : safeText(product.sku_base);
+}
+
+function parseBasePackUnits(product){
+  const desc = safeText(product.description);
+  const m = desc.match(/\[BASEPACK:(\d+)\]/i);
+  return m ? safeInt(m[1], safeInt(product.units_per_colli, 1)) : safeInt(product.units_per_colli, 1);
+}
+
+function isSplit1xProduct(product){
+  return /\[SPLIT1X\]/i.test(safeText(product.description));
+}
+
+function enrichRow(row){
+  const product = row.products || {};
+  const unitsPerColli = safeInt(product.units_per_colli, 1);
+  const split1x = isSplit1xProduct(product);
+  const basePackUnits = parseBasePackUnits(product);
+  const baseSku = parseBaseSku(product);
+
+  return {
+    id: row.id,
+    product_id: product.id || row.product_id,
+    sku_unique: row.sku_unique || '',
+    scan_code: row.scan_code || baseSku,
+    status: row.status || 'IN_STOCK',
+    location: row.location || '',
+    in_at: row.in_at || row.created_at || '',
+    created_at: row.created_at || '',
+    sku_base: product.sku_base || '',
+    name: stripPackSuffix(product.name || ''),
+    raw_name: product.name || '',
+    description: cleanDescription(product.description || ''),
+    units_per_colli: unitsPerColli,
+    base_pack_units: basePackUnits,
+    base_sku: baseSku,
+    split_1x: split1x,
+    unit_value: split1x ? 1 : unitsPerColli
+  };
+}
+
+function groupItems(rows){
+  const map = new Map();
+
+  rows.forEach(row => {
+    const key = `${row.product_id}`;
+    if(!map.has(key)){
+      map.set(key, {
+        product_id: row.product_id,
+        sku_base: row.sku_base,
+        name: row.name,
+        raw_name: row.raw_name,
+        description: row.description,
+        units_per_colli: row.units_per_colli,
+        base_pack_units: row.base_pack_units,
+        split_1x: row.split_1x,
+        items: []
+      });
+    }
+    map.get(key).items.push(row);
+  });
+
+  return Array.from(map.values()).map(group => {
+    group.colli_count = group.items.length;
+    group.unit_count = group.items.reduce((sum, it) => sum + it.unit_value, 0);
+    group.show_units = group.unit_count !== group.colli_count;
+    return group;
+  });
+}
+
+function sortGroups(groups, sort){
+  const rows = [...groups];
+  const cmp = (a,b) => String(a ?? '').localeCompare(String(b ?? ''), 'nl');
+
+  if(sort === 'name_asc') rows.sort((a,b) => cmp(a.name, b.name) || cmp(a.sku_base, b.sku_base));
+  if(sort === 'sku_asc') rows.sort((a,b) => cmp(a.sku_base, b.sku_base));
+  if(sort === 'colli_desc') rows.sort((a,b) => b.colli_count - a.colli_count || cmp(a.name, b.name));
+  if(sort === 'units_desc') rows.sort((a,b) => b.unit_count - a.unit_count || cmp(a.name, b.name));
+  if(sort === 'units_per_colli_desc') rows.sort((a,b) => b.units_per_colli - a.units_per_colli || cmp(a.name, b.name));
+
+  rows.forEach(group => {
+    group.items.sort((a,b) => {
+      const ta = new Date(a.in_at || a.created_at || 0).getTime();
+      const tb = new Date(b.in_at || b.created_at || 0).getTime();
+      return ta - tb || String(a.sku_unique).localeCompare(String(b.sku_unique), 'nl');
+    });
+  });
+
+  return rows;
+}
+
+function getCurrentVisibleItems(){
+  return state.visibleItems || [];
+}
+
+function findItemById(itemId){
+  return getCurrentVisibleItems().find(it => String(it.id) === String(itemId)) || null;
+}
+
+function getItemsByProductId(productId){
+  return getCurrentVisibleItems().filter(it => String(it.product_id) === String(productId));
+}
+
+function updateBulkSummary(){
+  byIdLocal('bulkSummary').textContent = `Geselecteerd: ${selectedItemIds.size} artikelen`;
+}
+
+function syncSelectionUI(){
+  document.querySelectorAll('[data-select-item-id]').forEach(cb => {
+    cb.checked = selectedItemIds.has(cb.getAttribute('data-select-item-id'));
+  });
+
+  document.querySelectorAll('[data-select-product-id]').forEach(cb => {
+    const productId = cb.getAttribute('data-select-product-id');
+    const items = getItemsByProductId(productId);
+    cb.checked = items.length > 0 && items.every(it => selectedItemIds.has(String(it.id)));
+  });
+
+  updateBulkSummary();
+}
+
+function clearSelection(){
+  selectedItemIds.clear();
+  syncSelectionUI();
+}
+
+function selectAllVisibleItems(){
+  getCurrentVisibleItems().forEach(it => selectedItemIds.add(String(it.id)));
+  syncSelectionUI();
+}
+
+function selectAllProductItems(productId){
+  getItemsByProductId(productId).forEach(it => selectedItemIds.add(String(it.id)));
+  syncSelectionUI();
+}
+
+function clearAllProductItems(productId){
+  getItemsByProductId(productId).forEach(it => selectedItemIds.delete(String(it.id)));
+  syncSelectionUI();
+}
+
+function makeGroupHtml(group, index){
+  const headClass = group.show_units ? 'stock-group-head' : 'stock-group-head single-metric';
+
+  return `
+    <div class="stock-group" data-group-index="${index}">
+      <button class="${headClass}" type="button" aria-expanded="false">
+        <div class="sg-sku">${esc(group.sku_base)}</div>
+
+        <div class="sg-info">
+          <b>${esc(group.raw_name || group.name)}</b>
+          <div class="sub">${esc(group.description || 'Geen overige vermelding')}</div>
+          <div class="sg-meta">
+            <span class="pill">${esc(unitsPerColliLabel(group.units_per_colli))}</span>
+            ${group.split_1x ? `<span class="pill split">Gesplitste 1x-voorraad</span>` : ''}
+          </div>
+        </div>
+
+        <div class="sg-stat colli">
+          <div class="n">${group.colli_count}</div>
+          <div class="t">${group.split_1x ? 'items' : 'colli'}</div>
+        </div>
+
+        ${group.show_units ? `
+          <div class="sg-stat units">
+            <div class="n">${group.unit_count}</div>
+            <div class="t">${esc(unitWord(group.unit_count))}</div>
+          </div>
+        ` : ''}
+
+        <div class="sg-arrow">⌄</div>
+      </button>
+
+      <div class="stock-group-body">
+        <div class="body-top">
+          <div class="mini-kpi">
+            <div class="label">${group.split_1x ? 'Losse items op voorraad' : 'Colli op voorraad'}</div>
+            <div class="value">${group.colli_count}</div>
+          </div>
+
+          <div class="mini-kpi">
+            <div class="label">Eenheden per colli</div>
+            <div class="value">${group.units_per_colli}</div>
+          </div>
+
+          <div class="mini-kpi">
+            <div class="label">Totaal ${esc(unitWord(group.unit_count))}</div>
+            <div class="value">${group.unit_count}</div>
+          </div>
+        </div>
+
+        <div class="group-action-bar">
+          <div class="group-action-left">
+            <label style="display:flex;align-items:center;gap:8px;font-weight:800;color:var(--navy)">
+              <input class="row-check" type="checkbox" data-select-product-id="${esc(group.product_id)}"/>
+              Selecteer alle regels van dit artikel
+            </label>
+
+            <button class="btn small-btn" type="button" data-clear-product="${esc(group.product_id)}">Selectie wissen</button>
+          </div>
+
+          <div class="btnRow">
+            <button class="btn small-btn" type="button" data-action-product="OUT" data-product-id="${esc(group.product_id)}">Uitboeken</button>
+            <button class="btn primary small-btn" type="button" data-action-product="ALLOCATE_ORDER" data-product-id="${esc(group.product_id)}">Toewijzen order</button>
+            <button class="btn accent small-btn" type="button" data-action-product="RETURN_TO_HUIZEN" data-product-id="${esc(group.product_id)}">Retour Huizen + XML</button>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table class="stock-detail">
+            <thead>
+              <tr>
+                <th>Selectie</th>
+                <th>Locatie</th>
+                <th>Inslag tijd</th>
+                <th>Waarde</th>
+                <th>Actie</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${group.items.map(it => `
+                <tr>
+                  <td><input class="row-check" type="checkbox" data-select-item-id="${esc(it.id)}"/></td>
+                  <td>${esc(it.location || '')}</td>
+                  <td>${esc(formatNlDateTime(it.in_at))}</td>
+                  <td>${it.unit_value} ${esc(unitWord(it.unit_value))}</td>
+                  <td>
+                    <div class="detail-actions">
+                      <button class="btn small-btn" type="button" data-action-row="OUT" data-item-id="${esc(it.id)}">Uitboeken</button>
+                      <button class="btn primary small-btn" type="button" data-action-row="ALLOCATE_ORDER" data-item-id="${esc(it.id)}">Order</button>
+                      <button class="btn accent small-btn" type="button" data-action-row="RETURN_TO_HUIZEN" data-item-id="${esc(it.id)}">XML</button>
+                      ${(!it.split_1x && it.units_per_colli > 1) ? `
+                        <button class="btn small-btn" type="button" data-split-item-id="${esc(it.id)}">Splits 1x</button>
+                      ` : ''}
+                    </div>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="mobile-cards">
+          ${group.items.map(it => `
+            <div class="mobile-card">
+              <div class="mobile-line">
+                <div class="mobile-k">Selectie</div>
+                <div class="mobile-v"><input class="row-check" type="checkbox" data-select-item-id="${esc(it.id)}"/></div>
+              </div>
+              <div class="mobile-line">
+                <div class="mobile-k">Locatie</div>
+                <div class="mobile-v">${esc(it.location || '')}</div>
+              </div>
+              <div class="mobile-line">
+                <div class="mobile-k">Inslag</div>
+                <div class="mobile-v">${esc(formatNlDateTime(it.in_at))}</div>
+              </div>
+              <div class="mobile-line">
+                <div class="mobile-k">Waarde</div>
+                <div class="mobile-v">${it.unit_value} ${esc(unitWord(it.unit_value))}</div>
+              </div>
+              <div class="mobile-line" style="margin-top:10px">
+                <div class="detail-actions">
+                  <button class="btn small-btn" type="button" data-action-row="OUT" data-item-id="${esc(it.id)}">Uitboeken</button>
+                  <button class="btn primary small-btn" type="button" data-action-row="ALLOCATE_ORDER" data-item-id="${esc(it.id)}">Order</button>
+                  <button class="btn accent small-btn" type="button" data-action-row="RETURN_TO_HUIZEN" data-item-id="${esc(it.id)}">XML</button>
+                  ${(!it.split_1x && it.units_per_colli > 1) ? `
+                    <button class="btn small-btn" type="button" data-split-item-id="${esc(it.id)}">Splits 1x</button>
+                  ` : ''}
+                </div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function bindExpanders(){
+  document.querySelectorAll('.stock-group-head').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const wrap = btn.closest('.stock-group');
+      const open = wrap.classList.toggle('open');
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+  });
+}
+
+function bindSelectionControls(){
+  document.querySelectorAll('[data-select-item-id]').forEach(cb => {
+    cb.addEventListener('change', () => {
+      const id = cb.getAttribute('data-select-item-id');
+      if(cb.checked) selectedItemIds.add(String(id));
+      else selectedItemIds.delete(String(id));
+      syncSelectionUI();
+    });
+  });
+
+  document.querySelectorAll('[data-select-product-id]').forEach(cb => {
+    cb.addEventListener('change', () => {
+      const productId = cb.getAttribute('data-select-product-id');
+      if(cb.checked) selectAllProductItems(productId);
+      else clearAllProductItems(productId);
+    });
+  });
+
+  document.querySelectorAll('[data-clear-product]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      clearAllProductItems(btn.getAttribute('data-clear-product'));
+    });
+  });
+}
+
+function buildXmlSummaryRowsFromItems(itemIds){
+  const items = itemIds.map(findItemById).filter(Boolean);
+  const map = new Map();
+
+  items.forEach(it => {
+    const key = `${it.base_sku}||${it.name}`;
+    if(!map.has(key)){
+      map.set(key, {
+        modelnaam: it.name,
+        aantal: 0,
+        base_pack_units: it.base_pack_units
+      });
+    }
+    const row = map.get(key);
+    row.aantal += it.unit_value;
+  });
+
+  return Array.from(map.values()).map(row => ({
+    ...row,
+    colli: Math.ceil(row.aantal / row.base_pack_units)
+  }));
+}
+
+function renderReturnXmlSummary(itemIds){
+  const tbody = byIdLocal('returnXmlSummaryBody');
+  const rows = buildXmlSummaryRowsFromItems(itemIds);
+
+  if(!rows.length){
+    tbody.innerHTML = `<tr><td colspan="4">Nog geen regels.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = rows.map(row => `
+    <tr>
+      <td>${esc(row.modelnaam)}</td>
+      <td>${row.aantal}</td>
+      <td>${row.colli}</td>
+      <td>${row.base_pack_units}</td>
+    </tr>
+  `).join('');
+}
+
+function openActionModal(actionType, itemIds){
+  if(!itemIds || !itemIds.length){
+    showToast('Geen artikelen geselecteerd.', 'err');
+    return;
+  }
+
+  state.currentActionContext = { actionType, itemIds: [...itemIds] };
+
+  const items = itemIds.map(findItemById).filter(Boolean);
+  const skuBases = [...new Set(items.map(it => it.sku_base).filter(Boolean))];
+
+  const titles = {
+    OUT: 'Artikelen uitboeken',
+    ALLOCATE_ORDER: 'Artikelen toewijzen aan order',
+    RETURN_TO_HUIZEN: 'Artikelen retour Huizen + XML'
+  };
+
+  const subs = {
+    OUT: 'Vul het ordernummer in. De geselecteerde artikelen worden direct uit de voorraad gehaald en toegevoegd aan de uitscans.',
+    ALLOCATE_ORDER: 'Vul het ordernummer in. De geselecteerde artikelen worden direct afgeboekt en aan dit ordernummer gekoppeld.',
+    RETURN_TO_HUIZEN: 'Vul de retour- en adresgegevens in. De geselecteerde artikelen worden direct afgeboekt en daarna wordt automatisch een XML-bestand gedownload.'
+  };
+
+  const hints = {
+    OUT: 'Deze actie boekt direct af.',
+    ALLOCATE_ORDER: 'Deze actie boekt direct af.',
+    RETURN_TO_HUIZEN: 'Deze actie boekt direct af en genereert daarna XML.'
+  };
+
+  byIdLocal('actionModalTitle').textContent = titles[actionType] || 'Actie uitvoeren';
+  byIdLocal('actionModalSub').textContent = subs[actionType] || '';
+  byIdLocal('modalHint').textContent = hints[actionType] || '';
+
+  byIdLocal('actionModalInfo').innerHTML = `
+    <div><b>Aantal geselecteerde regels:</b> ${itemIds.length}</div>
+    <div><b>SKU's:</b> ${esc(skuBases.join(', ') || '-')}</div>
+  `;
+
+  byIdLocal('modalOrderNo').value = '';
+  byIdLocal('modalNote').value = '';
+  byIdLocal('modalDestination').value = 'Retour Huizen';
+
+  byIdLocal('actionOrderWrap').classList.toggle('hidden', actionType === 'RETURN_TO_HUIZEN');
+  byIdLocal('actionDestinationWrap').classList.toggle('hidden', actionType !== 'RETURN_TO_HUIZEN');
+  byIdLocal('returnXmlWrap').classList.toggle('hidden', actionType !== 'RETURN_TO_HUIZEN');
+
+  byIdLocal('xmlRef').value = '';
+  byIdLocal('xmlDebiteur').value = '20009';
+  byIdLocal('xmlLosnaam').value = '';
+  byIdLocal('xmlLosadres').value = '';
+  byIdLocal('xmlLospostcode').value = '';
+  byIdLocal('xmlLoswoonplaats').value = '';
+  byIdLocal('xmlLostelefoon').value = '';
+  byIdLocal('xmlCommissie').value = '';
+  byIdLocal('xmlVerzendinstructie').value = '';
+  byIdLocal('xmlBijzonderheden').value = '';
+
+  renderReturnXmlSummary(itemIds);
+
+  byIdLocal('actionModal').classList.add('show');
+
+  if(actionType === 'RETURN_TO_HUIZEN') byIdLocal('xmlRef').focus();
+  else byIdLocal('modalOrderNo').focus();
+}
+
+function closeActionModal(){
+  state.currentActionContext = null;
+  byIdLocal('actionModal').classList.remove('show');
+}
+
+function bindActionButtons(){
+  document.querySelectorAll('[data-action-row]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const clickedId = String(btn.getAttribute('data-item-id'));
+      const actionType = btn.getAttribute('data-action-row');
+
+      let ids = [];
+      if(selectedItemIds.size > 0 && selectedItemIds.has(clickedId)){
+        ids = [...selectedItemIds];
+      } else {
+        ids = [clickedId];
+      }
+
+      openActionModal(actionType, ids);
+    });
+  });
+
+  document.querySelectorAll('[data-action-product]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const productId = btn.getAttribute('data-product-id');
+      const ids = getItemsByProductId(productId).map(it => String(it.id));
+      openActionModal(btn.getAttribute('data-action-product'), ids);
+    });
+  });
+
+  document.querySelectorAll('[data-split-item-id]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const item = findItemById(btn.getAttribute('data-split-item-id'));
+      if(item) openSplitModal(item);
+    });
+  });
+}
+
+function validateReturnXmlFields(){
+  const fields = {
+    ref: safeText(byIdLocal('xmlRef').value),
+    debiteur: safeText(byIdLocal('xmlDebiteur').value),
+    losnaam: safeText(byIdLocal('xmlLosnaam').value),
+    losadres: safeText(byIdLocal('xmlLosadres').value),
+    lospostcode: safeText(byIdLocal('xmlLospostcode').value),
+    loswoonplaats: safeText(byIdLocal('xmlLoswoonplaats').value),
+    lostelefoon: safeText(byIdLocal('xmlLostelefoon').value),
+    commissie: safeText(byIdLocal('xmlCommissie').value),
+    verzendinstructie: safeText(byIdLocal('xmlVerzendinstructie').value),
+    bijzonderheden: safeText(byIdLocal('xmlBijzonderheden').value)
+  };
+
+  if(!fields.ref) throw new Error('Referentie / opdrachtnummer ontbreekt.');
+  if(!fields.debiteur) throw new Error('Debiteur ontbreekt.');
+  if(!fields.losnaam) throw new Error('Losnaam ontbreekt.');
+  if(!fields.losadres) throw new Error('Losadres ontbreekt.');
+  if(!fields.lospostcode) throw new Error('Lospostcode ontbreekt.');
+  if(!fields.loswoonplaats) throw new Error('Loswoonplaats ontbreekt.');
+
+  return fields;
+}
+
+function buildReturnXml(itemIds, fields){
+  const rows = buildXmlSummaryRowsFromItems(itemIds);
+
+  const partijenXml = rows.map((row, idx) => `
+            <Partij Referentie="${idx}">
+              <Aantal>${Number(row.aantal).toFixed(3)}</Aantal>
+              <Modelnaam>${xmlEsc(row.modelnaam)}</Modelnaam>
+              <Kleur></Kleur>
+              <Colli>${row.colli}</Colli>
+              <Gewicht>${Number(row.aantal).toFixed(3)}</Gewicht>
+              <Statistiekcode></Statistiekcode>
+              <Stof></Stof>
+              <Volume>0.000</Volume>
+              <AantalZe>1</AantalZe>
+            </Partij>`).join('\n');
+
+  return `<?xml version="1.0" encoding="utf-8"?>
+<Bericht>
+  <Opdrachten>
+    <Opdracht Referentie="${xmlEsc(fields.ref)}">
+      <Opdrachtreferentie>${xmlEsc(fields.ref)}</Opdrachtreferentie>
+      <Debiteur>${xmlEsc(fields.debiteur)}</Debiteur>
+      <Rembours></Rembours>
+      <Activiteiten>
+        <Activiteit Referentie="${xmlEsc(fields.ref)}">
+          <Activiteitreferentie>${xmlEsc(fields.ref)}</Activiteitreferentie>
+          <Losnaam>${xmlEsc(fields.losnaam)}</Losnaam>
+          <Losadres>${xmlEsc(fields.losadres)}</Losadres>
+          <Loswoonplaats>${xmlEsc(fields.loswoonplaats)}</Loswoonplaats>
+          <Lospostcode>${xmlEsc(fields.lospostcode)}</Lospostcode>
+          <Lostelefoon>${xmlEsc(fields.lostelefoon)}</Lostelefoon>
+          <Commissie>${xmlEsc(fields.commissie)}</Commissie>
+          <Verzendinstructie>${xmlEsc(fields.verzendinstructie)}</Verzendinstructie>
+          <Bijzonderheden>${xmlEsc(fields.bijzonderheden)}</Bijzonderheden>
+          <Partijen>
+${partijenXml}
+          </Partijen>
+        </Activiteit>
+      </Activiteiten>
+    </Opdracht>
+  </Opdrachten>
+</Bericht>`;
+}
+
+function downloadXmlFile(filename, xmlContent){
+  const blob = new Blob([xmlContent], { type: 'application/xml;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+async function countOrderUsesLocal(orderNo){
+  const { count, error } = await client
+    .from('movements')
+    .select('*', { count:'exact', head:true })
+    .eq('order_no', orderNo);
+
+  if(error) throw error;
+  return count || 0;
+}
+
+async function performStockAction(actionType, itemIds, options = {}){
+  if(!itemIds?.length){
+    showToast('Geen artikelen geselecteerd.', 'err');
+    return;
+  }
+
+  const orderNo = safeText(options.orderNo);
+  const note = safeText(options.note);
+  const destination = safeText(options.destination);
+
+  if((actionType === 'OUT' || actionType === 'ALLOCATE_ORDER') && !orderNo){
+    showToast('Vul een ordernummer in.', 'err');
+    return;
+  }
+
+  if(actionType === 'RETURN_TO_HUIZEN' && !destination){
+    showToast('Vul een bestemming in.', 'err');
+    return;
+  }
+
+  let xmlFields = null;
+  if(actionType === 'RETURN_TO_HUIZEN'){
+    xmlFields = validateReturnXmlFields();
+  }
+
+  try{
+    if((actionType === 'OUT' || actionType === 'ALLOCATE_ORDER') && orderNo){
+      const used = await countOrderUsesLocal(orderNo).catch(() => 0);
+      if(used > 0){
+        const ok = confirm(`Ordernummer ${orderNo} is al ${used}x gebruikt. Doorgaan?`);
+        if(!ok) return;
+      }
+    }
+
+    const selectedItems = itemIds.map(findItemById).filter(Boolean);
+    if(!selectedItems.length){
+      throw new Error('Geen geldige items geselecteerd.');
+    }
+
+    const uniqueScannedCodes = [...new Set(selectedItems.map(it => it.scan_code).filter(Boolean))];
+    const scannedCodeForLog = uniqueScannedCodes.length === 1 ? uniqueScannedCodes[0] : null;
+
+    const { data, error } = await client.rpc('perform_stock_action', {
+      p_item_ids: itemIds,
+      p_action_type: actionType,
+      p_order_no: (actionType === 'OUT' || actionType === 'ALLOCATE_ORDER') ? orderNo : (xmlFields?.ref || null),
+      p_destination: actionType === 'RETURN_TO_HUIZEN' ? destination : null,
+      p_note: note || null,
+      p_scanned_code: scannedCodeForLog
+    });
+
+    if(error) throw error;
+
+    if(actionType === 'RETURN_TO_HUIZEN'){
+      const xml = buildReturnXml(itemIds, xmlFields);
+      const filenameBase = safeText(xmlFields.ref).replace(/[^\w\-]+/g, '_') || 'retour_huizen';
+      downloadXmlFile(`${filenameBase}.xml`, xml);
+    }
+
+    clearSelection();
+    closeActionModal();
+
+    const labels = {
+      OUT: `uitgeboekt op order ${orderNo}`,
+      ALLOCATE_ORDER: `toegewezen aan order ${orderNo}`,
+      RETURN_TO_HUIZEN: `retour geboekt naar ${destination || 'Retour Huizen'}`
+    };
+
+    const extra = actionType === 'RETURN_TO_HUIZEN' ? ' XML gedownload.' : '';
+    showToast(`${Number(data || itemIds.length)} regel(s) ${labels[actionType] || 'verwerkt'}.${extra}`, 'ok');
+
+    await loadStock();
+  }catch(e){
+    console.error('performStockAction fout:', e);
+    showToast(e.message || String(e), 'err');
+  }
+}
+
+/* HANDMATIGE XML */
+function resetManualXmlModal(){
+  state.manualXmlLines = [];
+  byIdLocal('manualXmlRef').value = '';
+  byIdLocal('manualXmlDebiteur').value = '20009';
+  byIdLocal('manualXmlLosnaam').value = '';
+  byIdLocal('manualXmlLosadres').value = '';
+  byIdLocal('manualXmlLospostcode').value = '';
+  byIdLocal('manualXmlLoswoonplaats').value = '';
+  byIdLocal('manualXmlLostelefoon').value = '';
+  byIdLocal('manualXmlCommissie').value = '';
+  byIdLocal('manualXmlVerzendinstructie').value = '';
+  byIdLocal('manualXmlBijzonderheden').value = '';
+  byIdLocal('manualXmlOmschrijving').value = '';
+  renderManualXmlSummary();
+}
+
+function openManualXmlModal(){
+  resetManualXmlModal();
+  byIdLocal('manualXmlModal').classList.add('show');
+  byIdLocal('manualXmlRef').focus();
+}
+
+function closeManualXmlModal(){
+  byIdLocal('manualXmlModal').classList.remove('show');
+  resetManualXmlModal();
+}
+
+function addManualXmlLine(){
+  const omschrijving = safeText(byIdLocal('manualXmlOmschrijving').value);
+  if(!omschrijving){
+    showToast('Vul een artikelomschrijving in.', 'err');
+    byIdLocal('manualXmlOmschrijving').focus();
+    return;
+  }
+
+  state.manualXmlLines.push({
+    id: `manual_${Date.now()}_${Math.random().toString(36).slice(2,8)}`,
+    modelnaam: omschrijving
+  });
+
+  byIdLocal('manualXmlOmschrijving').value = '';
+  renderManualXmlSummary();
+  byIdLocal('manualXmlOmschrijving').focus();
+}
+
+function renderManualXmlSummary(){
+  const tbody = byIdLocal('manualXmlSummaryBody');
+
+  if(!state.manualXmlLines.length){
+    tbody.innerHTML = `<tr><td colspan="5">Nog geen handmatige regels toegevoegd.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = state.manualXmlLines.map(line => `
+    <tr>
+      <td><span class="summary-type manual">Handmatig</span></td>
+      <td>${esc(line.modelnaam)}</td>
+      <td>1</td>
+      <td>1</td>
+      <td><button class="btn small-btn" type="button" data-remove-manual-line="${esc(line.id)}">Verwijderen</button></td>
+    </tr>
+  `).join('');
+
+  tbody.querySelectorAll('[data-remove-manual-line]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.getAttribute('data-remove-manual-line');
+      state.manualXmlLines = state.manualXmlLines.filter(x => String(x.id) !== String(id));
+      renderManualXmlSummary();
+    });
+  });
+}
+
+function validateManualXmlFields(){
+  const fields = {
+    ref: safeText(byIdLocal('manualXmlRef').value),
+    debiteur: safeText(byIdLocal('manualXmlDebiteur').value),
+    losnaam: safeText(byIdLocal('manualXmlLosnaam').value),
+    losadres: safeText(byIdLocal('manualXmlLosadres').value),
+    lospostcode: safeText(byIdLocal('manualXmlLospostcode').value),
+    loswoonplaats: safeText(byIdLocal('manualXmlLoswoonplaats').value),
+    lostelefoon: safeText(byIdLocal('manualXmlLostelefoon').value),
+    commissie: safeText(byIdLocal('manualXmlCommissie').value),
+    verzendinstructie: safeText(byIdLocal('manualXmlVerzendinstructie').value),
+    bijzonderheden: safeText(byIdLocal('manualXmlBijzonderheden').value)
+  };
+
+  if(!fields.ref) throw new Error('Referentie / opdrachtnummer ontbreekt.');
+  if(!fields.debiteur) throw new Error('Debiteur ontbreekt.');
+  if(!fields.losnaam) throw new Error('Losnaam ontbreekt.');
+  if(!fields.losadres) throw new Error('Losadres ontbreekt.');
+  if(!fields.lospostcode) throw new Error('Lospostcode ontbreekt.');
+  if(!fields.loswoonplaats) throw new Error('Loswoonplaats ontbreekt.');
+  return fields;
+}
+
+function buildManualXml(fields){
+  const partijenXml = state.manualXmlLines.map((line, idx) => `
+            <Partij Referentie="${idx}">
+              <Aantal>1.000</Aantal>
+              <Modelnaam>${xmlEsc(line.modelnaam)}</Modelnaam>
+              <Kleur></Kleur>
+              <Colli>1</Colli>
+              <Gewicht>1.000</Gewicht>
+              <Statistiekcode></Statistiekcode>
+              <Stof></Stof>
+              <Volume>0.000</Volume>
+              <AantalZe>1</AantalZe>
+            </Partij>`).join('\n');
+
+  return `<?xml version="1.0" encoding="utf-8"?>
+<Bericht>
+  <Opdrachten>
+    <Opdracht Referentie="${xmlEsc(fields.ref)}">
+      <Opdrachtreferentie>${xmlEsc(fields.ref)}</Opdrachtreferentie>
+      <Debiteur>${xmlEsc(fields.debiteur)}</Debiteur>
+      <Rembours></Rembours>
+      <Activiteiten>
+        <Activiteit Referentie="${xmlEsc(fields.ref)}">
+          <Activiteitreferentie>${xmlEsc(fields.ref)}</Activiteitreferentie>
+          <Losnaam>${xmlEsc(fields.losnaam)}</Losnaam>
+          <Losadres>${xmlEsc(fields.losadres)}</Losadres>
+          <Loswoonplaats>${xmlEsc(fields.loswoonplaats)}</Loswoonplaats>
+          <Lospostcode>${xmlEsc(fields.lospostcode)}</Lospostcode>
+          <Lostelefoon>${xmlEsc(fields.lostelefoon)}</Lostelefoon>
+          <Commissie>${xmlEsc(fields.commissie)}</Commissie>
+          <Verzendinstructie>${xmlEsc(fields.verzendinstructie)}</Verzendinstructie>
+          <Bijzonderheden>${xmlEsc(fields.bijzonderheden)}</Bijzonderheden>
+          <Partijen>
+${partijenXml}
+          </Partijen>
+        </Activiteit>
+      </Activiteiten>
+    </Opdracht>
+  </Opdrachten>
+</Bericht>`;
+}
+
+function downloadManualXml(){
+  try{
+    const fields = validateManualXmlFields();
+    if(!state.manualXmlLines.length){
+      throw new Error('Voeg eerst minimaal 1 handmatige artikelregel toe.');
+    }
+    const xml = buildManualXml(fields);
+    const filenameBase = safeText(fields.ref).replace(/[^\w\-]+/g, '_') || 'handmatige_xml';
+    downloadXmlFile(`${filenameBase}.xml`, xml);
+    showToast(`${state.manualXmlLines.length} handmatige regel(s) in XML geplaatst.`, 'ok');
+    closeManualXmlModal();
+  }catch(e){
+    showToast(e.message || String(e), 'err');
+  }
+}
+
+/* SPLIT */
+function openSplitModal(item){
+  state.currentSplitItem = item;
+  byIdLocal('splitModalInfo').innerHTML = `
+    <div><b>Artikel:</b> ${esc(item.raw_name)}</div>
+    <div><b>SKU:</b> ${esc(item.sku_base)}</div>
+    <div><b>Locatie:</b> ${esc(item.location || '-')}</div>
+    <div><b>Huidige colli-inhoud:</b> ${item.units_per_colli} ${esc(unitWord(item.units_per_colli))}</div>
+    <div style="margin-top:8px">
+      Deze actie haalt deze colli uit voorraad en maakt daarvoor
+      <b>${item.units_per_colli} losse 1x-items</b> terug op dezelfde locatie.
+    </div>
+  `;
+  byIdLocal('splitModal').classList.add('show');
+}
+
+function closeSplitModal(){
+  state.currentSplitItem = null;
+  byIdLocal('splitModal').classList.remove('show');
+}
+
+async function splitItemTo1x(){
+  const item = state.currentSplitItem;
+  if(!item){
+    showToast('Geen colli geselecteerd om te splitsen.', 'err');
+    return;
+  }
+
+  try{
+    const { data, error } = await client.rpc('split_item_to_1x', {
+      p_item_id: item.id
+    });
+
+    if(error) throw error;
+
+    closeSplitModal();
+    clearSelection();
+    showToast(`${Number(data?.created_count || item.units_per_colli)} losse 1x-items aangemaakt.`, 'ok');
+    await loadStock();
+  }catch(e){
+    console.error('splitItemTo1x fout:', e);
+    showToast(e.message || String(e), 'err');
+  }
+}
+
+/* EXPORT */
+function exportGroupedToExcel(groups){
+  const rows = [];
+
+  groups.forEach(group => {
+    rows.push({
+      SKU: group.sku_base,
+      Omschrijving: group.raw_name || group.name,
+      'Overige vermelding': group.description || '',
+      'Eenheden per colli': group.units_per_colli,
+      'Totaal colli/items': group.colli_count,
+      'Totaal eenheden': group.unit_count,
+      Locatie: '',
+      'Inslag tijd': '',
+      'Waarde per regel': ''
+    });
+
+    group.items.forEach(it => {
+      rows.push({
+        SKU: '',
+        Omschrijving: '',
+        'Overige vermelding': '',
+        'Eenheden per colli': '',
+        'Totaal colli/items': '',
+        'Totaal eenheden': '',
+        Locatie: it.location || '',
+        'Inslag tijd': formatNlDateTime(it.in_at),
+        'Waarde per regel': it.unit_value
+      });
+    });
+  });
+
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.json_to_sheet(rows);
+
+  ws["!cols"] = [
+    { wch: 16 }, { wch: 34 }, { wch: 28 }, { wch: 16 }, { wch: 16 },
+    { wch: 16 }, { wch: 18 }, { wch: 22 }, { wch: 14 }
+  ];
+
+  XLSX.utils.book_append_sheet(wb, ws, 'Voorraad');
+
+  const now = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  const filename = `huidige_voorraad_${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}_${pad(now.getHours())}-${pad(now.getMinutes())}.xlsx`;
+
+  XLSX.writeFile(wb, filename);
+}
+
+/* LOAD */
+async function loadStock(){
+  if(!client) throw new Error('Supabase client ontbreekt.');
+
+  const q = safeText(byIdLocal('q').value).toLowerCase();
+  const sort = byIdLocal('sort').value;
+
+  const { data, error } = await client
+    .from('items')
+    .select(`
+      id,
+      sku_unique,
+      scan_code,
+      status,
+      location,
+      in_at,
+      created_at,
+      product_id,
+      products:product_id (
+        id,
+        sku_base,
+        name,
+        description,
+        units_per_colli,
+        print_without_sequence
+      )
+    `)
+    .eq('status', 'IN_STOCK')
+    .order('created_at', { ascending: false });
+
+  if(error) throw error;
+
+  let rows = (data || []).filter(row => row.products).map(enrichRow);
+
+  if(q){
+    rows = rows.filter(row => {
+      const haystack = [
+        row.sku_base,
+        row.raw_name,
+        row.description,
+        row.location
+      ].join(' ').toLowerCase();
+
+      return haystack.includes(q);
+    });
+  }
+
+  state.visibleItems = rows;
+  state.groups = sortGroups(groupItems(rows), sort);
+
+  const visibleIds = new Set(rows.map(r => String(r.id)));
+  [...selectedItemIds].forEach(id => {
+    if(!visibleIds.has(String(id))) selectedItemIds.delete(String(id));
+  });
+
+  byIdLocal('kpiSkuCount').textContent = String(state.groups.length);
+  byIdLocal('kpiColliCount').textContent = String(state.groups.reduce((sum, g) => sum + g.colli_count, 0));
+  byIdLocal('kpiUnitCount').textContent = String(state.groups.reduce((sum, g) => sum + g.unit_count, 0));
+
+  const listEl = byIdLocal('groupList');
+
+  if(!state.groups.length){
+    listEl.innerHTML = `<div class="empty-state">Geen voorraad gevonden voor deze zoekopdracht.</div>`;
+    updateBulkSummary();
+    return;
+  }
+
+  listEl.innerHTML = state.groups.map((group, index) => makeGroupHtml(group, index)).join('');
+  bindExpanders();
+  bindSelectionControls();
+  bindActionButtons();
+  syncSelectionUI();
+}
+
+/* EVENTS */
+byIdLocal('btn_refresh').addEventListener('click', () => {
+  loadStock().catch(err => showToast(err.message || String(err), 'err'));
+});
+
+byIdLocal('q').addEventListener('keydown', e => {
+  if(e.key === 'Enter'){
+    loadStock().catch(err => showToast(err.message || String(err), 'err'));
+  }
+});
+
+byIdLocal('sort').addEventListener('change', () => {
+  loadStock().catch(err => showToast(err.message || String(err), 'err'));
+});
+
+byIdLocal('btnSelectAllVisible').addEventListener('click', selectAllVisibleItems);
+byIdLocal('btnSelectNone').addEventListener('click', clearSelection);
+
+byIdLocal('btnBulkOut').addEventListener('click', () => openActionModal('OUT', [...selectedItemIds]));
+byIdLocal('btnBulkAllocate').addEventListener('click', () => openActionModal('ALLOCATE_ORDER', [...selectedItemIds]));
+byIdLocal('btnBulkReturn').addEventListener('click', () => openActionModal('RETURN_TO_HUIZEN', [...selectedItemIds]));
+byIdLocal('btnManualXml').addEventListener('click', openManualXmlModal);
+byIdLocal('btnExportStock').addEventListener('click', () => exportGroupedToExcel(state.groups));
+
+byIdLocal('btnCancelAction').addEventListener('click', closeActionModal);
+byIdLocal('btnConfirmAction').addEventListener('click', async () => {
+  if(!state.currentActionContext){
+    showToast('Actiecontext ontbreekt. Open de popup opnieuw.', 'err');
+    return;
+  }
+
+  const btn = byIdLocal('btnConfirmAction');
+  const oldText = btn.textContent;
+
+  try{
+    btn.disabled = true;
+    btn.textContent = 'Bezig...';
+
+    await performStockAction(state.currentActionContext.actionType, state.currentActionContext.itemIds, {
+      orderNo: byIdLocal('modalOrderNo').value,
+      destination: byIdLocal('modalDestination').value,
+      note: byIdLocal('modalNote').value
+    });
+  }finally{
+    btn.disabled = false;
+    btn.textContent = oldText;
+  }
+});
+
+byIdLocal('actionModal').addEventListener('click', e => {
+  if(e.target === byIdLocal('actionModal')) closeActionModal();
+});
+
+byIdLocal('btnCancelManualXml').addEventListener('click', closeManualXmlModal);
+byIdLocal('btnAddManualXmlLine').addEventListener('click', addManualXmlLine);
+byIdLocal('btnDownloadManualXml').addEventListener('click', downloadManualXml);
+byIdLocal('manualXmlOmschrijving').addEventListener('keydown', e => {
+  if(e.key === 'Enter'){
+    e.preventDefault();
+    addManualXmlLine();
+  }
+});
+
+byIdLocal('manualXmlModal').addEventListener('click', e => {
+  if(e.target === byIdLocal('manualXmlModal')) closeManualXmlModal();
+});
+
+byIdLocal('btnCancelSplit').addEventListener('click', closeSplitModal);
+byIdLocal('btnConfirmSplit').addEventListener('click', splitItemTo1x);
+
+byIdLocal('splitModal').addEventListener('click', e => {
+  if(e.target === byIdLocal('splitModal')) closeSplitModal();
+});
+
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape'){
+    if(byIdLocal('actionModal').classList.contains('show')) closeActionModal();
+    if(byIdLocal('manualXmlModal').classList.contains('show')) closeManualXmlModal();
+    if(byIdLocal('splitModal').classList.contains('show')) closeSplitModal();
+  }
+});
+
+loadStock().catch(err => {
+  console.error(err);
+  showToast(err.message || String(err), 'err');
+});
+</script>
+
+</body>
+</html>
       display:flex;
       align-items:center;
       flex-wrap:wrap;
