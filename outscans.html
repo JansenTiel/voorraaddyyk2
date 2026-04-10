@@ -33,57 +33,17 @@
 
     .outscan-toolbar{
       display:grid;
-      grid-template-columns:1.3fr .8fr .8fr auto;
+      grid-template-columns:1.2fr .7fr auto;
       gap:14px;
       align-items:end;
       margin-top:14px;
-    }
-
-    .filter-row{
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-      margin-top:14px;
-    }
-
-    .filter-pill{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      padding:8px 12px;
-      border:1px solid var(--border);
-      border-radius:999px;
-      background:#fff;
-      color:var(--text);
-      font-weight:800;
-      cursor:pointer;
-    }
-
-    .filter-pill.active{
-      background:var(--navy);
-      color:#fff;
-      border-color:var(--navy);
-    }
-
-    .results-head{
-      display:flex;
-      justify-content:space-between;
-      gap:12px;
-      flex-wrap:wrap;
-      align-items:center;
-      margin-bottom:14px;
-    }
-
-    .results-meta{
-      color:var(--muted);
-      font-size:14px;
-      line-height:1.4;
     }
 
     .badge-row{
       display:flex;
       flex-wrap:wrap;
       gap:6px;
+      justify-content:flex-start;
     }
 
     .scan-badge{
@@ -117,70 +77,14 @@
       border-color:#ddd6fe;
     }
 
-    .badge-allocate{
+    .badge-order{
       background:#ecfdf3;
       color:#027a48;
       border-color:#abefc6;
     }
 
-    .badge-split{
-      background:#fff7ed;
-      color:#c2410c;
-      border-color:#fed7aa;
-    }
-
-    .badge-default{
-      background:#f8fafc;
-      color:#334155;
-      border-color:#dbe2ea;
-    }
-
-    .table-wrap{
-      overflow:auto;
-      border:1px solid var(--border);
-      border-radius:14px;
-      background:#fff;
-    }
-
-    table.outscan-table{
-      width:100%;
-      border-collapse:collapse;
-      min-width:1260px;
-    }
-
-    table.outscan-table th,
-    table.outscan-table td{
-      padding:12px 14px;
-      border-bottom:1px solid #edf2f7;
-      text-align:left;
-      font-size:14px;
-      vertical-align:top;
-    }
-
-    table.outscan-table th{
-      background:#f8fafc;
-      color:#334155;
-      font-size:12px;
-      text-transform:uppercase;
-      letter-spacing:.04em;
-      position:sticky;
-      top:0;
-      z-index:1;
-    }
-
-    .cell-main{
-      font-weight:900;
-      color:var(--navy);
-      word-break:break-word;
-      line-height:1.2;
-    }
-
-    .cell-sub{
-      margin-top:4px;
-      font-size:12px;
-      color:var(--muted);
-      line-height:1.35;
-      word-break:break-word;
+    .desktop-table{
+      display:block;
     }
 
     .mobile-cards{
@@ -214,7 +118,7 @@
       color:var(--muted);
       text-transform:uppercase;
       letter-spacing:.04em;
-      min-width:108px;
+      min-width:110px;
     }
 
     .mobile-v{
@@ -224,31 +128,45 @@
       word-break:break-word;
     }
 
-    .empty-state{
-      border:1px solid var(--border);
-      border-radius:14px;
-      background:#fff;
-      padding:18px;
+    .outscan-empty{
+      padding:18px 0;
       color:var(--muted);
     }
 
-    @media(max-width:1080px){
+    .result-head{
+      margin-bottom:12px;
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+
+    .small-note{
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.4;
+    }
+
+    @media(max-width:900px){
       .outscan-toolbar{
         grid-template-columns:1fr 1fr;
       }
     }
 
     @media(max-width:760px){
-      .outscan-toolbar{
-        grid-template-columns:1fr;
-      }
-
-      .table-wrap{
+      .desktop-table{
         display:none;
       }
 
       .mobile-cards{
         display:flex;
+      }
+    }
+
+    @media(max-width:700px){
+      .outscan-toolbar{
+        grid-template-columns:1fr;
       }
     }
   </style>
@@ -292,8 +210,8 @@
   <div class="card">
     <h2>Uitscans</h2>
     <div class="muted">
-      Overzicht van alle uitgeboekte artikelen. Zoek op ordernummer, unieke SKU, artikel, locatie, bestemming of opmerking.
-      Inventarisatie, retour Huizen, handmatig uitboeken, ordertoewijzing en split-acties worden apart gemarkeerd.
+      Overzicht van alle afboekingen en uitscans. Filter op ordernummer, SKU, productomschrijving, locatie of bestemming.
+      Inventarisatie, retour Huizen en handmatig uitboeken worden apart gemarkeerd.
     </div>
 
     <p class="page-url">
@@ -304,7 +222,7 @@
     <div class="outscan-toolbar">
       <div>
         <label for="q">Zoeken</label>
-        <input id="q" placeholder="Zoek op SKU / order / artikel / locatie / bestemming / opmerking"/>
+        <input id="q" placeholder="Zoek op SKU / ordernummer / omschrijving / locatie / bestemming"/>
       </div>
 
       <div>
@@ -314,80 +232,51 @@
           <option value="250" selected>250</option>
           <option value="500">500</option>
           <option value="1000">1000</option>
-          <option value="2500">2500</option>
           <option value="5000">5000</option>
         </select>
       </div>
 
       <div>
-        <label for="sort">Sorteren</label>
-        <select id="sort">
-          <option value="newest" selected>Nieuwste eerst</option>
-          <option value="oldest">Oudste eerst</option>
-          <option value="order_asc">Ordernummer A-Z</option>
-          <option value="sku_asc">SKU A-Z</option>
-        </select>
-      </div>
-
-      <div>
         <label>&nbsp;</label>
-        <button class="btn primary" id="btnRefresh" type="button" style="width:100%">Verversen</button>
+        <button class="btn primary" id="btn_refresh" type="button" style="width:100%">Verversen</button>
       </div>
     </div>
 
-    <div class="filter-row" id="filterRow">
-      <button class="filter-pill active" type="button" data-filter="ALL">Alles</button>
-      <button class="filter-pill" type="button" data-filter="OUT">Handmatig uitgeboekt</button>
-      <button class="filter-pill" type="button" data-filter="ALLOCATE_ORDER">Toegewezen aan order</button>
-      <button class="filter-pill" type="button" data-filter="RETURN_TO_HUIZEN">Retour Huizen</button>
-      <button class="filter-pill" type="button" data-filter="INVENTARISATIE">Inventarisatie</button>
-      <button class="filter-pill" type="button" data-filter="SPLIT">Split</button>
-    </div>
-
-    <div class="row-4" style="margin-top:16px">
+    <div class="row-3" style="margin-top:16px">
       <div class="card" style="padding:16px">
         <div class="kpi">
           <div class="label">Totaal gevonden</div>
-          <div class="value" id="kpiCount">0</div>
+          <div class="value" id="outscanCount">0</div>
         </div>
       </div>
 
       <div class="card" style="padding:16px">
         <div class="kpi">
           <div class="label">Unieke orders</div>
-          <div class="value" id="kpiOrders">0</div>
-        </div>
-      </div>
-
-      <div class="card" style="padding:16px">
-        <div class="kpi">
-          <div class="label">Unieke SKU's</div>
-          <div class="value" id="kpiSku">0</div>
+          <div class="value" id="outscanOrderCount">0</div>
         </div>
       </div>
 
       <div class="card" style="padding:16px">
         <div class="kpi">
           <div class="label">Laatste uitscan</div>
-          <div class="value" id="kpiLast" style="font-size:16px">-</div>
+          <div class="value" id="outscanLastTime" style="font-size:16px">-</div>
         </div>
       </div>
     </div>
   </div>
 
   <div class="card" style="margin-top:16px">
-    <div class="results-head">
+    <div class="result-head">
       <div>
-        <h3 style="margin:0 0 4px 0">Resultaten</h3>
-        <div class="results-meta" id="resultsMeta">Nog geen data geladen.</div>
+        <h3 style="margin:0">Uitscan-overzicht</h3>
       </div>
-
-      <div class="btnRow">
-        <button class="btn" id="btnClearSearch" type="button">Zoekveld leegmaken</button>
+      <div class="small-note">
+        De lijst toont de meest recente uitscans bovenaan.
       </div>
     </div>
 
-    <div id="resultWrap"></div>
+    <div id="list"></div>
   </div>
 </div>
 
@@ -396,217 +285,126 @@ setActiveNav();
 
 const client = sb();
 
-const state = {
-  rows: [],
-  filteredRows: [],
-  currentFilter: 'ALL'
-};
-
 function safeText(v){
   return String(v ?? '').trim();
-}
-
-function lower(v){
-  return safeText(v).toLowerCase();
 }
 
 function upper(v){
   return safeText(v).toUpperCase();
 }
 
-function isInventoryRow(row){
-  return upper(row.order_no) === 'INVENTARISATIE';
+function cleanDescription(desc){
+  return safeText(desc)
+    .replace(/\[SPLIT1X\]/g, '')
+    .replace(/\[BASESKU:[^\]]+\]/gi, '')
+    .replace(/\[BASEPACK:\d+\]/gi, '')
+    .trim();
 }
 
-function isReturnRow(row){
+function prettyProductName(name){
+  return safeText(name)
+    .replace(/\s*\(\d+x\)\s*$/i, '')
+    .replace(/\s*\(1x\)\s*$/i, '')
+    .trim();
+}
+
+function isInventoryOutscan(row){
+  return upper(row.order_no) === 'INVENTARISATIE' || upper(row.action_type) === 'INVENTARISATIE';
+}
+
+function isReturnHuizen(row){
   return upper(row.action_type) === 'RETURN_TO_HUIZEN' || upper(row.destination) === 'RETOUR HUIZEN';
 }
 
-function isManualOutRow(row){
+function isManualOut(row){
   return upper(row.action_type) === 'OUT';
 }
 
-function isAllocateRow(row){
+function isAllocateOrder(row){
   return upper(row.action_type) === 'ALLOCATE_ORDER';
-}
-
-function isSplitRow(row){
-  return upper(row.action_type) === 'SPLIT_OUT' || upper(row.action_type) === 'SPLIT_IN';
-}
-
-function getActionLabel(row){
-  const action = upper(row.action_type);
-
-  if(isInventoryRow(row)) return 'Inventarisatie';
-  if(action === 'RETURN_TO_HUIZEN') return 'Retour Huizen';
-  if(action === 'ALLOCATE_ORDER') return 'Toegewezen aan order';
-  if(action === 'OUT') return 'Handmatig uitgeboekt';
-  if(action === 'SPLIT_OUT') return 'Split uit voorraad';
-  if(action === 'SPLIT_IN') return 'Split 1x aangemaakt';
-
-  return safeText(row.action_type) || 'Overig';
 }
 
 function buildBadges(row){
   const badges = [];
 
-  if(isInventoryRow(row)){
-    badges.push('<span class="scan-badge badge-inventory">INVENTARISATIE</span>');
+  if(isInventoryOutscan(row)){
+    badges.push(`<span class="scan-badge badge-inventory">INVENTARISATIE</span>`);
   }
 
-  if(isReturnRow(row)){
-    badges.push('<span class="scan-badge badge-return">RETOUR HUIZEN</span>');
+  if(isReturnHuizen(row)){
+    badges.push(`<span class="scan-badge badge-return">RETOUR HUIZEN</span>`);
   }
 
-  if(isManualOutRow(row) && !isInventoryRow(row)){
-    badges.push('<span class="scan-badge badge-manual">HANDMATIG UITGEBOEKT</span>');
+  if(isManualOut(row)){
+    badges.push(`<span class="scan-badge badge-manual">HANDMATIG UITGEBOEKT</span>`);
   }
 
-  if(isAllocateRow(row)){
-    badges.push('<span class="scan-badge badge-allocate">ORDER</span>');
-  }
-
-  if(isSplitRow(row)){
-    badges.push('<span class="scan-badge badge-split">SPLIT</span>');
-  }
-
-  if(!badges.length){
-    badges.push('<span class="scan-badge badge-default">OVERIG</span>');
+  if(isAllocateOrder(row)){
+    badges.push(`<span class="scan-badge badge-order">TOEGEWEZEN ORDER</span>`);
   }
 
   return badges.join('');
 }
 
-function rowMatchesFilter(row, filter){
-  if(filter === 'ALL') return true;
-  if(filter === 'INVENTARISATIE') return isInventoryRow(row);
-  if(filter === 'RETURN_TO_HUIZEN') return isReturnRow(row);
-  if(filter === 'OUT') return isManualOutRow(row) && !isInventoryRow(row);
-  if(filter === 'ALLOCATE_ORDER') return isAllocateRow(row);
-  if(filter === 'SPLIT') return isSplitRow(row);
-  return true;
+function prettyAction(row){
+  const action = upper(row.action_type);
+
+  if(action === 'RETURN_TO_HUIZEN') return 'Retour Huizen';
+  if(action === 'ALLOCATE_ORDER') return 'Toegewezen aan order';
+  if(action === 'OUT') return 'Handmatig uitgeboekt';
+  if(action === 'INVENTARISATIE') return 'Inventarisatie';
+  if(action === 'SPLIT_OUT') return 'Gesplitst uit voorraad';
+  return safeText(row.action_type) || '-';
 }
 
-function rowMatchesSearch(row, q){
-  if(!q) return true;
+function updateSummary(rows){
+  byId('outscanCount').textContent = String(rows.length);
 
-  const haystack = [
-    row.sku_unique,
-    row.order_no,
-    row.location,
-    row.destination,
-    row.note,
-    row.action_type,
-    row.products?.name,
-    row.products?.sku_base
-  ].map(lower).join(' ');
-
-  return haystack.includes(q);
-}
-
-function sortRows(rows){
-  const sort = byId('sort').value;
-  const copy = [...rows];
-
-  if(sort === 'newest'){
-    copy.sort((a,b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
-  }else if(sort === 'oldest'){
-    copy.sort((a,b) => new Date(a.created_at || 0) - new Date(b.created_at || 0));
-  }else if(sort === 'order_asc'){
-    copy.sort((a,b) => safeText(a.order_no).localeCompare(safeText(b.order_no), 'nl') || (new Date(b.created_at || 0) - new Date(a.created_at || 0)));
-  }else if(sort === 'sku_asc'){
-    copy.sort((a,b) => safeText(a.sku_unique).localeCompare(safeText(b.sku_unique), 'nl') || (new Date(b.created_at || 0) - new Date(a.created_at || 0)));
-  }
-
-  return copy;
-}
-
-function updateKpis(rows){
-  byId('kpiCount').textContent = String(rows.length);
-
-  const uniqueOrders = new Set(
-    rows.map(r => safeText(r.order_no)).filter(Boolean)
+  const orderSet = new Set(
+    rows
+      .map(r => safeText(r.order_no))
+      .filter(Boolean)
   );
-  byId('kpiOrders').textContent = String(uniqueOrders.size);
 
-  const uniqueSku = new Set(
-    rows.map(r => safeText(r.sku_unique)).filter(Boolean)
-  );
-  byId('kpiSku').textContent = String(uniqueSku.size);
+  byId('outscanOrderCount').textContent = String(orderSet.size);
 
   if(rows.length){
-    byId('kpiLast').textContent = nlTime(rows[0].created_at);
+    const first = rows[0];
+    byId('outscanLastTime').textContent = nlTime(first.created_at);
   }else{
-    byId('kpiLast').textContent = '-';
+    byId('outscanLastTime').textContent = '-';
   }
-}
-
-function updateResultsMeta(rows){
-  const q = safeText(byId('q').value);
-  const filterLabelMap = {
-    ALL: 'alles',
-    OUT: 'handmatig uitgeboekt',
-    ALLOCATE_ORDER: 'toegewezen aan order',
-    RETURN_TO_HUIZEN: 'retour Huizen',
-    INVENTARISATIE: 'inventarisatie',
-    SPLIT: 'split'
-  };
-
-  const parts = [
-    `${rows.length} resultaat/resultaten`,
-    `filter: ${filterLabelMap[state.currentFilter] || 'alles'}`
-  ];
-
-  if(q){
-    parts.push(`zoekterm: "${q}"`);
-  }
-
-  byId('resultsMeta').textContent = parts.join(' · ');
 }
 
 function buildDesktopTable(rows){
   return `
-    <div class="table-wrap">
-      <table class="outscan-table">
+    <div class="table-wrap desktop-table">
+      <table>
         <thead>
           <tr>
             <th>Tijd</th>
-            <th>Unieke SKU</th>
+            <th>SKU</th>
             <th>Product</th>
             <th>Locatie</th>
             <th>Ordernummer</th>
             <th>Actie</th>
             <th>Bestemming</th>
-            <th>Opmerking</th>
             <th>Markering</th>
           </tr>
         </thead>
         <tbody>
           ${rows.map(r => `
             <tr>
-              <td>${escapeHtml(nlTime(r.created_at))}</td>
-
+              <td>${nlTime(r.created_at)}</td>
+              <td><b>${escapeHtml(r.display_sku || '')}</b></td>
               <td>
-                <div class="cell-main">${escapeHtml(r.sku_unique || '')}</div>
+                ${escapeHtml(r.display_name || '')}
+                ${r.display_description ? `<div class="small">${escapeHtml(r.display_description)}</div>` : ''}
               </td>
-
-              <td>
-                <div class="cell-main">${escapeHtml(r.products?.name || '')}</div>
-                <div class="cell-sub">${escapeHtml(r.products?.sku_base || '')}</div>
-              </td>
-
               <td>${escapeHtml(r.location || '')}</td>
-
-              <td>
-                <div class="cell-main">${escapeHtml(r.order_no || '')}</div>
-              </td>
-
-              <td>${escapeHtml(getActionLabel(r))}</td>
-
+              <td><b>${escapeHtml(r.order_no || '')}</b></td>
+              <td>${escapeHtml(prettyAction(r))}</td>
               <td>${escapeHtml(r.destination || '')}</td>
-
-              <td>${escapeHtml(r.note || '')}</td>
-
               <td><div class="badge-row">${buildBadges(r)}</div></td>
             </tr>
           `).join('')}
@@ -623,19 +421,19 @@ function buildMobileCards(rows){
         <div class="mobile-card">
           <div class="mobile-line">
             <div class="mobile-k">Tijd</div>
-            <div class="mobile-v">${escapeHtml(nlTime(r.created_at))}</div>
+            <div class="mobile-v">${nlTime(r.created_at)}</div>
           </div>
 
           <div class="mobile-line">
-            <div class="mobile-k">Unieke SKU</div>
-            <div class="mobile-v"><b>${escapeHtml(r.sku_unique || '')}</b></div>
+            <div class="mobile-k">SKU</div>
+            <div class="mobile-v"><b>${escapeHtml(r.display_sku || '')}</b></div>
           </div>
 
           <div class="mobile-line">
             <div class="mobile-k">Product</div>
             <div class="mobile-v">
-              ${escapeHtml(r.products?.name || '')}
-              ${r.products?.sku_base ? `<br><span class="muted">${escapeHtml(r.products.sku_base)}</span>` : ''}
+              ${escapeHtml(r.display_name || '')}
+              ${r.display_description ? `<br><span class="small">${escapeHtml(r.display_description)}</span>` : ''}
             </div>
           </div>
 
@@ -651,17 +449,12 @@ function buildMobileCards(rows){
 
           <div class="mobile-line">
             <div class="mobile-k">Actie</div>
-            <div class="mobile-v">${escapeHtml(getActionLabel(r))}</div>
+            <div class="mobile-v">${escapeHtml(prettyAction(r))}</div>
           </div>
 
           <div class="mobile-line">
             <div class="mobile-k">Bestemming</div>
             <div class="mobile-v">${escapeHtml(r.destination || '')}</div>
-          </div>
-
-          <div class="mobile-line">
-            <div class="mobile-k">Opmerking</div>
-            <div class="mobile-v">${escapeHtml(r.note || '')}</div>
           </div>
 
           <div class="mobile-line">
@@ -674,36 +467,16 @@ function buildMobileCards(rows){
   `;
 }
 
-function renderResults(){
-  const q = lower(byId('q').value);
-
-  let rows = state.rows.filter(row => rowMatchesFilter(row, state.currentFilter));
-  rows = rows.filter(row => rowMatchesSearch(row, q));
-  rows = sortRows(rows);
-
-  state.filteredRows = rows;
-
-  updateKpis(rows);
-  updateResultsMeta(rows);
-
-  const wrap = byId('resultWrap');
-
-  if(!rows.length){
-    wrap.innerHTML = `<div class="empty-state">Geen uitscans gevonden voor deze selectie.</div>`;
-    return;
-  }
-
-  wrap.innerHTML = buildDesktopTable(rows) + buildMobileCards(rows);
-}
-
-async function loadOutscans(){
+async function load(){
+  const q = safeText(byId('q').value).toLowerCase();
   const limit = Number(byId('limit').value || 250);
 
-  const { data, error } = await client
+  let query = client
     .from('movements')
     .select(`
       created_at,
       sku_unique,
+      scanned_code,
       order_no,
       location,
       action_type,
@@ -711,61 +484,77 @@ async function loadOutscans(){
       note,
       products:product_id (
         name,
-        sku_base
+        sku_base,
+        description
       )
     `)
     .eq('type', 'OUT')
     .order('created_at', { ascending:false })
     .limit(limit);
 
+  if(q){
+    query = query.or(`sku_unique.ilike.%${q}%,scanned_code.ilike.%${q}%,order_no.ilike.%${q}%,location.ilike.%${q}%,destination.ilike.%${q}%`);
+  }
+
+  const { data, error } = await query;
   if(error) throw error;
 
-  state.rows = data || [];
-  renderResults();
-}
+  let rows = (data || []).map(r => {
+    const displaySku = safeText(r.scanned_code || r.products?.sku_base || r.sku_unique || '');
+    const displayName = prettyProductName(r.products?.name || '');
+    const displayDescription = cleanDescription(r.products?.description || '');
 
-function setFilter(nextFilter){
-  state.currentFilter = nextFilter;
-
-  document.querySelectorAll('[data-filter]').forEach(btn => {
-    btn.classList.toggle('active', btn.getAttribute('data-filter') === nextFilter);
+    return {
+      ...r,
+      display_sku: displaySku,
+      display_name: displayName,
+      display_description: displayDescription
+    };
   });
 
-  renderResults();
+  if(q){
+    rows = rows.filter(r => {
+      const haystack = [
+        r.display_sku,
+        r.display_name,
+        r.display_description,
+        r.order_no,
+        r.location,
+        r.destination,
+        r.action_type
+      ].join(' ').toLowerCase();
+
+      return haystack.includes(q);
+    });
+  }
+
+  updateSummary(rows);
+
+  const el = byId('list');
+
+  if(!rows.length){
+    el.innerHTML = `<div class="outscan-empty">Nog geen uitscans gevonden.</div>`;
+    return;
+  }
+
+  el.innerHTML = buildDesktopTable(rows) + buildMobileCards(rows);
 }
 
-document.querySelectorAll('[data-filter]').forEach(btn => {
-  btn.addEventListener('click', () => {
-    setFilter(btn.getAttribute('data-filter'));
-  });
+byId('btn_refresh').addEventListener('click', () => {
+  load().catch(e => toast(e.message || String(e), 'err'));
 });
-
-byId('btnRefresh').addEventListener('click', () => {
-  loadOutscans().catch(e => toast(e.message || String(e), 'err'));
-});
-
-byId('btnClearSearch').addEventListener('click', () => {
-  byId('q').value = '';
-  renderResults();
-  byId('q').focus();
-});
-
-byId('q').addEventListener('input', renderResults);
 
 byId('q').addEventListener('keydown', e => {
   if(e.key === 'Enter'){
-    e.preventDefault();
-    renderResults();
+    load().catch(err => toast(err.message || String(err), 'err'));
   }
 });
 
 byId('limit').addEventListener('change', () => {
-  loadOutscans().catch(e => toast(e.message || String(e), 'err'));
+  load().catch(e => toast(e.message || String(e), 'err'));
 });
 
-byId('sort').addEventListener('change', renderResults);
-
-loadOutscans().catch(e => toast(e.message || String(e), 'err'));
+load().catch(e => toast(e.message || String(e), 'err'));
 </script>
 
 </body>
